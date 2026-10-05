@@ -57,3 +57,16 @@ def pitfalls(password, data, cmd):
     subprocess.run(["ls", "-l"], timeout=5)
     # ruleid: std.py.jwt-unverified
     claims = jwt.decode(token, options={"verify_signature": False})
+
+
+def crypto_controls(key, data):
+    import hashlib
+    from Crypto.Cipher import AES
+    # ruleid: std.py.weak-crypto
+    d = hashlib.md5(data).hexdigest()
+    # ok: std.py.weak-crypto
+    etag = hashlib.md5(data, usedforsecurity=False).hexdigest()
+    # ruleid: std.py.weak-crypto
+    c = AES.new(key, AES.MODE_ECB)
+    # ok: std.py.weak-crypto
+    g = AES.new(key, AES.MODE_GCM)

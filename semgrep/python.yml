@@ -120,3 +120,19 @@ rules:
     pattern-either:
       - pattern: 'jwt.decode(..., options={..., "verify_signature": False, ...}, ...)'
       - pattern: jwt.decode(..., verify=False, ...)
+
+  - id: std.py.weak-crypto
+    languages: [python]
+    severity: ERROR
+    message: "Weak cryptography — SHA-2/3 for security hashing (pass usedforsecurity=False for non-security use); AEAD ciphers, never ECB/DES/RC4 (CRY-2, CRY-3)."
+    metadata: { standard: [CRY-2, CRY-3] }
+    pattern-either:
+      - patterns:
+          - pattern-either:
+              - pattern: hashlib.md5(...)
+              - pattern: hashlib.sha1(...)
+          - pattern-not: hashlib.$F(..., usedforsecurity=False, ...)
+      - pattern: AES.new($K, AES.MODE_ECB, ...)
+      - pattern: modes.ECB(...)
+      - pattern: DES.new(...)
+      - pattern: ARC4.new(...)

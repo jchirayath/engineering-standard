@@ -204,3 +204,55 @@ rules:
           - pattern: $FS.$READ(<... $REQ.params.$P ...>, ...)
           - pattern: $FS.$READ(<... $REQ.body.$P ...>, ...)
       - metavariable-regex: { metavariable: $READ, regex: '^(readFile|readFileSync|createReadStream|writeFile|writeFileSync|unlink|unlinkSync|sendFile|open)$' }
+
+  # ── §2B verified controls ───────────────────────────────────────────────────
+  - id: std.web.unsafe-dom-insertion
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Dynamic HTML inserted into the DOM — use textContent / framework binding, or sanitize with DOMPurify (INP-4)."
+    metadata: { standard: [INP-4] }
+    patterns:
+      - pattern-either:
+          - pattern: $EL.innerHTML = $X
+          - pattern: $EL.outerHTML = $X
+          - pattern: $EL.insertAdjacentHTML($POS, $X)
+          - pattern: document.write($X)
+      - pattern-not: $EL.innerHTML = "..."
+      - pattern-not: $EL.innerHTML = DOMPurify.sanitize(...)
+      - pattern-not: $EL.insertAdjacentHTML($POS, DOMPurify.sanitize(...))
+
+  - id: std.web.loose-equality
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "Loose equality — use === / !== (INP-6). `x == null` is allowed."
+    metadata: { standard: [INP-6] }
+    patterns:
+      - pattern-either:
+          - pattern: $A == $B
+          - pattern: $A != $B
+      - pattern-not: $A == null
+      - pattern-not: $A != null
+
+  - id: std.web.prototype-pollution-merge
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Request data merged into an object — whitelist fields via the schema (CORE-9) instead; merging allows __proto__ pollution and mass assignment (INP-6, SEC-10)."
+    metadata: { standard: [INP-6, SEC-10] }
+    patterns:
+      - pattern-either:
+          - pattern: Object.assign($T, ..., $REQ.$SRC, ...)
+          - pattern: $_.merge($T, ..., $REQ.$SRC, ...)
+          - pattern: $_.defaultsDeep($T, ..., $REQ.$SRC, ...)
+          - pattern: "{..., ...$REQ.$SRC, ...}"
+      - metavariable-regex: { metavariable: $SRC, regex: '^(body|query|params)$' }
+
+  - id: std.web.weak-crypto
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Weak cryptography — SHA-2/3 for hashing; AES-GCM / ChaCha20-Poly1305 for encryption; never MD5, SHA-1, DES, RC4 or ECB (CRY-2, CRY-3). HMAC-SHA1 for TOTP (RFC 6238) is not flagged."
+    metadata: { standard: [CRY-2, CRY-3] }
+    patterns:
+      - pattern-either:
+          - pattern: $C.createHash($ALG)
+          - pattern: $C.createCipheriv($ALG, ...)
+      - metavariable-regex: { metavariable: $ALG, regex: "(?i)^['\"](md4|md5|sha1|sha-1|rc4|des|des-ede3?(-cbc)?|bf-.*|aes-\\d+-ecb|.*-ecb)['\"]$" }

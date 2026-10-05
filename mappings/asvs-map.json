@@ -1,0 +1,3521 @@
+[
+ {
+  "req_id": "V1.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CORE-9",
+   "INP-1",
+   "SEC-1"
+  ],
+  "note": "Closed in v1.2 by CORE-9, INP-1, SEC-1; independently verified after tightening (No requirement to decode only when encoded data in that form is expected (avoid ).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-1",
+   "SEC-3"
+  ],
+  "note": "Closed in v1.2 by INP-1, SEC-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "INP-1",
+   "SEC-3"
+  ],
+  "note": "Closed in v1.2 by INP-1, SEC-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "INP-1",
+   "SEC-3"
+  ],
+  "note": "Closed in v1.2 by INP-1, SEC-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.3",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-3"
+  ],
+  "note": "SEC-3 requires JS-context encoding; framework auto-escaping and justified raw-HTML sinks.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.4",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-2",
+   "CORE-8"
+  ],
+  "note": "Parameterized queries only, no string-built SQL/NoSQL; CORE-8 enforces via lint.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.5",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-2",
+   "SEC-28"
+  ],
+  "note": "No shell string building; commands take argument arrays, never shell=True.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.6",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-2"
+  ],
+  "note": "SEC-2 explicitly bans string-built LDAP.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.7",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-3",
+   "SEC-2"
+  ],
+  "note": "Closed in v1.2 by INP-3, SEC-2; independently verified after tightening (Requires XPath parameterization or precompiled queries; INP-3 permits escaping w).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.8",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-3"
+  ],
+  "note": "Closed in v1.2 by INP-3; independently verified after tightening (No allowlist of permitted LaTeX commands; only sandboxing without shell-escape.).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.9",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-3"
+  ],
+  "note": "Closed in v1.2 by INP-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.2.10",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "UX-3 mandates CSV export but no RFC 4180 escaping or formula-injection prefixing.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "INP-4",
+   "SEC-3"
+  ],
+  "note": "Closed in v1.2 by INP-4, SEC-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-2"
+  ],
+  "note": "SEC-2 bans eval and exec of user-influenced strings; lint (\u00a77.2) covers eval.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-2",
+   "SEC-1"
+  ],
+  "note": "Closed in v1.2 by INP-2, SEC-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-4"
+  ],
+  "note": "Closed in v1.2 by INP-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-4"
+  ],
+  "note": "Closed in v1.2 by INP-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.6",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-1",
+   "CORE-6",
+   "SEC-5"
+  ],
+  "note": "Closed in v1.2 by CFG-1, CORE-6, SEC-5; independently verified after tightening (No sanitization of dangerous characters before the call; path allow-listing is o).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.7",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-3"
+  ],
+  "note": "Closed in v1.2 by INP-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.8",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-3"
+  ],
+  "note": "Closed in v1.2 by INP-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.9",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-3"
+  ],
+  "note": "Closed in v1.2 by INP-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.10",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-3"
+  ],
+  "note": "Closed in v1.2 by INP-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.11",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CORE-14",
+   "INP-1",
+   "WEB-12"
+  ],
+  "note": "Closed in v1.2 by CORE-14, INP-1, WEB-12; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.3.12",
+  "L": "3",
+  "status": "covered",
+  "rules": [
+   "SEC-28"
+  ],
+  "note": "Regex input length cap plus linear-time engine or timeout.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.4.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-5"
+  ],
+  "note": "Closed in v1.2 by INP-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.4.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-2",
+   "SEC-1"
+  ],
+  "note": "Closed in v1.2 by INP-2, SEC-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-5"
+  ],
+  "note": "Closed in v1.2 by INP-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.5.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-27"
+  ],
+  "note": "XML parsers have external entities and DTDs disabled.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.5.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-27"
+  ],
+  "note": "No pickle/yaml.load/native serialization of untrusted data.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V1.5.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule on consistent parsers/encodings across components.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.1.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "API-1",
+   "CORE-9",
+   "SEC-1"
+  ],
+  "note": "Checked-in API schema and shared CORE-9 schemas define expected structure for every input.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-1",
+   "CORE-9",
+   "INP-2"
+  ],
+  "note": "Closed in v1.2 by API-1, CORE-9, INP-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.1.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-4",
+   "BL-2"
+  ],
+  "note": "Closed in v1.2 by API-4, BL-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-1",
+   "CORE-9"
+  ],
+  "note": "Every external input validated against a schema at the boundary; reject on failure.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-1",
+   "CORE-9",
+   "WEB-12"
+  ],
+  "note": "Server-side schema validation at the boundary; client validation is shared but not relied on.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-2",
+   "SEC-1"
+  ],
+  "note": "Closed in v1.2 by INP-2, SEC-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "BL-1"
+  ],
+  "note": "Closed in v1.2 by BL-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-4",
+   "BL-2"
+  ],
+  "note": "Closed in v1.2 by API-4, BL-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "COR-4"
+  ],
+  "note": "Multi-step writes are transactional.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "PERF-5",
+   "API-9"
+  ],
+  "note": "Shared state uses locks/upserts/leases, never last-write-wins; optimistic concurrency.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.3.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "Only SEC-19 requires human confirmation for destructive AI tools; no multi-user approval.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.4.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-4",
+   "WEB-12",
+   "OPS-6"
+  ],
+  "note": "Rate limiting/quotas on every public endpoint, stricter on costly ops; bot protection on forms.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V2.4.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "WEB-12"
+  ],
+  "note": "Bot protection on public forms; no realistic-human-timing checks on business flows.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.1.1",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "Headers mandated but no documentation of required browser features or fallback behaviour.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "BRW-4",
+   "SEC-14",
+   "SEC-4"
+  ],
+  "note": "Closed in v1.2 by BRW-4, SEC-14, SEC-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "INP-4",
+   "SEC-3"
+  ],
+  "note": "Closed in v1.2 by INP-4, SEC-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.2.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No DOM-clobbering rule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "BRW-2",
+   "SEC-9",
+   "WEB-4"
+  ],
+  "note": "Closed in v1.2 by BRW-2, SEC-9, WEB-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "WEB-4"
+  ],
+  "note": "SameSite=Lax|Strict required on cookies.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-2"
+  ],
+  "note": "Closed in v1.2 by BRW-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-2",
+   "SEC-9",
+   "WEB-4"
+  ],
+  "note": "Closed in v1.2 by BRW-2, SEC-9, WEB-4; independently verified after tightening (HttpOnly required only for session-like cookies (WEB-4), not every cookie not me).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.3.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No cookie size limit.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "BRW-1",
+   "SEC-12",
+   "SEC-14",
+   "WEB-3"
+  ],
+  "note": "Closed in v1.2 by BRW-1, SEC-12, SEC-14, WEB-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-14"
+  ],
+  "note": "CORS is an explicit allow-list.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-1",
+   "SEC-14",
+   "WEB-3"
+  ],
+  "note": "Closed in v1.2 by BRW-1, SEC-14, WEB-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-14",
+   "WEB-3"
+  ],
+  "note": "X-Content-Type-Options: nosniff on every response.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-14",
+   "WEB-3"
+  ],
+  "note": "Referrer-Policy strict-origin-when-cross-origin required.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.6",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-14",
+   "WEB-3"
+  ],
+  "note": "frame-ancestors 'none' (or named allowlist) on every response.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.7",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "WEB-3"
+  ],
+  "note": "Report-Only rollout required but no reporting endpoint (report-to/report-uri) mandated.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.4.8",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No Cross-Origin-Opener-Policy requirement.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "WEB-12"
+  ],
+  "note": "CSRF protection required on cookie-authenticated mutations.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "BRW-3",
+   "SEC-9"
+  ],
+  "note": "Closed in v1.2 by BRW-3, SEC-9; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.3",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "BRW-3"
+  ],
+  "note": "Closed in v1.2 by BRW-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-3"
+  ],
+  "note": "Closed in v1.2 by BRW-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-3",
+   "SEC-1"
+  ],
+  "note": "Closed in v1.2 by BRW-3, SEC-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.6",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "JSONP not banned.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.7",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule keeping authorized data out of script responses.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.5.8",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No CORP or Sec-Fetch requirement for authenticated resources.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.6.1",
+  "L": "3",
+  "status": "covered",
+  "rules": [
+   "WEB-6"
+  ],
+  "note": "SRI required for external static assets; GA4/Fonts exemption documented.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.7.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-4",
+   "WEB-16"
+  ],
+  "note": "Closed in v1.2 by BRW-4, WEB-16; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.7.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-28"
+  ],
+  "note": "Redirects to user-supplied URLs go through an allow-list.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.7.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No external-redirect interstitial.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.7.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "HSTS preload list submission not required.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V3.7.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No documented behaviour for unsupported browsers.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.1.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "BRW-4"
+  ],
+  "note": "Closed in v1.2 by BRW-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-5"
+  ],
+  "note": "Closed in v1.2 by BRW-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.1.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-5",
+   "SEC-7"
+  ],
+  "note": "Closed in v1.2 by BRW-5, SEC-7; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.1.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule blocking unused HTTP methods.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.1.5",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-24"
+  ],
+  "note": "Signatures required for inbound webhooks only; no per-message signing for sensitive transactions.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.2.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-5"
+  ],
+  "note": "Closed in v1.2 by BRW-5; independently verified after tightening (No HTTP/2/HTTP/3 rule that Content-Length must match DATA frame length; only CL+).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.2.2",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No Content-Length consistency rule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.2.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No HTTP/2/3 connection-specific header rule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.2.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No CR/LF header-value rejection for HTTP/2/3 requests.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.2.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No outbound URI/header length validation (CORE-6 silent).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.3.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-12",
+   "API-4",
+   "BRW-6",
+   "PERF-3"
+  ],
+  "note": "Closed in v1.2 by API-12, API-4, BRW-6, PERF-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-6",
+   "SEC-14"
+  ],
+  "note": "Closed in v1.2 by BRW-6, SEC-14; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.4.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-12",
+   "WEB-5"
+  ],
+  "note": "All traffic TLS 1.2+; no mixed content.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.4.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-6"
+  ],
+  "note": "Closed in v1.2 by BRW-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-6",
+   "SEC-9"
+  ],
+  "note": "Closed in v1.2 by BRW-6, SEC-9; independently verified after tightening (Doesn't require dedicated WebSocket tokens to meet session-management requiremen).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V4.4.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-6"
+  ],
+  "note": "Closed in v1.2 by BRW-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "FILE-1",
+   "SEC-4"
+  ],
+  "note": "Closed in v1.2 by FILE-1, SEC-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-4",
+   "API-4"
+  ],
+  "note": "Upload size cap plus stricter rate limits on upload.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "FILE-1",
+   "SEC-4"
+  ],
+  "note": "Closed in v1.2 by FILE-1, SEC-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "FILE-1",
+   "SEC-26"
+  ],
+  "note": "Closed in v1.2 by FILE-1, SEC-26; independently verified after tightening (Caps exist but no requirement to check uncompressed size and entry count before ).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.2.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "API-4"
+  ],
+  "note": "Generic quotas; no per-user storage size/file-count quota.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.2.5",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-26"
+  ],
+  "note": "Prevents symlink escape but does not reject symlinks in archives by default.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.2.6",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No max pixel dimension check.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-4"
+  ],
+  "note": "Uploads stored outside web root/object storage with random names, so never executed.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.3.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-26",
+   "SEC-4"
+  ],
+  "note": "Paths resolved inside allowed root; random server-side names.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.3.3",
+  "L": "3",
+  "status": "covered",
+  "rules": [
+   "SEC-26"
+  ],
+  "note": "Archive extraction checks every entry (zip-slip).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.4.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "FILE-2"
+  ],
+  "note": "Closed in v1.2 by FILE-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.4.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "FILE-2"
+  ],
+  "note": "Closed in v1.2 by FILE-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V5.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "FILE-1",
+   "SEC-4"
+  ],
+  "note": "Closed in v1.2 by FILE-1, SEC-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.1.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "API-4",
+   "AUTH-1",
+   "SEC-20",
+   "SEC-9"
+  ],
+  "note": "Closed in v1.2 by API-4, AUTH-1, SEC-20, SEC-9; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.1.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-1",
+   "SEC-20"
+  ],
+  "note": "Closed in v1.2 by AUTH-1, SEC-20; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-3"
+  ],
+  "note": "Closed in v1.2 by AUTH-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.3",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-3"
+  ],
+  "note": "Closed in v1.2 by AUTH-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.4",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.5",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.6",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-3",
+   "MOB-7"
+  ],
+  "note": "Closed in v1.2 by AUTH-3, MOB-7; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.7",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-3"
+  ],
+  "note": "Closed in v1.2 by AUTH-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.8",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.9",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.10",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.11",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.2.12",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-2"
+  ],
+  "note": "Closed in v1.2 by AUTH-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "API-4"
+  ],
+  "note": "Rate-limited login with lockout/backoff; stricter limits per user/IP on auth endpoints.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-1",
+   "SEC-18"
+  ],
+  "note": "Closed in v1.2 by AUTH-1, SEC-18; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-4",
+   "SEC-9"
+  ],
+  "note": "Closed in v1.2 by AUTH-4, SEC-9; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-1",
+   "CORE-5",
+   "SEC-6"
+  ],
+  "note": "Closed in v1.2 by AUTH-1, CORE-5, SEC-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No notification of suspicious authentication attempts.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.6",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "Nothing forbids email as an authentication factor.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.7",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "CORE-14 exists, but no rule to notify users after credential/email changes.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.3.8",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule against user enumeration via messages, status codes or timing.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.4.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-5",
+   "SEC-21"
+  ],
+  "note": "Closed in v1.2 by AUTH-5, SEC-21; independently verified after tightening (Initial passwords/activation codes not required to follow the existing password ).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.4.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AUTH-3"
+  ],
+  "note": "Closed in v1.2 by AUTH-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-4",
+   "AUTH-4",
+   "SEC-21"
+  ],
+  "note": "Closed in v1.2 by API-4, AUTH-4, SEC-21; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.4.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-4"
+  ],
+  "note": "Closed in v1.2 by AUTH-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.4.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No expiring-credential renewal reminders.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.4.6",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule that admins can trigger but not set user passwords.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-5"
+  ],
+  "note": "Closed in v1.2 by AUTH-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-5",
+   "SEC-22"
+  ],
+  "note": "Closed in v1.2 by AUTH-5, SEC-22; independently verified after tightening ('Low-entropy' undefined; ASVS threshold of <112 bits (and salted approved passwo).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-21"
+  ],
+  "note": "Tokens, reset codes and nonces must come from a CSPRNG; applies to OTP codes and seeds.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-5"
+  ],
+  "note": "Closed in v1.2 by AUTH-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-5"
+  ],
+  "note": "Closed in v1.2 by AUTH-5; independently verified after tightening (TOTP '\u00b11 drift' allows a code to be accepted for ~90s, exceeding the 30-second m).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.6",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule for revoking lost authentication factors.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.7",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No restriction on biometrics as a sole factor.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.5.8",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule on trusted time source for TOTP.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.6.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-4"
+  ],
+  "note": "Closed in v1.2 by AUTH-4; independently verified after tightening (No requirement to inform users about the security risks of SMS/phone OTP.).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.6.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-5"
+  ],
+  "note": "Closed in v1.2 by AUTH-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.6.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-4"
+  ],
+  "note": "Rate limiting is required and stricter on OTP endpoints.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.6.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No push-MFA bombing protection.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.7.1",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule protecting assertion-verification certificates from modification.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.7.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-21"
+  ],
+  "note": "Nonces from a CSPRNG, but no minimum 64-bit length.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.8.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-6"
+  ],
+  "note": "Closed in v1.2 by AUTH-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.8.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-6",
+   "SEC-23"
+  ],
+  "note": "Closed in v1.2 by AUTH-6, SEC-23; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.8.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-6"
+  ],
+  "note": "Closed in v1.2 by AUTH-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V6.8.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-6"
+  ],
+  "note": "Closed in v1.2 by AUTH-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "SESS-1"
+  ],
+  "note": "Closed in v1.2 by SEC-9, SESS-1; independently verified after tightening (Documentation need not justify deviations from NIST SP 800-63B re-authentication).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-1"
+  ],
+  "note": "Closed in v1.2 by SESS-1; independently verified after tightening (Documents the concurrent-session limit but not the behaviour/actions when the ma).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.1.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-1"
+  ],
+  "note": "Closed in v1.2 by SESS-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-6",
+   "SEC-7",
+   "SEC-23"
+  ],
+  "note": "Tokens verified server-side; identity derived from the token on the server.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "SEC-11"
+  ],
+  "note": "Short-lived, rotating session tokens required; static secrets banned from clients.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.2.3",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-21",
+   "SESS-2"
+  ],
+  "note": "Closed in v1.2 by SEC-21, SESS-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.2.4",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SESS-2"
+  ],
+  "note": "Closed in v1.2 by SESS-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.3.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "SESS-2"
+  ],
+  "note": "Closed in v1.2 by SEC-9, SESS-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "SESS-2"
+  ],
+  "note": "Closed in v1.2 by SEC-9, SESS-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.4.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "SESS-3"
+  ],
+  "note": "Closed in v1.2 by SEC-9, SESS-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.4.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SESS-3"
+  ],
+  "note": "Closed in v1.2 by SESS-3; independently verified after tightening (Covers disabled accounts only; termination of sessions on account deletion not s).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-4"
+  ],
+  "note": "Closed in v1.2 by SESS-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.4.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-3"
+  ],
+  "note": "Closed in v1.2 by SESS-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.4.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-4"
+  ],
+  "note": "Closed in v1.2 by SESS-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.5.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-4"
+  ],
+  "note": "Closed in v1.2 by SESS-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.5.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-4"
+  ],
+  "note": "Closed in v1.2 by SESS-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.5.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No step-up authentication for highly sensitive operations.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.6.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-5"
+  ],
+  "note": "Closed in v1.2 by SESS-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V7.6.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SESS-5"
+  ],
+  "note": "Closed in v1.2 by SESS-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.1.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "AZ-1",
+   "CORE-5",
+   "HELP-1",
+   "SEC-20"
+  ],
+  "note": "Closed in v1.2 by AZ-1, CORE-5, HELP-1, SEC-20; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AZ-1"
+  ],
+  "note": "Closed in v1.2 by AZ-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.1.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No documentation of contextual attributes used in security decisions.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.1.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No documentation of adaptive/contextual decision-making.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-6",
+   "CORE-5",
+   "API-12",
+   "TEST-2"
+  ],
+  "note": "Deny-by-default server-side function-level authz at one choke point, with denied-path tests.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-7",
+   "SEC-8",
+   "API-12"
+  ],
+  "note": "Ownership/tenant check on every access; RLS default-deny; BOLA reviewed.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-12",
+   "AZ-1",
+   "SEC-10"
+  ],
+  "note": "Closed in v1.2 by API-12, AZ-1, SEC-10; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.2.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No adaptive contextual controls.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-6",
+   "CORE-5"
+  ],
+  "note": "Server-side enforcement; client-side gating is UX only.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.3.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-9"
+  ],
+  "note": "Short-lived tokens bound staleness; no immediate propagation of permission changes or alerting.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.3.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule that downstream services authorize on the originating user, not service identity.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.4.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-7",
+   "CORE-8",
+   "PERF-6",
+   "TEST-0"
+  ],
+  "note": "Tenant checks on every access, tenant-scoped persistence and caches, cross-tenant denied-path integration tests.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V8.4.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-9",
+   "WEB-8"
+  ],
+  "note": "Admin MFA and admin off public host; no continuous verification, device posture or contextual risk.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V9.1.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-23"
+  ],
+  "note": "JWTs must be verified, never just decoded.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V9.1.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-23"
+  ],
+  "note": "Pinned algorithm, no 'none', no HS/RS confusion.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V9.1.3",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-23",
+   "TOK-1"
+  ],
+  "note": "Closed in v1.2 by SEC-23, TOK-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V9.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-23"
+  ],
+  "note": "exp and nbf must be checked.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V9.2.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "TOK-1"
+  ],
+  "note": "Closed in v1.2 by TOK-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V9.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-23"
+  ],
+  "note": "aud must be checked on every verified JWT.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V9.2.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "TOK-1"
+  ],
+  "note": "Closed in v1.2 by TOK-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "MOB-1",
+   "SEC-9",
+   "TOK-2"
+  ],
+  "note": "Closed in v1.2 by MOB-1, SEC-9, TOK-2; independently verified after tightening (Only refresh tokens kept from JS; access tokens and general 'send tokens only to).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-21",
+   "SEC-25",
+   "TOK-2"
+  ],
+  "note": "Closed in v1.2 by SEC-21, SEC-25, TOK-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.2.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-25"
+  ],
+  "note": "Authorization Code + PKCE with state required.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.2.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-23",
+   "TOK-2"
+  ],
+  "note": "Closed in v1.2 by SEC-23, TOK-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.2.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule on requesting minimal OAuth scopes.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.3.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-23"
+  ],
+  "note": "aud checked on JWT access tokens.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-6",
+   "SEC-7",
+   "TOK-3"
+  ],
+  "note": "Closed in v1.2 by SEC-6, SEC-7, TOK-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-6",
+   "SEC-7"
+  ],
+  "note": "Closed in v1.2 by AUTH-6, SEC-7; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-6"
+  ],
+  "note": "Closed in v1.2 by AUTH-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.3.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No sender-constrained (DPoP/mTLS) tokens required.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-25"
+  ],
+  "note": "Redirect URIs exact-match allow-listed; met by configuring the hosted IdP with exact (non-wildcard) entries.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.2",
+  "L": "1",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.3",
+  "L": "1",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.4",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-25",
+   "TOK-3"
+  ],
+  "note": "Closed in v1.2 by SEC-25, TOK-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.5",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-9",
+   "TOK-3"
+  ],
+  "note": "Closed in v1.2 by SEC-9, TOK-3; independently verified after tightening (Reuse detection stated but not invalidating used token and revoking all refresh ).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.6",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth). Client-side PKCE is covered by SEC-25.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.7",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth). No dynamic client registration.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.8",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "TOK-3"
+  ],
+  "note": "Closed in v1.2 by TOK-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.9",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth). Revocation UI belongs to the hosted IdP.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.10",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth). Client authentication is enforced by the hosted IdP.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.11",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-30",
+   "TOK-3"
+  ],
+  "note": "Closed in v1.2 by SEC-30, TOK-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.12",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.13",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.14",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.15",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.4.16",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.5.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-25"
+  ],
+  "note": "nonce required in the OIDC flow.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.5.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "AUTH-6",
+   "SEC-7"
+  ],
+  "note": "Closed in v1.2 by AUTH-6, SEC-7; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.5.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-23",
+   "TOK-2"
+  ],
+  "note": "Closed in v1.2 by SEC-23, TOK-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.5.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-23"
+  ],
+  "note": "aud checked on every JWT, including ID tokens.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.5.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "TOK-3"
+  ],
+  "note": "Closed in v1.2 by TOK-3; independently verified after tightening (Only 'logout+jwt' type check; missing 'event' claim verification and rejection o).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.6.1",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "OpenID Provider-only; apps use hosted IdPs. Client side bans implicit flow (SEC-25).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.6.2",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "OpenID Provider-only; apps use hosted IdPs.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.7.1",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth). Consent is handled by the hosted IdP.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.7.2",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth). Consent is handled by the hosted IdP.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V10.7.3",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Authorization-server-only; apps use hosted IdPs (Supabase Auth, Entra ID, Firebase Auth). Consent is handled by the hosted IdP.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-1",
+   "OPS-5",
+   "SEC-12"
+  ],
+  "note": "Closed in v1.2 by CRY-1, OPS-5, SEC-12; independently verified after tightening (Key policy not tied to a standard like NIST SP 800-57; no rule against overshari).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-1"
+  ],
+  "note": "Closed in v1.2 by CRY-1; independently verified after tightening (No requirement to keep the inventory regularly updated or record where keys cann).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.1.3",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No cryptographic discovery mechanism required.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.1.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No crypto inventory or post-quantum migration plan.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.2.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-2",
+   "SEC-22"
+  ],
+  "note": "Closed in v1.2 by CRY-2, SEC-22; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.2.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-2",
+   "SEC-12"
+  ],
+  "note": "Closed in v1.2 by CRY-2, SEC-12; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-2"
+  ],
+  "note": "Closed in v1.2 by CRY-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.2.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-22"
+  ],
+  "note": "Constant-time required only for secret comparisons.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.2.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule on crypto modules failing securely (e.g. padding oracles).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "CRY-2"
+  ],
+  "note": "Closed in v1.2 by CRY-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.3.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "CRY-2",
+   "SEC-12"
+  ],
+  "note": "Closed in v1.2 by CRY-2, SEC-12; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-2"
+  ],
+  "note": "Closed in v1.2 by CRY-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.3.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No nonce/IV uniqueness rule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.3.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No encrypt-then-MAC rule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.4.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "CRY-3",
+   "SEC-22"
+  ],
+  "note": "Closed in v1.2 by CRY-3, SEC-22; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.4.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-3",
+   "SEC-22",
+   "SEC-9"
+  ],
+  "note": "Closed in v1.2 by CRY-3, SEC-22, SEC-9; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-3"
+  ],
+  "note": "Closed in v1.2 by CRY-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.4.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-3"
+  ],
+  "note": "Closed in v1.2 by CRY-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.5.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-3",
+   "SEC-21"
+  ],
+  "note": "Closed in v1.2 by CRY-3, SEC-21; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.5.2",
+  "L": "3",
+  "status": "covered",
+  "rules": [
+   "SEC-21"
+  ],
+  "note": "Mandates OS-backed CSPRNG APIs, which are built to stay secure under load.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.6.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CRY-2",
+   "SEC-23"
+  ],
+  "note": "Closed in v1.2 by CRY-2, SEC-23; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.6.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-12"
+  ],
+  "note": "TLS 1.2+ only; no requirement on key-exchange parameters.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.7.1",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No memory-encryption requirement.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V11.7.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-13"
+  ],
+  "note": "Data inventory and retention; no in-use minimization or prompt re-encryption.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.1.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-12",
+   "TLS-1",
+   "WEB-2"
+  ],
+  "note": "Closed in v1.2 by SEC-12, TLS-1, WEB-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "TLS-1"
+  ],
+  "note": "Closed in v1.2 by TLS-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.1.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "TLS-1"
+  ],
+  "note": "Closed in v1.2 by TLS-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.1.4",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No OCSP stapling or revocation-checking requirement.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.1.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No Encrypted Client Hello requirement.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SEC-12",
+   "WEB-2",
+   "WEB-5",
+   "MOB-2"
+  ],
+  "note": "HTTPS only, http\u2192https redirect, HSTS, no mixed content, no cleartext on mobile.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.2.2",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "WEB-2",
+   "SEC-12"
+  ],
+  "note": "Valid certificate with automated renewal and expiry alerts.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.3.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-12",
+   "TLS-1"
+  ],
+  "note": "Closed in v1.2 by SEC-12, TLS-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-12",
+   "TLS-1"
+  ],
+  "note": "Closed in v1.2 by SEC-12, TLS-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-12",
+   "TLS-1"
+  ],
+  "note": "Closed in v1.2 by SEC-12, TLS-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "TLS-1"
+  ],
+  "note": "Closed in v1.2 by TLS-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V12.3.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No mutual authentication between internal services.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-12",
+   "CFG-1",
+   "SEC-20"
+  ],
+  "note": "Closed in v1.2 by API-12, CFG-1, SEC-20; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.1.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "PERF-10"
+  ],
+  "note": "Pools must be sized, but max connections and behaviour at the limit are not required to be documented.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.1.3",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "PERF-2",
+   "CORE-6"
+  ],
+  "note": "Timeouts/retry caps required in code; no documented per-resource strategy, release procedures, or no-retry rule for synchronous calls.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.1.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-12",
+   "OPS-5"
+  ],
+  "note": "Rotation runbook required; no documented list of critical secrets with a threat-model-based rotation schedule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.2.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-2",
+   "SEC-30"
+  ],
+  "note": "Closed in v1.2 by CFG-2, SEC-30; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.2.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-30",
+   "SEC-16"
+  ],
+  "note": "Least-privilege DB roles and scoped cloud identities; non-root runtime.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-2",
+   "SEC-18"
+  ],
+  "note": "Closed in v1.2 by CFG-2, SEC-18; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.2.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-1",
+   "CORE-6",
+   "SEC-5"
+  ],
+  "note": "Closed in v1.2 by CFG-1, CORE-6, SEC-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.2.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-1",
+   "SEC-5"
+  ],
+  "note": "Closed in v1.2 by CFG-1, SEC-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.2.6",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "PERF-2",
+   "PERF-10"
+  ],
+  "note": "Timeouts, retries and pools required, but not verified against a documented per-connection configuration.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.3.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CORE-2",
+   "SEC-11",
+   "SEC-12"
+  ],
+  "note": "Vault-backed secrets module, none in git/artifacts, keys in KMS and rotated. HSM (L3) not required.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-2",
+   "SEC-30"
+  ],
+  "note": "Closed in v1.2 by CFG-2, SEC-30; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.3.3",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-12"
+  ],
+  "note": "Keys held in KMS/vault, but crypto operations are not required to execute inside the module.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.3.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-12"
+  ],
+  "note": "Rotation required; no configured expiry tied to documented schedule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.4.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "WEB-1",
+   "WEB-8"
+  ],
+  "note": "Allowlist deploy excludes .git; host blocks VCS paths.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.4.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-14",
+   "MOB-2",
+   "LOG-3"
+  ],
+  "note": "Debug endpoints/stack traces off in prod; no debug flags in release builds.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "WEB-8"
+  ],
+  "note": "Directory listing off.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.4.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "BRW-5"
+  ],
+  "note": "Closed in v1.2 by BRW-5; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.4.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-3",
+   "OPS-1",
+   "SEC-14",
+   "WEB-8"
+  ],
+  "note": "Closed in v1.2 by CFG-3, OPS-1, SEC-14, WEB-8; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.4.6",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "WEB-3"
+  ],
+  "note": "Only Server/X-Powered-By headers on sites; not error pages, API responses or other backend components.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V13.4.7",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "WEB-1",
+   "WEB-8"
+  ],
+  "note": "Deploy ships an allowlist of files, but web tier not configured to serve only permitted extensions.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-13"
+  ],
+  "note": "Every PII/sensitive field classified with retention and deletion path.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "DATA-1",
+   "SEC-12",
+   "SEC-13"
+  ],
+  "note": "Closed in v1.2 by DATA-1, SEC-12, SEC-13; independently verified after tightening (Missing database-level encryption, privacy-enhancing technologies, and access co).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "DATA-2",
+   "SEC-11"
+  ],
+  "note": "Closed in v1.2 by DATA-2, SEC-11; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "DATA-2",
+   "PERF-13",
+   "PERF-6"
+  ],
+  "note": "Closed in v1.2 by DATA-2, PERF-13, PERF-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "DATA-2",
+   "MOB-8",
+   "WEB-14"
+  ],
+  "note": "Closed in v1.2 by DATA-2, MOB-8, WEB-14; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "DATA-1",
+   "LOG-4",
+   "SEC-12",
+   "SEC-13"
+  ],
+  "note": "Closed in v1.2 by DATA-1, LOG-4, SEC-12, SEC-13; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No web cache deception defences (content-type-bound caching, 404 for nonexistent paths).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.6",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "API-12",
+   "PERF-12"
+  ],
+  "note": "Explicit response DTOs required; no masking/minimisation of sensitive values (e.g. partial card numbers).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.7",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-13"
+  ],
+  "note": "Retention period and deletion path required, but automated/scheduled deletion not mandated.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.2.8",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No rule strips metadata (EXIF, GPS, author) from user uploads.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "SESS-3"
+  ],
+  "note": "Closed in v1.2 by SESS-3; independently verified after tightening (Clearing only on logout; not on session expiry, nor client-side clearing when se).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "DATA-2",
+   "PERF-14"
+  ],
+  "note": "Closed in v1.2 by DATA-2, PERF-14; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V14.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "DATA-2",
+   "MOB-1"
+  ],
+  "note": "Closed in v1.2 by DATA-2, MOB-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.1.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "VULN-2",
+   "CLEAN-10"
+  ],
+  "note": "Fix-time targets by severity plus scheduled dependency updates.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.1.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-3",
+   "SEC-15",
+   "SEC-16",
+   "SEC-31"
+  ],
+  "note": "Closed in v1.2 by CFG-3, SEC-15, SEC-16, SEC-31; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.1.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-10",
+   "BL-2",
+   "PERF-11"
+  ],
+  "note": "Closed in v1.2 by API-10, BL-2, PERF-11; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.1.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "CLEAN-10"
+  ],
+  "note": "Dependency decisions recorded per PR, but risky components are not flagged in documentation.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.1.5",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-20"
+  ],
+  "note": "Threat model lists abuse cases, not explicitly dangerous functionality locations.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.2.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "VULN-2",
+   "VULN-3",
+   "SEC-15"
+  ],
+  "note": "Fix-time targets, continuous scanning and no Critical/High CVEs shipped.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.2.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "PERF-11",
+   "API-4",
+   "API-10",
+   "PERF-5"
+  ],
+  "note": "Background jobs, rate limits/quotas, bounded concurrency.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-3",
+   "COR-1",
+   "COR-2",
+   "PERF-9",
+   "WEB-1"
+  ],
+  "note": "Closed in v1.2 by CFG-3, COR-1, COR-2, PERF-9, WEB-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.2.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "SEC-15",
+   "SEC-31"
+  ],
+  "note": "Lockfiles and package verification; no explicit dependency-confusion control (scoped registries, namespace reservation).",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.2.5",
+  "L": "3",
+  "status": "gap",
+  "rules": [],
+  "note": "No isolation/sandboxing requirement for dangerous functionality or risky components.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.3.1",
+  "L": "1",
+  "status": "covered",
+  "rules": [
+   "API-12",
+   "PERF-12"
+  ],
+  "note": "Explicit response DTOs; no SELECT * to JSON.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CFG-1"
+  ],
+  "note": "Closed in v1.2 by CFG-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-10"
+  ],
+  "note": "Explicit DTO mapping, no mass assignment.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-4",
+   "BRW-5",
+   "LOG-1"
+  ],
+  "note": "Closed in v1.2 by API-4, BRW-5, LOG-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.3.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CLEAN-1",
+   "INP-6",
+   "SEC-1"
+  ],
+  "note": "Closed in v1.2 by CLEAN-1, INP-6, SEC-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.3.6",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "INP-6"
+  ],
+  "note": "Closed in v1.2 by INP-6; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.3.7",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "CORE-9",
+   "INP-6",
+   "SEC-1"
+  ],
+  "note": "Closed in v1.2 by CORE-9, INP-6, SEC-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.4.1",
+  "L": "3",
+  "status": "covered",
+  "rules": [
+   "PERF-5"
+  ],
+  "note": "Shared state uses locks/upserts; go test -race in CI.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.4.2",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "PERF-5",
+   "COR-4",
+   "SEC-26"
+  ],
+  "note": "Transactions and locks required; TOCTOU atomic check-and-act not explicit.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.4.3",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "PERF-5"
+  ],
+  "note": "Locks required; no deadlock avoidance or lock encapsulation rule.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V15.4.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "PERF-5"
+  ],
+  "note": "Bounded worker pools; no fairness/starvation requirement.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.1.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-6",
+   "LOG-9",
+   "SLOG-1"
+  ],
+  "note": "Closed in v1.2 by LOG-6, LOG-9, SLOG-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.2.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-1",
+   "LOG-5"
+  ],
+  "note": "Schema mandates timestamp, service, user, event, outcome, request/trace ids.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.2.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-1",
+   "SLOG-1"
+  ],
+  "note": "Closed in v1.2 by LOG-1, SLOG-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.2.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-2",
+   "LOG-6",
+   "SLOG-1"
+  ],
+  "note": "Closed in v1.2 by LOG-2, LOG-6, SLOG-1; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.2.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-1",
+   "LOG-2"
+  ],
+  "note": "OTel log data model, JSON, OTLP export.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.2.5",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "DATA-1",
+   "LOG-4",
+   "SEC-11"
+  ],
+  "note": "Closed in v1.2 by DATA-1, LOG-4, SEC-11; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.3.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-1",
+   "LOG-9",
+   "SLOG-2"
+  ],
+  "note": "Closed in v1.2 by LOG-1, LOG-9, SLOG-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.3.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-1",
+   "LOG-5",
+   "SLOG-2"
+  ],
+  "note": "Closed in v1.2 by LOG-1, LOG-5, SLOG-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.3.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-6",
+   "SEC-20",
+   "SLOG-2"
+  ],
+  "note": "Closed in v1.2 by LOG-6, SEC-20, SLOG-2; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.3.4",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "COR-3",
+   "LOG-3",
+   "CORE-6",
+   "LOG-9"
+  ],
+  "note": "Every caught error is logged; outbound failures logged via CORE-6; audit-write failure alerted.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.4.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "SEC-29",
+   "LOG-1"
+  ],
+  "note": "Logger escapes CR/LF and control characters; structured JSON.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.4.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-5",
+   "LOG-9",
+   "SLOG-3"
+  ],
+  "note": "Closed in v1.2 by LOG-5, LOG-9, SLOG-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.4.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "LOG-2",
+   "LOG-9",
+   "SLOG-3"
+  ],
+  "note": "Closed in v1.2 by LOG-2, LOG-9, SLOG-3; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.5.1",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "API-5",
+   "CORE-7",
+   "SEC-11",
+   "SEC-14"
+  ],
+  "note": "Problem Details with safe messages; no stack traces, SQL or secrets in errors.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.5.2",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "REL-7",
+   "PERF-2",
+   "CORE-6"
+  ],
+  "note": "Circuit-breaking, timeouts, fallbacks and graceful degradation.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.5.3",
+  "L": "2",
+  "status": "covered",
+  "rules": [
+   "COR-4",
+   "SEC-1",
+   "SEC-6",
+   "SLOG-4"
+  ],
+  "note": "Closed in v1.2 by COR-4, SEC-1, SEC-6, SLOG-4; independently verified.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V16.5.4",
+  "L": "3",
+  "status": "partial",
+  "rules": [
+   "LOG-8",
+   "COR-3"
+  ],
+  "note": "Crash reporter for clients; no required server-side last-resort handler.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.1.1",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.1.2",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.1",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.2",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.3",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.4",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.5",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.6",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.7",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.2.8",
+  "L": "3",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.3.1",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ },
+ {
+  "req_id": "V17.3.2",
+  "L": "2",
+  "status": "n/a",
+  "rules": [],
+  "note": "Applies only if the app uses WebRTC \u2014 add rules when one does.",
+  "proposed": ""
+ }
+]

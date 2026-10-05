@@ -128,12 +128,13 @@ async function checkSite(cfg) {
     if (/'unsafe-eval'/.test(scriptSrc)) add('WARN', 'headers', 'WEB-3', "CSP script-src allows 'unsafe-eval'", 'remove eval-based code, then drop the keyword')
     if (/(^|\s)(\*|https:|http:)(\s|$)/.test(scriptSrc)) add('ERROR', 'headers', 'WEB-3', 'CSP script-src is a wildcard', HARDEN)
     if (dir('object-src') === undefined && !/'none'/.test(dir('default-src') || '')) add('WARN', 'headers', 'WEB-3', "CSP missing object-src 'none'", HARDEN)
-    if (dir('base-uri') === undefined) add('WARN', 'headers', 'WEB-3', "CSP missing base-uri 'self'", HARDEN)
+    if (dir('base-uri') === undefined) add('WARN', 'headers', 'WEB-3', "CSP missing base-uri 'none'", HARDEN)
   }
   if (!(csp && dir('frame-ancestors') !== undefined) && !/^(deny|sameorigin)$/i.test(h('x-frame-options'))) add('ERROR', 'headers', 'WEB-3', 'no clickjacking protection', HARDEN)
   if (h('x-content-type-options').toLowerCase() !== 'nosniff') add('ERROR', 'headers', 'WEB-3', 'missing X-Content-Type-Options: nosniff', HARDEN)
   if (!h('referrer-policy')) add('WARN', 'headers', 'WEB-3', 'missing Referrer-Policy', HARDEN)
   if (!h('permissions-policy')) add('WARN', 'headers', 'WEB-3', 'missing Permissions-Policy', HARDEN)
+  if (!h('cross-origin-resource-policy')) add('INFO', 'headers', 'WEB-3', 'missing Cross-Origin-Resource-Policy', HARDEN)
   for (const n of ['server', 'x-powered-by', 'x-aspnet-version', 'x-generator']) if (/\d/.test(h(n))) add('WARN', 'headers', 'WEB-3', `${n}: "${h(n)}" discloses a version`, `${HARDEN} (unsets it where the host allows; PHP: expose_php = Off)`)
   for (const c of page.headers.getSetCookie?.() || []) {
     const name = c.split('=')[0]
@@ -142,6 +143,8 @@ async function checkSite(cfg) {
     if (!/;\s*samesite=/i.test(c)) add('WARN', 'headers', 'WEB-4', `cookie ${name} without SameSite`, 'set SameSite=Lax (or Strict)')
   }
   if (!/br|gzip|zstd/.test(h('content-encoding')) && page.raw.length > 2000) add('WARN', 'quality', 'PERF-1', 'HTML served without compression', 'enable gzip/br on the host (Caddy: encode zstd gzip; Apache: mod_deflate — harden.mjs adds it)')
+  const trace = await get(cfg.url, { method: 'TRACE' })
+  if (trace.status === 200 && /TRACE \//.test(trace.body)) add('ERROR', 'vulnerability', 'BRW-5', 'HTTP TRACE is enabled (cross-site tracing)', 'disable TRACE/TRACK on the server or proxy (Apache: TraceEnable off)')
   const cors = await get(cfg.url, { headers: { origin: 'https://evil.example' } })
   if ((cors.headers.get('access-control-allow-origin') || '') === 'https://evil.example') {
     const cred = /true/i.test(cors.headers.get('access-control-allow-credentials') || '')

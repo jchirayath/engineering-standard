@@ -77,7 +77,7 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
 
 ---
 
-## 2 · Secure code (baseline: OWASP ASVS 5.0 Level 2)
+## 2 · Secure code (baseline: OWASP ASVS 5.0 Level 2 — specifics in §2B, proof in `mappings/ASVS-5.0.md`)
 
 ### Boundaries & input
 - **SEC-1 MUST** Validate every external input (HTTP, queue message, file, webhook, LLM output) against
@@ -100,7 +100,7 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   operation, default-deny. `SECURITY DEFINER` functions re-check authz and pin `search_path`.
 - **SEC-9 MUST** Sessions: short-lived access tokens, rotating refresh, `HttpOnly; Secure;
   SameSite=Lax|Strict` cookies, CSRF protection on cookie-auth mutations, MFA available for admins,
-  rate-limited login with lockout/backoff. Passwords (if any) hashed with Argon2id/bcrypt.
+  rate-limited login with lockout/backoff. Passwords (if any) hashed per CRY-3 / AUTH-2.
 - **SEC-10 MUST** No mass assignment — map request DTOs to models explicitly.
 
 ### Secrets & data
@@ -111,7 +111,7 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   KMS/vault, rotated; a written **rotation runbook** (redeploying does not un-leak a credential).
 - **SEC-13 MUST** Data inventory: every PII/sensitive field is classified, has a retention period
   and a deletion path; data-subject export/delete exists where law applies.
-- **SEC-14 MUST** Security headers: CSP (no `unsafe-inline` for scripts), HSTS, `X-Content-Type-Options`,
+- **SEC-14 MUST** Security headers with the exact values in WEB-3/BRW-1: CSP (no `unsafe-inline` for scripts), HSTS, `X-Content-Type-Options`,
   `frame-ancestors`, `Referrer-Policy`, `Permissions-Policy`; CORS is an explicit allow-list.
   Debug endpoints, stack traces and prod source maps are off.
 
@@ -141,7 +141,8 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
 - **SEC-21 MUST** Tokens, IDs used as secrets, reset codes and nonces come from a **CSPRNG**
   (`crypto.randomBytes`/`crypto.getRandomValues`, Go `crypto/rand`, Python `secrets`, Dart
   `Random.secure()`) — never `Math.random`, `math/rand`, `random`, `Random()`.
-- **SEC-22 MUST** Passwords are hashed with **Argon2id** (or bcrypt/scrypt) via a maintained library —
+- **SEC-22 MUST** Passwords are hashed with **Argon2id** (or scrypt; bcrypt only with AUTH-2's no-truncation
+  rule) via a maintained library —
   never a bare `md5/sha1/sha256(salt + password)`. Secret comparisons are constant-time
   (`crypto.timingSafeEqual`, `hmac.compare_digest`, `subtle.ConstantTimeCompare`).
 - **SEC-23 MUST** JWTs are **verified**, never just decoded: pinned algorithm (no `none`, no
@@ -171,6 +172,224 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
 
 ---
 
+## 2B · Verified security controls (closes OWASP ASVS 5.0 Levels 1–2)
+
+The specific controls behind §2, written so each one can be tested. Bracketed IDs are the ASVS 5.0
+requirements a rule closes; the full matrix is `mappings/ASVS-5.0.md`. Rules marked *if used* apply
+only when the app has that feature — and become MUST the day it does.
+
+### Input, encoding & injection
+- **INP-1 MUST** Decode input to canonical form exactly once, only where that encoding is expected, and
+  before validation; encode output at the
+  last step for its exact context — HTML, attribute, JS, CSS, URL component, HTTP header (strip CR/LF),
+  mail header — and never store pre-encoded data. URLs built from untrusted data allow only `http(s)`
+  (no `javascript:`/`data:`/`vbscript:`). [1.1.1–2, 1.2.1–2, 1.3.11]
+- **INP-2 MUST** Every schema field (CORE-9) has type, max length, allowed characters and, for numbers,
+  min/max; cross-field rules (start < end, totals) live in the schema; money and quantities use checked
+  or decimal arithmetic that fails on overflow. [1.3.3, 1.4.2, 2.1.2, 2.2.3]
+- **INP-3 MUST** Untrusted data is never: concatenated into XPath/XQuery (use parameterized or
+  precompiled queries with variable resolvers) or LDAP/regex (escape with the platform's quote function), used as a format string, used to build or select a template, or put raw
+  into a cache key (hash it). If used: LaTeX renders sandboxed without shell-escape and
+  with an allow-list of permitted commands; Java never passes
+  input to JNDI and disables remote codebases. [1.2.7–9, 1.3.7–10]
+- **INP-4 MUST** Untrusted HTML, Markdown, SVG, CSS and XSL are sanitized server-side with a maintained
+  allow-list sanitizer (DOMPurify, bluemonday, nh3) before storage or rendering; SVG uploads are
+  sanitized or rasterized and served as attachments. Client code inserts text with `textContent`/framework
+  binding — `innerHTML`/`document.write` with dynamic data are lint-banned. [1.3.1, 1.3.4–5, 3.2.2]
+- **INP-5 MUST** Memory-safe languages only; any `unsafe`/cgo/FFI/native module needs an ADR, stays
+  small, is fuzzed (TEST-10) and sanitizer-tested; resources are released deterministically
+  (`defer`/`with`/`using`/`finally`). [1.4.1, 1.4.3]
+- **INP-6 MUST** Defensive coding: strict equality everywhere (`===`, `eqeqeq`); no merging
+  user-controlled keys into plain JS objects (`Map`, `Object.create(null)`, reject
+  `__proto__`/`constructor`/`prototype`); each parameter has one declared source and duplicated
+  parameters are rejected. [15.3.5–7]
+
+### Business logic
+- **BL-1 MUST** Multi-step flows (checkout, onboarding, approvals) keep their state on the server and
+  reject skipped or out-of-order steps. [2.3.1]
+- **BL-2 MUST** Business limits (per-user and global amounts, counts, frequencies) and resource-heavy
+  operations are listed in `docs/THREAT_MODEL.md` with their limits, enforced server-side, and each has
+  a denied-path test. [2.1.3, 2.3.2, 15.1.3]
+
+### Browser & HTTP
+- **BRW-1 MUST** App and API responses carry the same header values as websites (WEB-3): HSTS
+  `max-age ≥ 31536000; includeSubDomains`, CSP with `object-src 'none'`, `base-uri 'none'`, and
+  script sources from an allow-list, nonces or hashes. [3.4.1, 3.4.3]
+- **BRW-2 MUST** Cookies use the `__Host-` prefix (`Secure`, `Path=/`, no `Domain`) unless an ADR needs
+  `__Secure-`; every cookie not read by client script is `HttpOnly`; session tokens are set only via `Set-Cookie` and never echoed in bodies, URLs or JS
+  storage. [3.3.1, 3.3.3–4]
+- **BRW-3 MUST** GET/HEAD/OPTIONS never change state; cookie-authenticated endpoints check `Origin`
+  against the allow-list and require a non-simple content type or custom header (no reliance on CORS
+  preflight alone); `postMessage` handlers check `event.origin` and the message schema; separate apps
+  live on separate hostnames. [3.5.2–5]
+- **BRW-4 MUST** Every body has an accurate `Content-Type` with `charset=utf-8` for text types;
+  non-document responses (JSON, uploads) use `Content-Disposition: attachment` or `CSP: sandbox`; no
+  plugins or obsolete runtimes. [3.2.1, 3.7.1, 4.1.1]
+- **BRW-5 MUST** API hosts **refuse** plain HTTP rather than redirecting (only browser-facing hosts
+  redirect, WEB-2); edge proxies strip client-supplied `X-Forwarded-*`/`X-Real-IP`/`X-User-*` and the app
+  trusts forwarding headers only from configured proxies (derive client IP from the rightmost untrusted
+  hop); ambiguous framing is rejected (`Content-Length` + `Transfer-Encoding`; HTTP/2–3 `content-length`
+  that doesn't match the DATA frames); `TRACE`/`TRACK` are
+  disabled. [4.1.2–3, 4.2.1, 13.4.4, 15.3.4]
+- **BRW-6 MUST** *If used:* GraphQL enforces depth/breadth/cost limits (or persisted queries) and
+  disables introspection in production; WebSockets validate `Origin` on handshake and authenticate with
+  a short-lived single-use ticket obtained over the existing HTTPS session — never a token in the URL;
+  any dedicated WebSocket session token meets SESS-2/SESS-3 (entropy, expiry, revocation).
+  [4.3.1–2, 4.4.2–4]
+
+### Files
+- **FILE-1 MUST** Each upload feature documents allowed types, max size (including unpacked) and
+  malicious-file handling; extension allow-list **and** content check (magic bytes or re-encode) must
+  agree, also per archive entry; archives are checked against maximum uncompressed size and entry count **before** extraction and
+  enforced during it;
+  user-shared files are antivirus-scanned and quarantined on detection. [5.1.1, 5.2.2–3, 5.4.3]
+- **FILE-2 MUST** Downloads use a server-chosen or validated filename, RFC 6266/5987-encoded
+  (`filename*=UTF-8''…`) with CR/LF, quotes and path separators removed. [5.4.1–2]
+
+### Authentication
+- **AUTH-1 MUST** `docs/THREAT_MODEL.md` lists every authentication pathway (password, SSO, magic link,
+  API key, mobile, recovery) with its controls; every pathway goes through CORE-5 with the same MFA,
+  rate-limit and lockout; lockout is per-account backoff that can't be used to lock out a real user.
+  No default or seeded accounts — the first admin is created by an explicit bootstrap step.
+  [6.1.1, 6.1.3, 6.3.2, 6.3.4]
+- **AUTH-2 MUST** **Password policy** (where passwords exist): minimum 8 characters (15 recommended),
+  at least 64 accepted, any Unicode and spaces, **no composition rules, no forced rotation**; reject
+  the top common passwords, breached passwords (HIBP k-anonymity) and the app's documented
+  context-specific words; verify exactly as entered — no truncation (bcrypt inputs longer than 72 bytes
+  are pre-hashed or the app uses Argon2id). [6.1.2, 6.2.1, 6.2.4–5, 6.2.8–12]
+- **AUTH-3 MUST** Password UX: masked fields with optional show toggle; paste, browser helpers and
+  password managers work (correct `autocomplete`); users can change their password with the current
+  one; no password hints or security questions. [6.2.2–3, 6.2.6–7, 6.4.2]
+- **AUTH-4 MUST** **MFA for every user** (TOTP, passkeys/WebAuthn preferred; SMS/voice only to a verified
+  number, alongside a stronger option, with its risks explained to the user); exceptions recorded with compensating controls. Password reset
+  never bypasses enrolled MFA; recovering a lost factor requires identity proofing equal to enrollment
+  and is `record()`ed. [6.3.3, 6.4.3–4, 6.6.1]
+- **AUTH-5 MUST** **One-time codes:** initial passwords/activation codes from a CSPRNG, meeting the
+  AUTH-2 password policy, short-lived and replaced on first use; OTP and recovery codes ≥ 20 bits of entropy, single use (replays and reused TOTP
+  steps rejected), out-of-band codes expire within 10 minutes and are bound to the login transaction;
+  TOTP uses 30-second steps and accepts a code only within its own step — no drift window (server
+  clocks stay accurate via NTP, SLOG-1);
+  stored recovery/lookup secrets under 112 bits of entropy are hashed with a salted approved password
+  hash (CRY-3), higher-entropy ones at least hashed.
+  [6.4.1, 6.5.1–2, 6.5.4–5, 6.6.2]
+- **AUTH-6 MUST** **Identity providers:** users are keyed by `(iss, sub)` — never by email or other
+  reassignable claims, and never linked across IdPs without verified explicit linking; every assertion's
+  signature is verified with a pinned algorithm and trusted key; functions that need strength or recency
+  check `acr`/`amr`/`auth_time` (absent = single factor); *if SAML is used*, assertion IDs are stored and
+  replays rejected. [6.8.1–4, 10.3.3–4, 10.5.2]
+
+### Sessions
+- **SESS-1 MUST** `docs/THREAT_MODEL.md` documents the idle timeout and absolute lifetime (justifying
+  any deviation from NIST SP 800-63B re-authentication guidance), the concurrent session limit and what
+  happens when it is reached, and — with SSO — which systems create sessions and how logout/re-auth is coordinated.
+  [7.1.1–3]
+- **SESS-2 MUST** Session tokens are CSPRNG, ≥ 128 bits; login and re-authentication issue a **new**
+  token and invalidate the old; sessions expire on inactivity and at an absolute maximum —
+  refresh-token rotation never extends past either. [7.2.3–4, 7.3.1–2]
+- **SESS-3 MUST** Logout and expiry revoke server-side (refresh tokens revoked, access tokens rejected
+  via deny-list or per-user not-before); disabling or deleting an account revokes all its sessions immediately;
+  every authenticated screen shows logout; logout **and session expiry** clear authenticated data from client storage (DOM, localStorage,
+  IndexedDB, caches, secure store) — client-side even when the server is unreachable — and logout
+  responses send `Clear-Site-Data`.
+  [7.4.1–2, 7.4.4, 14.3.1]
+- **SESS-4 MUST** Users can list and end their sessions (after re-auth); after a password/MFA/recovery
+  change the app offers to end all other sessions; admins can revoke one user's or everyone's sessions
+  (`record()`ed); changing email, phone, MFA or recovery info requires fresh re-authentication.
+  [7.4.3, 7.4.5, 7.5.1–2]
+- **SESS-5 MUST** *Federated:* re-authenticate via the IdP when the documented max age since IdP login
+  is exceeded; never create a session silently (`prompt=none`) without a user action. [7.6.1–2]
+
+### Authorization
+- **AZ-1 MUST** `docs/AUTHZ.md` defines, per role and resource attribute, which functions, objects and
+  **fields** each consumer may read or write (including state-dependent rules); CORE-5 policies,
+  role-aware response DTOs and writable-field allow-lists implement it, with denied-field tests.
+  [8.1.1–2, 8.2.3]
+
+### Tokens & OAuth
+- **TOK-1 MUST** Token keys come only from the issuer's pre-configured JWKS (tokens with `jku`/`x5u`/`jwk`
+  pointing elsewhere are rejected); services check token **type** (`typ`/`token_use`) — access tokens
+  for APIs, ID tokens only for sign-in; tokens the app mints carry a unique audience. [9.1.3, 9.2.2, 9.2.4]
+- **TOK-2 MUST** Browser apps keep access and refresh tokens out of JS-readable storage (BFF or
+  HttpOnly cookie) and send tokens only to the components that need them;
+  PKCE verifier, `state` and `nonce` are per transaction and bound to the browser session; clients of
+  more than one authorization server validate `iss`; OIDC clients pin the issuer and reject mismatched
+  discovery metadata. [10.1.1–2, 10.2.2, 10.5.3]
+- **TOK-3 MUST** Resource servers base each decision on the token's `sub`, `scope` and
+  `authorization_details`; IdP clients enable only the grant types and scopes they use (no implicit, no
+  password grant); refresh tokens rotate on every use, and on reuse of an old token the IdP invalidates it and revokes
+  every refresh token of that grant; refresh tokens have an absolute lifetime; *if
+  back-channel logout is used*, logout tokens are validated as `logout+jwt`
+  with the correct `events` claim, no `nonce`, and a short expiry. [10.3.2, 10.4.4–5, 10.4.8,
+  10.4.11, 10.5.5]
+
+### Cryptography
+- **CRY-1 MUST** `docs/CRYPTO.md` inventories every key, algorithm and certificate — where each may and
+  may not be used, and what data it may and may not protect — and is updated in the same PR as any
+  crypto change; plus a key-management policy aligned with NIST SP 800-57 (generation, storage,
+  rotation, revocation, destruction) in which each private key is held by one entity and a shared symmetric secret by
+  no more than two. [11.1.1–2]
+- **CRY-2 MUST** Vetted libraries only (Web Crypto, Go `crypto`, libsodium, Tink) — no hand-rolled
+  primitives; ≥ 128-bit security strength; symmetric encryption is AEAD (AES-GCM, ChaCha20-Poly1305);
+  no ECB, no PKCS#1 v1.5 (RSA uses OAEP/PSS); signatures Ed25519, ECDSA P-256+ or RSA-PSS 3072+;
+  algorithms are config-selected with versioned ciphertext so they can be rotated. [11.2.1–3, 11.3.1–3,
+  11.6.1]
+- **CRY-3 MUST** SHA-2/SHA-3 only for security purposes (no MD5/SHA-1; HMAC-SHA1 only where a protocol
+  mandates it, e.g. TOTP RFC 6238), ≥ 256-bit output for integrity
+  and signatures; password hashing at current OWASP parameters (Argon2id m ≥ 19 MiB, t ≥ 2; bcrypt cost
+  ≥ 10), reviewed yearly; password-derived keys use Argon2id, scrypt or PBKDF2-SHA256 ≥ 600,000
+  iterations with a random salt; secret values have ≥ 128 bits from a CSPRNG and UUIDs are never used as
+  secrets. [11.4.1–4, 11.5.1]
+
+### TLS & service-to-service
+- **TLS-1 MUST** TLS 1.3 preferred, 1.2 the only fallback, AEAD suites with forward secrecy only
+  (Mozilla "intermediate"); every connection — DB, cache, queue, partner API, internal HTTP — is
+  encrypted with no plaintext fallback (`sslmode=verify-full`, WireGuard/Tailscale for overlays); clients
+  verify certificates and hostnames; internal CAs or self-signed certs are trusted specifically, never by
+  disabling verification; *if mTLS is used*, client certs are validated against a pinned CA.
+  [12.1.1–3, 12.3.1–4]
+
+### Configuration & outbound
+- **CFG-1 MUST** Outbound access is an **allow-list**: `docs/THREAT_MODEL.md` lists every outbound
+  dependency and every feature that fetches a user-supplied URL; CORE-6 permits only listed
+  scheme, host, port **and path**, rejects URLs containing control or otherwise dangerous characters
+  before the call, re-checks after DNS resolution and **does not follow redirects** (or
+  re-validates each hop with a hop limit); hosts restrict egress at the network layer to the same list.
+  [1.3.6, 13.1.1, 13.2.4–5, 15.3.2]
+- **CFG-2 MUST** Backend-to-backend calls authenticate with per-service identities (workload identity,
+  short-lived tokens, mTLS) — no shared accounts or long-lived keys; no vendor-default credentials
+  anywhere (checked in IaC scans); vault access is scoped per secret to the identities that need it, with
+  no standing human read access to production secrets. [13.2.1, 13.2.3, 13.3.2]
+- **CFG-3 MUST** API docs UIs, metrics, detailed health and monitoring endpoints are not public unless
+  listed as intentionally public; production builds exclude test code, fixtures and dev routes (CI
+  verifies the artifact); SBOM per release and dependencies only from approved registries via lockfiles.
+  [13.4.5, 15.1.2, 15.2.3]
+
+### Data protection
+- **DATA-1 MUST** `docs/DATA_INVENTORY.md` (SEC-13) defines per classification level the required
+  encryption (in transit, at rest and database-level), integrity, retention, logging treatment and who
+  may read those logs, access controls, and privacy-enhancing techniques (minimization,
+  pseudonymization); each requirement is enforced and
+  checked by a test or CI check; the LOG-4 redactor is generated from it. [14.1.2, 14.2.4, 16.2.5]
+- **DATA-2 MUST** Sensitive data never goes in URLs, shared caches (CDN, proxy, app cache) or third parties
+  not approved in the inventory (analytics, error trackers — scrub before export); authenticated and
+  sensitive responses send `Cache-Control: no-store`; browsers store only session tokens (HttpOnly
+  cookies), never other sensitive data. [14.2.1–3, 14.3.2–3]
+
+### Security logging & failure
+- **SLOG-1 MUST** `docs/OBSERVABILITY.md` inventories events, format, sinks, consumers, access and
+  retention per layer; CORE-3 exports only to listed sinks; clocks are NTP-synced with drift alerts.
+  [16.1.1, 16.2.2–3]
+- **SLOG-2 MUST** `record()` every authentication operation (login, logout, MFA, refresh, reset —
+  success and failure, with method), every **denied** authorization decision, and defined security
+  events (validation rejections, rate-limit and bot-protection hits, business-logic violations).
+  [16.3.1–3]
+- **SLOG-3 MUST** Logs go over TLS to a store in a separate trust domain the app can append to but not
+  read, modify or delete (WORM/append-only), with role-restricted read access. [16.4.2–3]
+- **SLOG-4 MUST** **Fail closed:** an error in authentication, authorization, validation or any security
+  dependency denies the request and rolls back — never defaults to allow. [16.5.3]
+
+---
+
 ## 2A · Websites — secure build & deploy profile
 
 Applies to every site, static or dynamic, on any host (Azure Static Web Apps, Netlify, cPanel/Apache,
@@ -192,11 +411,12 @@ when nobody deploys. Every finding carries a one-line fix; header/exposure fixes
   staging directory and uploads that (pattern: `a staged-allowlist deploy.sh`). Repo roots are never document
   roots. `check-build.mjs <stage>` runs before upload and **aborts the deploy** on any private file:
   `.git`, `.env*`, keys, backups, DB dumps, logs, server code, auth/secret files, lockfiles, deploy scripts.
-- **WEB-2 MUST** HTTPS only: http → https with 301/308 on every hostname, TLS 1.2+, valid certificate
+- **WEB-2 MUST** HTTPS only: http → https with 301/308 on every browser-facing hostname (API hosts refuse
+  plain HTTP instead, BRW-5), TLS 1.2+, valid certificate
   with automated renewal and an expiry alert (Uptime Kuma / check-site warns under 30 days).
 - **WEB-3 MUST** Security headers on every response, from the kit template for the host
   (`site/headers/`): **CSP** with no `'unsafe-inline'`/wildcards in `script-src`, `object-src 'none'`,
-  `base-uri 'self'`, `frame-ancestors 'none'` (or a named allowlist); **HSTS** ≥ 1 year with
+  `base-uri 'none'`, `frame-ancestors 'none'` (or a named allowlist); **HSTS** ≥ 1 year with
   `includeSubDomains`; `X-Content-Type-Options: nosniff`; `Referrer-Policy:
   strict-origin-when-cross-origin`; `Permissions-Policy` denying unused features; no version-disclosing
   `Server`/`X-Powered-By`. New CSPs roll out as `-Report-Only` for one deploy, then enforce. No inline
@@ -362,23 +582,29 @@ Code is read far more than it is written; these rules keep it cheap to read, cha
 
 One call, one schema, every service, every platform.
 
-### LOG-1 · The event schema (MUST — every log line is JSON with these fields)
+### LOG-1 · The event schema (MUST — OpenTelemetry log data model + semantic conventions)
 
-| Field | Required | Notes |
+Every log record follows the **OTel log data model** and uses **OTel semantic-convention attribute
+names**, so logs, traces and metrics join up in any OTel backend (App Insights, Grafana, Datadog,
+Honeycomb) without remapping. App-specific attributes live under the `app.` namespace. On the wire
+(JSON), keys are the dotted names below.
+
+| Field (OTel name) | Required | Notes |
 |---|---|---|
-| `ts` | ✅ | RFC 3339 UTC, ms precision |
-| `level` | ✅ | `debug` · `info` · `warn` · `error` (see LOG-3) |
-| `service`, `version`, `env` | ✅ | `version` = git SHA or semver; set once at logger init |
-| `event` | ✅ | Stable dotted name: `invoice.create`, `auth.login`, `job.scan.finish` — the thing you query |
-| `msg` | ✅ | Human sentence; no data interpolated that isn't also a field |
+| `timestamp` | ✅ | RFC 3339 UTC, ms precision |
+| `severity_text` / `severity_number` | ✅ | `DEBUG` 5 · `INFO` 9 · `WARN` 13 · `ERROR` 17 (see LOG-3) |
+| `body` | ✅ | Human sentence; no data interpolated that isn't also an attribute |
+| `service.name`, `service.version`, `deployment.environment.name` | ✅ | Resource attributes, set once at logger init; `service.version` = git SHA or semver |
+| `event.name` | ✅ | Stable dotted name: `invoice.create`, `auth.login`, `job.scan.finish` — the thing you query |
 | `trace_id`, `span_id` | ✅ | W3C Trace Context; propagated across HTTP/queues by CORE-6 |
-| `request_id` | ✅ for requests | Echoed in the `X-Request-Id` response header and in client error UIs |
-| `actor_id`, `actor_role` | ✅ when authenticated | **Two fields.** Roles are shared — role alone can't answer "which admin?" |
-| `tenant_id` | ✅ if multi-tenant | |
-| `outcome` | ✅ for actions | `success` · `failure` · `denied` |
-| `error_code` | ✅ on failure | Stable CORE-7 code, never a free-text message |
-| `duration_ms` | for timed ops | |
-| `attrs` | optional | Event-specific, flat, redacted |
+| `app.request.id` | ✅ for requests | Echoed in the `X-Request-Id` response header and shown in client error UIs |
+| `user.id`, `user.roles` | ✅ when authenticated | **Two fields.** Roles are shared — role alone can't answer "which admin?" |
+| `app.tenant.id` | ✅ if multi-tenant | |
+| `app.outcome` | ✅ for actions | `success` · `failure` · `denied` |
+| `error.type` | ✅ on failure | Stable CORE-7 code (e.g. `INVOICE_NOT_FOUND`), never a free-text message; `exception.*` for stack traces |
+| `http.request.method`, `http.route`, `http.response.status_code`, `url.path`, `client.address`, `user_agent.original` | ✅ for HTTP | `http.route` is the template (`/invoices/{id}`), not the raw path |
+| `app.duration_ms` | for timed ops | Latency **distributions** belong in metrics (`http.server.request.duration`), not only logs |
+| other `app.*` | optional | Event-specific, flat, redacted |
 
 ### Rules
 - **LOG-2 MUST** All logging goes through CORE-3. Recommended implementations:
@@ -398,8 +624,9 @@ One call, one schema, every service, every platform.
 - **LOG-6 MUST** **Producer coverage**: every subsystem that mutates state calls `record()`. A
   dashboard or audit log fed by 9 of 63 subsystems is worse than none. Keep a producer × sink table
   in `docs/OBSERVABILITY.md`.
-- **LOG-7 MUST** Every request emits exactly one summary line (`http.request`: method, route
-  template — not raw path —, status, duration, bytes) plus spans for downstream calls.
+- **LOG-7 MUST** Every request emits exactly one summary record (`event.name: http.request` with
+  `http.request.method`, `http.route`, `http.response.status_code`, `app.duration_ms`) plus spans for
+  downstream calls, and the `http.server.request.duration` metric.
 - **LOG-8 MUST** Client apps: crash reporter live with release tag and uploaded symbols; client errors
   carry `request_id`; no raw `print`/`console` in release builds.
 - **LOG-9 MUST** Logs are centralized, retained per policy (default 30 d app / 1 y audit), access-
@@ -499,7 +726,27 @@ lint as **warn**, codemod the hits to semantic tokens, (4) flip the rule to **er
 - **API-3 MUST** Every mutating endpoint that can be retried accepts an **idempotency key**.
 - **API-4 MUST** **Rate limiting and quotas on every public endpoint** (per user, per IP, per tenant),
   stricter on auth, signup, password reset, OTP, file upload and anything that costs money (LLM, SMS).
-- **API-5 MUST** One error envelope everywhere (CORE-7/CORE-12): `{error:{code, message, request_id}}`.
+- **API-5 MUST** One error format everywhere (CORE-7/CORE-12): **RFC 9457 Problem Details**
+  (`Content-Type: application/problem+json`) — `type`, `title`, `status`, `detail`, `instance`, plus
+  extension members `code` (stable CORE-7 code) and `request_id`; field errors in an `errors` array
+  (`{pointer, code, detail}`). Never leak stack traces or SQL.
+- **API-6 MUST** **Resource-oriented naming:** plural nouns (`/invoices/{id}`), lower-case kebab paths,
+  one JSON casing per API, timestamps RFC 3339 UTC, money as integer minor units + ISO 4217 currency,
+  IDs opaque strings.
+- **API-7 MUST** **Pagination** is cursor-based: `page_size` (with a documented max) and `page_token` in;
+  `next_page_token` out (empty when done). No offset pagination on large or changing collections.
+- **API-8 SHOULD** **Filtering and sorting** use one convention per API (e.g. `filter=` expression and
+  `order_by=field desc`), validated against an allow-list of fields — never passed into a query raw.
+- **API-9 MUST** **Updates:** `PATCH` with JSON Merge Patch (or an explicit field mask); optimistic
+  concurrency via `ETag` + `If-Match` (412 on conflict) for resources more than one person edits.
+- **API-10 MUST** **Long-running work** returns `202 Accepted` with an operation resource
+  (`/operations/{id}`: status, progress, result or problem) instead of holding the request open.
+- **API-11 MUST** **Deprecation is signalled in-band:** `Deprecation` and `Sunset` headers (plus a `Link`
+  to the migration note) on deprecated endpoints, at least one mobile release cycle before removal.
+- **API-12 MUST** The **OWASP API Security Top 10** is reviewed per API: object-level authz (SEC-7),
+  function-level authz (SEC-6), property-level exposure (explicit response DTOs, no `SELECT *` to
+  JSON), resource consumption limits (API-4, PERF-3), SSRF (SEC-5), and an inventory of every
+  deployed API version (no forgotten `v1`).
 
 ## 6C · Mobile & client security
 
@@ -509,6 +756,24 @@ lint as **warn**, codemod the hits to semantic tokens, (4) flip the rule to **er
   verbose logging in release; screenshots hidden for sensitive screens where appropriate.
 - **MOB-3 MUST** Deep-link and push payloads are validated as untrusted input (SEC-1) and never
   carry secrets.
+- **MOB-4 MUST** **Verified links only:** Android App Links (`assetlinks.json`) and iOS Universal Links
+  (`apple-app-site-association`) for anything that opens the app with state; custom URL schemes never
+  carry auth codes.
+- **MOB-5 SHOULD** **App attestation** (Play Integrity / App Attest via Firebase App Check or
+  equivalent) on APIs that cost money or expose sensitive data, enforced server-side.
+- **MOB-6 MUST** **Certificate pinning is a recorded decision** (ADR): default is *no pinning* plus
+  ATS/Network Security Config; if pinned, pin the SPKI with a backup pin and a remote kill switch
+  (CORE-15) so a rotated certificate can't brick the app.
+- **MOB-7 MUST** **Nothing sensitive in backups, logs, clipboard or screenshots:** tokens and PII
+  excluded from device/cloud backup (Android `dataExtractionRules`; iOS Keychain
+  `ThisDeviceOnly` + `isExcludedFromBackup`), sensitive non-password fields mark `secureTextEntry`/disable autofill
+  suggestions (password fields keep password-manager autofill, AUTH-3), app switcher snapshot blurred on sensitive screens.
+- **MOB-8 MUST** **Store privacy declarations match the code:** Apple privacy manifest
+  (`PrivacyInfo.xcprivacy`, required-reason APIs) and Google Play Data safety form are updated in the
+  same PR as any new SDK or data collection.
+- **MOB-9 SHOULD** Release builds are obfuscated (`--obfuscate --split-debug-info`, R8) with symbols
+  uploaded privately; MASVS-RESILIENCE controls (root/jailbreak detection) only where the threat model
+  calls for them.
 
 ---
 
@@ -544,6 +809,18 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   tests tagged with it (`@feature:<key>` in the test name or tag) covering unit, e2e and walkthrough; a CI
   step lists features missing any kind and fails. A new route without tagged tests cannot merge.
 - **TEST-8 MUST** Bugs get a regression test that fails before the fix and passes after, in the same PR.
+- **TEST-10 MUST** **Fuzz anything that parses untrusted input** (file formats, decoders, URL/filter
+  parsers, import code): Go native fuzzing, Atheris (Python), Jazzer.js; fuzz targets run in CI for a
+  short budget and nightly for longer; crashes become regression tests (TEST-8).
+- **TEST-11 SHOULD** **Property-based tests** for domain invariants (money never negative, totals
+  equal the sum of lines, round-trip encode/decode): `fast-check`, `hypothesis`, `rapid`/`gopter`,
+  `glados` (Dart).
+- **TEST-12 SHOULD** **Mutation testing** on platform-core and domain modules each quarter (Stryker,
+  `mutmut`, `go-mutesting`); a mutation score under ~70% means the tests run the code without
+  checking it.
+- **TEST-13 MUST** **Automated accessibility checks** in CI: `@axe-core/playwright` on every walkthrough
+  page (web), Flutter `meetsGuideline` (tap targets, contrast, labels) in widget tests — zero serious
+  violations.
 - **TEST-9 SHOULD** Contract tests between client and API are generated from the API-1 schema; load
   smoke (`k6`) at expected peak for APIs with a PERF-1 budget; visual-regression goldens for the shared
   components.
@@ -564,6 +841,56 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   respond to each alert in LOG-9.
 - **OPS-6 SHOULD** Cost guardrails: budget alerts on cloud/LLM/SMS spend; per-tenant usage metered.
 - **OPS-7 SHOULD** Uptime monitoring (e.g. Uptime Kuma) on every public endpoint and TLS expiry.
+- **OPS-8 MUST** **Stateless, disposable processes** (Twelve-Factor): no state on local disk or in
+  process memory that another replica needs; start in seconds, shut down gracefully (OPS-1), so any
+  instance can be killed or scaled at any time. Dev, staging and prod use the same backing-service
+  types (no SQLite-in-dev / Postgres-in-prod).
+- **OPS-9 SHOULD** **DORA metrics** tracked monthly per app — deployment frequency, lead time for
+  changes, change failure rate, time to restore — to see whether the standard is making delivery
+  faster and safer, not slower.
+
+## 6H · Reliability & incidents
+
+- **REL-1 MUST** **SLOs per user-facing service:** 2–4 SLIs that reflect user experience (availability of
+  key journeys, p95 latency, freshness of background data) with targets (e.g. 99.5% monthly) written in
+  `docs/SLO.md`. Alerts (LOG-9) fire on **error-budget burn rate**, not on single errors.
+- **REL-2 MUST** **Error budget policy:** when a service has spent its monthly budget, reliability work
+  takes priority over features until it recovers.
+- **REL-3 MUST** **Incident process** in `docs/RUNBOOK.md`: severities (SEV1 user-facing outage or data/
+  security incident · SEV2 degraded · SEV3 minor), who is notified and how, a single incident lead, a
+  status note for users for SEV1/2, and the first steps for each alert.
+- **REL-4 MUST** **Blameless postmortem** within 5 business days for every SEV1/SEV2 and every security
+  incident: timeline, impact, root causes (plural), what went well, action items with owners and dates
+  tracked as issues. Repeated causes become standard rules or lint checks.
+- **REL-5 MUST** **Disaster recovery is rehearsed:** RPO/RTO per data store (OPS-3), a restore into a
+  clean environment at least twice a year, and a written, tested procedure for losing the primary
+  region/host (for single-VM hosts like a single VM: rebuild from IaC + backups, timed).
+- **REL-6 SHOULD** **Resilience is tested, not assumed:** each critical dependency (DB, auth provider,
+  payment, LLM, email) has a tested failure mode — timeouts, fallback or a clear degraded UI — exercised
+  by fault-injection tests or a game day.
+- **REL-7 MUST** **Graceful degradation:** a failing non-critical dependency (analytics, recommendations,
+  avatars) never takes down a critical journey; bulkheads separate their timeouts and pools.
+
+## 6I · Vulnerability management & disclosure
+
+- **VULN-1 MUST** Every repo has a `SECURITY.md` (kit template) stating how to report a vulnerability,
+  the response time, and supported versions; every website publishes `/.well-known/security.txt`
+  (WEB-9). Public GitHub repos enable private vulnerability reporting (GitHub offers it only for public repos).
+- **VULN-2 MUST** **Fix-time targets from discovery** (scanner, report, or advisory): **Critical 7 days ·
+  High 30 days · Medium 90 days · Low next planned release.** Actively exploited (CISA KEV) = Critical
+  regardless of score. Overdue items are reported weekly until closed.
+- **VULN-3 MUST** **Continuous monitoring of what is already shipped:** Dependabot/Renovate security alerts
+  on, and a scheduled scan (weekly) of the default branch and the latest release with `osv-scanner` /
+  `govulncheck` — a CVE published after release still has to be found.
+- **VULN-4 MUST** **Triage is recorded:** each finding is fixed, or marked not-affected with a reason
+  (VEX-style statement in the issue or `docs/STANDARD_EXCEPTIONS.md`) — never silently ignored.
+- **VULN-5 MUST** **Emergency patch path:** a documented way to ship a security fix to production within
+  hours (skipping non-essential gates, never skipping tests), plus forced-update / kill switch for
+  mobile (CORE-15).
+- **VULN-6 MUST** **Repo security posture is measured:** the OpenSSF **Scorecard** action (kit template)
+  runs weekly on every GitHub repo; target score ≥ 7/10, and a drop is investigated.
+- **VULN-7 MUST** Security fixes are disclosed honestly in the CHANGELOG / release notes once users can
+  update (CVE or advisory where applicable).
 
 ## 6F · Repo hygiene
 
@@ -677,6 +1004,9 @@ A repo meets the standard when:
       **blocking**; any `.semgrep/baseline.json` is shrinking release over release.
 - [ ] §7.1 gates run in CI and are **blocking**.
 - [ ] Every nav feature has tagged unit + e2e + walkthrough tests (TEST-0, TEST-7).
+- [ ] `SECURITY.md` present, Scorecard workflow running (VULN-1, VULN-6); `docs/SLO.md` and the incident
+      section of `docs/RUNBOOK.md` exist for user-facing services (REL-1, REL-3).
+- [ ] Security posture mapped: `mappings/ASVS-5.0.md` gaps for Level 1–2 are closed or listed as exceptions.
 - [ ] Websites: deploy runs `check-build.mjs` before upload and `check-site.mjs` after, with zero
       ERRORs on every hostname; a weekly scheduled `check-site.mjs` run alerts on regressions (§2A).
 - [ ] `docs/THREAT_MODEL.md`, `docs/OBSERVABILITY.md` (producer × sink table), `docs/RUNBOOK.md` and

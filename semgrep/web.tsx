@@ -85,5 +85,31 @@ export function pitfalls(req: any, res: any, fs: any, crypto: any, password: str
   res.redirect(safeNext(req.query.next) ? '/home' : '/')
   // ruleid: std.web.path-from-request
   fs.readFile('/data/' + req.params.name, cb)
+
+}
+
+export function controls(el: any, req: any, crypto: any, user: any) {
+  // ruleid: std.web.unsafe-dom-insertion
+  el.innerHTML = user.bio
+  // ok: std.web.unsafe-dom-insertion
+  el.innerHTML = DOMPurify.sanitize(user.bio)
+  // ok: std.web.unsafe-dom-insertion
+  el.innerHTML = "<b>static</b>"
+  // ruleid: std.web.loose-equality
+  if (user.role == 'admin') {}
+  // ok: std.web.loose-equality
+  if (user.role == null) {}
+  // ruleid: std.web.prototype-pollution-merge
+  const merged = Object.assign({}, defaults, req.body)
+  // ruleid: std.web.prototype-pollution-merge
+  const spread = { ...req.query }
+  // ok: std.web.prototype-pollution-merge
+  const picked = schema.parse(req.body)
+  // ruleid: std.web.weak-crypto
+  const md = crypto.createHash('md5')
+  // ruleid: std.web.weak-crypto
+  const c = crypto.createCipheriv('aes-128-ecb', key, null)
+  // ok: std.web.weak-crypto
+  const g = crypto.createCipheriv('aes-256-gcm', key, iv)
 }
 

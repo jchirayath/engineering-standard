@@ -273,9 +273,9 @@ else P2.
 | **L3 · Config & Entry** | 4 | app | **Owns E.** Classify every env var (user-tunable vs deploy-secret); each tunable without UI gets a `field_spec`. Run the no-mutation detector. *Usually the highest yield — be exhaustive.* |
 | **L4 · Product Value & IA** | 5,6,7,9 | group | **Owns B + D.** "The user opened this to decide ___" per feature; viability verdict for every feature; drill-down, filters/segments, export, standing reports. Think like the product owner on a Monday morning. |
 | **L5 · Honesty Auditor** ⭐⭐ | 8 | app | **Owns H + I.** For every success path: what did it ACTUALLY do? Follow the write to the real system. For every subsystem: does anything call it? Seeds and their missing inputs. *Finds the P0s nobody else can see.* |
-| **L6 · AppSec & Supply Chain** | 15 | app | **Runs the §9.1 scanners** (incl. `check-site.mjs` on the live URLs and `check-build.mjs` on the publish dir for anything web-facing — standard §2A) and triages output; SAST review for injection/XSS/SSRF/path traversal/deserialization/weak crypto; headers & CORS; IaC; CI hardening; LLM features vs SEC-19. Paste real scan output. |
+| **L6 · AppSec & Supply Chain** | 15 | app | **Runs the §9.1 scanners** and checks VULN-1…7 (SECURITY.md, fix-time targets, Scorecard) (incl. `check-site.mjs` on the live URLs and `check-build.mjs` on the publish dir for anything web-facing — standard §2A) and triages output; SAST review for injection/XSS/SSRF/path traversal/deserialization/weak crypto; headers & CORS; IaC; CI hardening; LLM features vs SEC-19. Paste real scan output. |
 | **L7 · Identity, Authz & Privacy** | 15 | app | **RBAC boundary test** (every admin-only route 403s for lower roles); IDOR (user A vs B, tenant X vs Y); identity derived server-side; RLS per operation; session/cookie/CSRF; PII inventory, retention, deletion; threat model current (SEC-20). |
-| **L8 · Observability & Sinks** | 3, 14 | app | **Owns C.** Producer × sink matrix (log, audit, activity, metrics) with misses named. Schema conformance to LOG-1; redaction (LOG-4); actor **and** role; request_id end-to-end; silent catches; alerting exists. |
+| **L8 · Observability & Sinks** | 3, 14 | app | **Owns C.** Producer × sink matrix (log, audit, activity, metrics) with misses named. Schema conformance to LOG-1 (OTel attribute names); SLOs + burn-rate alerts (REL-1); redaction (LOG-4); actor **and** role; request_id end-to-end; silent catches; alerting exists. |
 | **L9 · Architecture & Reuse** | 13 | app | **Owns J.** Every CORE module exists and is the only path; triage `standard-scan.json` (`std.*` rule hits = bypasses, grouped by CORE module); copy-paste to promote (name the unit + call sites); dead code and unused deps. Kit adopted and baseline shrinking? |
 | **L10 · Design System, Theme & A11y** | 12 | app | **Owns F + G — do G first.** Both modes on every screen; one token source + icon registry (count raw colours / direct icon imports outside them); same meaning → same token/icon on every screen; contrast; four states; WCAG 2.2 AA; recommend the durable fix (lint rule + both-modes e2e sweep), not one-off patches. |
 | **L11 · Performance & Concurrency** | 16 | app | Budgets (PERF-1) measured; N+1, missing indexes, unpaginated lists, missing timeouts; bounded concurrency; locks/upserts/idempotency/leases; multi-replica safety; no cross-tenant cache bleed. |
@@ -469,7 +469,8 @@ behaviour is backed by having watched it work.
 - [ ] RBAC boundary test + IDOR test pass against a running instance.
 - [ ] Live URL: `node ~/code/engineering-standard/site/check-site.mjs <every hostname>` — **zero ERRORs** (TLS, http→https, CSP/HSTS/nosniff/frame-ancestors, cookies, exposed files, directory listing, public source maps); CORS is an explicit allow-list.
 - [ ] Websites: `site/check-build.mjs` passes on the exact directory the deploy uploads (WEB-1, WEB-11).
-- [ ] OWASP Top 10 (and LLM Top 10 if applicable) walk-through: pass/fail per item.
+- [ ] OWASP Top 10, **OWASP API Security Top 10** (API-12) and LLM Top 10 if applicable: pass/fail per item; ASVS Level 1–2 gaps from `mappings/ASVS-5.0.md` that apply to this app are listed.
+- [ ] Vulnerability management: `SECURITY.md` present; no findings past their VULN-2 fix-time target; OpenSSF Scorecard ≥ 7/10 (VULN-6).
 
 ### 9.2 Release checklist (from QA_PLAYBOOK; tags: [web] [mobile] [api] — skip tags that don't apply)
 - [ ] **Screen × state matrix**: happy path + empty/error/loading for every route; dead links; edge cases (0/1/max items, deleting in-use objects, last member leaves).
@@ -483,6 +484,7 @@ behaviour is backed by having watched it work.
 - [ ] **Observability**: crash reporter live with release tag + symbols (dSYM / R8 mapping); alert rules fire in a test.
 - [ ] **Build hardening**: release builds minified/obfuscated; min-version / kill-switch on cold start; versioned API routes.
 - [ ] **Data**: migrations dry-run in a transaction with rollback tested; backups restored once, for real.
+- [ ] **Reliability**: `docs/SLO.md` with burn-rate alerts (REL-1), incident section of `docs/RUNBOOK.md` (REL-3), last DR rehearsal date within 6 months (REL-5).
 - [ ] **A11y / i18n / legal**: accessibility scan (`@axe-core/playwright`, platform inspectors); strings externalized; privacy policy, terms, data export/delete reachable; store listing parity.
 
 ---

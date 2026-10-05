@@ -15,6 +15,9 @@ site/check-site.mjs          post-deploy + weekly check of the live URL (TLS, re
 site/harden.mjs              APPLIES the website profile to a site repo: computed CSP (inline hashes), headers, https, private-path blocks, security.txt
 site/csp.mjs                 derive (suggest) / check (verify) a site's CSP from its own files — verify runs inside check-build
 site/headers/                security-header templates: Azure SWA, Netlify, Apache/.htaccess, Caddy, nginx, security.txt
+templates/SECURITY.md        vulnerability policy with fix-time targets (VULN-1/2) — adopt.sh copies it if absent
+templates/github/scorecard.yml   OpenSSF Scorecard weekly (VULN-6) — adopt.sh installs it in GitHub repos
+mappings/ASVS-5.0.md         every OWASP ASVS 5.0 requirement → our rule IDs (covered / partial / gap / n/a)
 fleet/sites.json             your website fleet + expected GA IDs; fleet/report.mjs renders results
 .github/workflows/sites-weekly.yml   Monday check of every hostname → opens/updates/closes a `site-check` issue
 design-tokens/schema/        semantic-keys.json — the canonical token + icon names (THEME-4)

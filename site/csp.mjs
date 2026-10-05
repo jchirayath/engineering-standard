@@ -93,7 +93,7 @@ function build() {
   d.push(['connect-src', "'self'", ...sorted(need['connect-src'])].join(' '))
   if (need['frame-src'].size) d.push(['frame-src', ...sorted(need['frame-src'])].join(' '))
   if (need['media-src'].size) d.push(['media-src', "'self'", ...sorted(need['media-src'])].join(' '))
-  d.push("object-src 'none'", "base-uri 'self'", ['form-action', "'self'", ...sorted(need['form-action'])].join(' '), "frame-ancestors 'none'", 'upgrade-insecure-requests')
+  d.push("object-src 'none'", "base-uri 'none'", ['form-action', "'self'", ...sorted(need['form-action'])].join(' '), "frame-ancestors 'none'", 'upgrade-insecure-requests')
   return d.join('; ')
 }
 

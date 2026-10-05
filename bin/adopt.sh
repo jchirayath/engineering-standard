@@ -41,6 +41,10 @@ if [ -n "$SITE" ]; then echo "  updated  tools/standard/ (check.sh, check-tests.
 
 # 3. Repo-owned starting points.
 mkdir -p "$REPO/docs"
+copy_if_absent "$KIT/templates/SECURITY.md" "$REPO/SECURITY.md"
+if [ -d "$REPO/.github" ] || git -C "$REPO" remote -v 2>/dev/null | grep -q github.com; then
+  copy_if_absent "$KIT/templates/github/scorecard.yml" "$REPO/.github/workflows/scorecard.yml"
+fi
 [ -e "$REPO/docs/STANDARD_EXCEPTIONS.md" ] || { printf '# Standard exceptions\n\n| Rule | Where | Reason | Owner | Expires |\n|---|---|---|---|---|\n' > "$REPO/docs/STANDARD_EXCEPTIONS.md"; echo "  created  docs/STANDARD_EXCEPTIONS.md"; }
 
 if [ -n "$SITE" ]; then

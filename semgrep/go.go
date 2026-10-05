@@ -1,6 +1,7 @@
 package fixture
 
 import (
+	"crypto/md5"
 	"crypto/sha256"
 	"crypto/tls"
 	"fmt"
@@ -58,3 +59,12 @@ func pitfalls(password string, name string) {
 	exec.Command("ls", name)
 	_, _, _, _ = resetToken, jitter, h, e
 }
+
+func cryptoControls(data []byte) {
+	// ruleid: std.go.weak-crypto
+	a := md5.Sum(data)
+	// ok: std.go.weak-crypto
+	b := sha256.Sum256(data)
+	_, _ = a, b
+}
+
