@@ -1,5 +1,8 @@
 # OpenSSF Scorecard — weekly repo security posture (ENGINEERING_STANDARD VULN-6). Target ≥ 7/10.
 # Results appear under Security → Code scanning (SARIF) and as a workflow artifact.
+# PRIVATE repos: GITHUB_TOKEN can't run Scorecard's GraphQL queries. Add a fine-grained PAT with read-only
+# access to this repo (Contents, Metadata, Administration read) as secret SCORECARD_TOKEN; without it the
+# job skips (with a notice) instead of failing every week.
 name: scorecard
 on:
   schedule: [{ cron: "30 6 * * 1" }]
@@ -10,16 +13,25 @@ jobs:
   analysis:
     runs-on: ubuntu-latest
     permissions: { security-events: write, id-token: write, contents: read, actions: read }
+    env: { SCORECARD_TOKEN: "${{ secrets.SCORECARD_TOKEN }}" }
     steps:
+      - name: Skip on private repos without a token
+        if: github.event.repository.private && env.SCORECARD_TOKEN == ''
+        run: echo "::notice::Scorecard skipped — private repo without SCORECARD_TOKEN secret (see header comment)"
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683          # v4.2.2
+        if: ${{ !github.event.repository.private || env.SCORECARD_TOKEN != '' }}
         with: { persist-credentials: false }
       - uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc     # v2.4.4
+        if: ${{ !github.event.repository.private || env.SCORECARD_TOKEN != '' }}
         with:
           results_file: results.sarif
           results_format: sarif
+          repo_token: ${{ env.SCORECARD_TOKEN || github.token }}
           publish_results: false          # set true for public repos to get the badge
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: ${{ !github.event.repository.private || env.SCORECARD_TOKEN != '' }}
         with: { name: scorecard-sarif, path: results.sarif, retention-days: 14 }
       - uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2  # v4.38.2
+        if: ${{ !github.event.repository.private || env.SCORECARD_TOKEN != '' }}
         continue-on-error: true           # code scanning upload needs GitHub Advanced Security on private repos
         with: { sarif_file: results.sarif }

@@ -888,7 +888,8 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   hours (skipping non-essential gates, never skipping tests), plus forced-update / kill switch for
   mobile (CORE-15).
 - **VULN-6 MUST** **Repo security posture is measured:** the OpenSSF **Scorecard** action (kit template)
-  runs weekly on every GitHub repo; target score ≥ 7/10, and a drop is investigated.
+  runs weekly on every GitHub repo (private repos need a read-only `SCORECARD_TOKEN` secret); target
+  score ≥ 7/10, and a drop is investigated.
 - **VULN-7 MUST** Security fixes are disclosed honestly in the CHANGELOG / release notes once users can
   update (CVE or advisory where applicable).
 
