@@ -1,0 +1,61 @@
+{
+  "$comment": "Canonical semantic token vocabulary shared by every app (ENGINEERING_STANDARD THEME-4). Apps own the VALUES; these NAMES are fixed. Apps may add keys only under extensionNamespaces. Bump version on any change; renames are breaking.",
+  "version": "1.0.0",
+  "modes": ["light", "dark"],
+  "required": {
+    "color": [
+      "color.surface.base", "color.surface.raised", "color.surface.sunken", "color.surface.overlay", "color.surface.inverse",
+      "color.text.primary", "color.text.muted", "color.text.inverse", "color.text.link", "color.text.disabled",
+      "color.border.default", "color.border.strong", "color.border.focus",
+      "color.brand.primary", "color.brand.onPrimary", "color.brand.primaryContainer", "color.brand.onPrimaryContainer",
+      "color.brand.accent", "color.brand.onAccent",
+      "color.action.primary", "color.action.onPrimary", "color.action.primaryHover",
+      "color.action.secondary", "color.action.onSecondary",
+      "color.action.destructive", "color.action.onDestructive",
+      "color.action.disabled", "color.action.onDisabled",
+      "color.status.success", "color.status.onSuccess", "color.status.successSubtle", "color.status.onSuccessSubtle",
+      "color.status.warning", "color.status.onWarning", "color.status.warningSubtle", "color.status.onWarningSubtle",
+      "color.status.danger", "color.status.onDanger", "color.status.dangerSubtle", "color.status.onDangerSubtle",
+      "color.status.info", "color.status.onInfo", "color.status.infoSubtle", "color.status.onInfoSubtle",
+      "color.state.selected", "color.state.hoverOverlay", "color.state.pressedOverlay",
+      "color.data.series.1", "color.data.series.2", "color.data.series.3", "color.data.series.4",
+      "color.data.series.5", "color.data.series.6", "color.data.series.7", "color.data.series.8"
+    ],
+    "base": [
+      "space.none", "space.xxs", "space.xs", "space.sm", "space.md", "space.lg", "space.xl", "space.xxl", "space.xxxl",
+      "radius.none", "radius.sm", "radius.md", "radius.lg", "radius.xl", "radius.full",
+      "font.family.base", "font.family.mono",
+      "font.size.xs", "font.size.sm", "font.size.md", "font.size.lg", "font.size.xl", "font.size.xxl", "font.size.display",
+      "font.weight.regular", "font.weight.medium", "font.weight.semibold", "font.weight.bold",
+      "font.lineHeight.tight", "font.lineHeight.normal",
+      "icon.size.sm", "icon.size.md", "icon.size.lg", "icon.size.xl",
+      "elevation.level0", "elevation.level1", "elevation.level2", "elevation.level3",
+      "motion.duration.fast", "motion.duration.normal", "motion.duration.slow",
+      "breakpoint.compact", "breakpoint.medium", "breakpoint.expanded", "breakpoint.large"
+    ]
+  },
+  "extensionNamespaces": ["color.domain.", "color.data.", "space.domain.", "icon.domain."],
+  "contrastExempt": ["color.text.disabled", "color.action.onDisabled", "color.state.hoverOverlay", "color.state.pressedOverlay"],
+  "contrastPairs": [
+    { "fg": "color.text.primary", "bg": ["color.surface.base", "color.surface.raised", "color.surface.sunken", "color.surface.overlay", "color.state.selected"], "min": 4.5 },
+    { "fg": "color.text.muted", "bg": ["color.surface.base", "color.surface.raised", "color.surface.overlay"], "min": 4.5 },
+    { "fg": "color.text.link", "bg": ["color.surface.base", "color.surface.raised"], "min": 4.5 },
+    { "fg": "color.text.inverse", "bg": ["color.surface.inverse"], "min": 4.5 },
+    { "fg": "color.border.focus", "bg": ["color.surface.base", "color.surface.raised"], "min": 3 },
+    { "fg": "color.border.strong", "bg": ["color.surface.base"], "min": 3 },
+    { "fg": "color.data.series.*", "bg": ["color.surface.base", "color.surface.raised"], "min": 3 },
+    { "pairsByPrefix": "on", "min": 4.5, "$comment": "every X / onX sibling pair, e.g. status.danger + status.onDanger, brand.primaryContainer + brand.onPrimaryContainer" }
+  ],
+  "icons": {
+    "platforms": { "web": "lucide", "flutter": "material", "swift": "sf" },
+    "required": [
+      "action.add", "action.edit", "action.delete", "action.save", "action.cancel", "action.close", "action.back",
+      "action.search", "action.filter", "action.sort", "action.export", "action.import", "action.refresh",
+      "action.share", "action.copy", "action.more", "action.settings", "action.logout",
+      "nav.home", "nav.profile", "nav.notifications", "nav.help",
+      "status.success", "status.warning", "status.danger", "status.info",
+      "object.user", "object.users", "object.calendar", "object.document", "object.link", "object.lock",
+      "state.expand", "state.collapse", "state.check", "state.visibility", "state.visibilityOff"
+    ]
+  }
+}

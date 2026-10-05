@@ -1,0 +1,52 @@
+# ENGINEERING_STANDARD banned-API rules — Swift / SwiftUI.  Test: semgrep --test semgrep/
+# Suppress one justified line:  // nosemgrep: <rule-id> -- <reason>
+rules:
+  - id: std.swift.raw-color
+    languages: [generic]
+    severity: ERROR
+    message: "Colour constructed in a view — use AppColors tokens (THEME-8)."
+    metadata: { standard: [THEME-8] }
+    paths:
+      include: ["*.swift"]
+      exclude: ["**/Design/**", "**/design/**", "**/Generated/**", "**/*Tests/**"]
+    patterns:
+      - pattern-regex: '\b(Color|UIColor|NSColor)\(\s*(red:|\.sRGB|hex:|white:|hue:|displayP3)|Color\.(red|blue|green|orange|yellow|pink|purple|gray|black|white|teal|indigo|mint|cyan|brown)\b|UIColor\.system\w+'
+      - pattern-not-regex: '//.*'
+
+  - id: std.swift.font-literal
+    languages: [generic]
+    severity: ERROR
+    message: "Literal font size — use AppFontSize / text styles (THEME-10)."
+    metadata: { standard: [THEME-10] }
+    paths: { include: ["*.swift"], exclude: ["**/Design/**", "**/design/**", "**/Generated/**"] }
+    patterns:
+      - pattern-regex: '\.system\(\s*size:\s*\d'
+      - pattern-not-regex: '//.*'
+
+  - id: std.swift.icons-direct
+    languages: [generic]
+    severity: ERROR
+    message: "SF Symbol referenced directly — use AppIcon.<name> from the icon registry (THEME-5)."
+    metadata: { standard: [THEME-5] }
+    paths: { include: ["*.swift"], exclude: ["**/Design/**", "**/design/**", "**/Generated/**"] }
+    patterns:
+      - pattern-regex: '(Image|Label)\([^)]*systemName:'
+      - pattern-not-regex: '//.*'
+
+  - id: std.swift.print
+    languages: [generic]
+    severity: ERROR
+    message: "print/NSLog — use the os.Logger-based logger module (LOG-2)."
+    metadata: { standard: [LOG-2, LOG-8] }
+    paths: { include: ["*.swift"], exclude: ["**/Logging/**", "**/*Tests/**", "**/Runner/**"] }
+    patterns:
+      - pattern-regex: '(?<![\w.])(print|debugPrint|NSLog|dump)\('
+      - pattern-not-regex: '//.*'
+
+  - id: std.swift.userdefaults-secret
+    languages: [generic]
+    severity: ERROR
+    message: "Secret-looking value in UserDefaults — use the Keychain (MOB-1)."
+    metadata: { standard: [MOB-1] }
+    paths: { include: ["*.swift"] }
+    pattern-regex: '(?i)UserDefaults[^\n]*\.set\([^\n]*forKey:\s*"[^"]*(token|secret|password|jwt|session|api_?key)'

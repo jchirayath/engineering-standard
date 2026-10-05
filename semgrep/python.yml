@@ -1,0 +1,70 @@
+# ENGINEERING_STANDARD banned-API rules — Python.  Test: semgrep --test semgrep/
+# Suppress one justified line:  # nosemgrep: <rule-id> -- <reason>
+rules:
+  - id: std.py.print
+    languages: [python]
+    severity: ERROR
+    message: "print() — log through the structlog-based logger module (LOG-2, CORE-3)."
+    metadata: { standard: [LOG-2] }
+    paths: { exclude: ["**/logging/**", "**/logger/**", "**/scripts/**", "**/cli/**", "test_*.py", "*_test.py", "**/tests/**"] }
+    pattern: print(...)
+
+  - id: std.py.environ
+    languages: [python]
+    severity: ERROR
+    message: "os.environ/getenv outside the config module — use typed settings (pydantic-settings) (CORE-1)."
+    metadata: { standard: [CORE-1] }
+    paths: { exclude: ["**/config/**", "**/config.py", "**/settings*", "**/tests/**", "conftest.py", "**/scripts/**"] }
+    pattern-either:
+      - pattern: os.environ
+      - pattern: os.getenv(...)
+
+  - id: std.py.requests-no-timeout
+    languages: [python]
+    severity: ERROR
+    message: "HTTP call without a timeout hangs forever — use the shared client (CORE-6, PERF-2)."
+    metadata: { standard: [CORE-6, PERF-2] }
+    patterns:
+      - pattern-either:
+          - pattern: requests.$M(...)
+          - pattern: httpx.$M(...)
+      - metavariable-regex: { metavariable: $M, regex: '^(get|post|put|patch|delete|head|request)$' }
+      - pattern-not: requests.$M(..., timeout=$T, ...)
+      - pattern-not: httpx.$M(..., timeout=$T, ...)
+
+  - id: std.py.sql-string
+    languages: [python]
+    severity: ERROR
+    message: "SQL built from an f-string/format/concatenation — use parameters (SEC-2)."
+    metadata: { standard: [SEC-2] }
+    patterns:
+      - pattern-either:
+          - pattern: $C.execute(f"...", ...)
+          - pattern: $C.execute("..." % $X, ...)
+          - pattern: $C.execute("...".format(...), ...)
+          - pattern: $C.execute("..." + $X, ...)
+          - pattern: text(f"...")
+
+  - id: std.py.tls-bypass
+    languages: [python]
+    severity: ERROR
+    message: "verify=False disables certificate checks (SEC-12)."
+    metadata: { standard: [SEC-12] }
+    pattern: $F(..., verify=False, ...)
+
+  - id: std.py.swallowed-exception
+    languages: [python]
+    severity: ERROR
+    message: "Exception swallowed with pass — log it or re-raise with context (COR-3)."
+    metadata: { standard: [COR-3] }
+    pattern-either:
+      - pattern: |
+          try:
+              ...
+          except $E:
+              pass
+      - pattern: |
+          try:
+              ...
+          except:
+              pass

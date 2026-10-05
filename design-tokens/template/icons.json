@@ -1,0 +1,190 @@
+{
+  "$comment": "Semantic icon name -> glyph per platform set. Screens use the generated registry, never the icon package (THEME-5). Change a glyph here, not in screens.",
+  "icons": {
+    "action.add": {
+      "lucide": "Plus",
+      "material": "add",
+      "sf": "plus"
+    },
+    "action.edit": {
+      "lucide": "Pencil",
+      "material": "edit",
+      "sf": "pencil"
+    },
+    "action.delete": {
+      "lucide": "Trash2",
+      "material": "delete",
+      "sf": "trash"
+    },
+    "action.save": {
+      "lucide": "Save",
+      "material": "save",
+      "sf": "square.and.arrow.down"
+    },
+    "action.cancel": {
+      "lucide": "X",
+      "material": "cancel",
+      "sf": "xmark.circle"
+    },
+    "action.close": {
+      "lucide": "X",
+      "material": "close",
+      "sf": "xmark"
+    },
+    "action.back": {
+      "lucide": "ArrowLeft",
+      "material": "arrow_back",
+      "sf": "chevron.left"
+    },
+    "action.search": {
+      "lucide": "Search",
+      "material": "search",
+      "sf": "magnifyingglass"
+    },
+    "action.filter": {
+      "lucide": "Filter",
+      "material": "filter_list",
+      "sf": "line.3.horizontal.decrease"
+    },
+    "action.sort": {
+      "lucide": "ArrowUpDown",
+      "material": "sort",
+      "sf": "arrow.up.arrow.down"
+    },
+    "action.export": {
+      "lucide": "Download",
+      "material": "download",
+      "sf": "square.and.arrow.up"
+    },
+    "action.import": {
+      "lucide": "Upload",
+      "material": "upload",
+      "sf": "square.and.arrow.down.on.square"
+    },
+    "action.refresh": {
+      "lucide": "RefreshCw",
+      "material": "refresh",
+      "sf": "arrow.clockwise"
+    },
+    "action.share": {
+      "lucide": "Share2",
+      "material": "share",
+      "sf": "square.and.arrow.up"
+    },
+    "action.copy": {
+      "lucide": "Copy",
+      "material": "content_copy",
+      "sf": "doc.on.doc"
+    },
+    "action.more": {
+      "lucide": "MoreHorizontal",
+      "material": "more_horiz",
+      "sf": "ellipsis"
+    },
+    "action.settings": {
+      "lucide": "Settings",
+      "material": "settings",
+      "sf": "gearshape"
+    },
+    "action.logout": {
+      "lucide": "LogOut",
+      "material": "logout",
+      "sf": "rectangle.portrait.and.arrow.right"
+    },
+    "nav.home": {
+      "lucide": "Home",
+      "material": "home",
+      "sf": "house"
+    },
+    "nav.profile": {
+      "lucide": "CircleUser",
+      "material": "account_circle",
+      "sf": "person.crop.circle"
+    },
+    "nav.notifications": {
+      "lucide": "Bell",
+      "material": "notifications",
+      "sf": "bell"
+    },
+    "nav.help": {
+      "lucide": "CircleHelp",
+      "material": "help",
+      "sf": "questionmark.circle"
+    },
+    "status.success": {
+      "lucide": "CircleCheck",
+      "material": "check_circle",
+      "sf": "checkmark.circle"
+    },
+    "status.warning": {
+      "lucide": "TriangleAlert",
+      "material": "warning",
+      "sf": "exclamationmark.triangle"
+    },
+    "status.danger": {
+      "lucide": "CircleAlert",
+      "material": "error",
+      "sf": "exclamationmark.octagon"
+    },
+    "status.info": {
+      "lucide": "Info",
+      "material": "info",
+      "sf": "info.circle"
+    },
+    "object.user": {
+      "lucide": "User",
+      "material": "person",
+      "sf": "person"
+    },
+    "object.users": {
+      "lucide": "Users",
+      "material": "group",
+      "sf": "person.2"
+    },
+    "object.calendar": {
+      "lucide": "Calendar",
+      "material": "calendar_today",
+      "sf": "calendar"
+    },
+    "object.document": {
+      "lucide": "FileText",
+      "material": "description",
+      "sf": "doc.text"
+    },
+    "object.link": {
+      "lucide": "Link",
+      "material": "link",
+      "sf": "link"
+    },
+    "object.lock": {
+      "lucide": "Lock",
+      "material": "lock",
+      "sf": "lock"
+    },
+    "state.expand": {
+      "lucide": "ChevronDown",
+      "material": "expand_more",
+      "sf": "chevron.down"
+    },
+    "state.collapse": {
+      "lucide": "ChevronUp",
+      "material": "expand_less",
+      "sf": "chevron.up"
+    },
+    "state.check": {
+      "lucide": "Check",
+      "material": "check",
+      "sf": "checkmark"
+    },
+    "state.visibility": {
+      "lucide": "Eye",
+      "material": "visibility",
+      "sf": "eye"
+    },
+    "state.visibilityOff": {
+      "lucide": "EyeOff",
+      "material": "visibility_off",
+      "sf": "eye.slash"
+    }
+  }
+}

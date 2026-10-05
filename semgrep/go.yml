@@ -1,0 +1,70 @@
+# ENGINEERING_STANDARD banned-API rules — Go.  Test: semgrep --test semgrep/
+# Suppress one justified line:  // nosemgrep: <rule-id> -- <reason>
+rules:
+  - id: std.go.print
+    languages: [go]
+    severity: ERROR
+    message: "fmt/log printing — use the slog-based logger module (LOG-2, CORE-3). CLI output under cmd/ is exempt."
+    metadata: { standard: [LOG-2] }
+    paths: { exclude: ["**/cmd/**", "**/logging/**", "**/logger/**", "*_test.go", "**/tools/**"] }
+    pattern-either:
+      - pattern: fmt.Print(...)
+      - pattern: fmt.Println(...)
+      - pattern: fmt.Printf(...)
+      - pattern: log.Print(...)
+      - pattern: log.Println(...)
+      - pattern: log.Printf(...)
+
+  - id: std.go.getenv
+    languages: [go]
+    severity: ERROR
+    message: "os.Getenv outside the config package — use typed, validated config (CORE-1)."
+    metadata: { standard: [CORE-1] }
+    paths: { exclude: ["**/config/**", "*_test.go", "**/cmd/**"] }
+    pattern-either:
+      - pattern: os.Getenv(...)
+      - pattern: os.LookupEnv(...)
+
+  - id: std.go.default-http-client
+    languages: [go]
+    severity: ERROR
+    message: "Default/ad-hoc HTTP client has no timeout, retries or SSRF guard — use the shared outbound client (CORE-6, PERF-2)."
+    metadata: { standard: [CORE-6, PERF-2, SEC-5] }
+    paths: { exclude: ["**/httpclient/**", "**/outbound/**", "*_test.go"] }
+    pattern-either:
+      - pattern: http.Get(...)
+      - pattern: http.Post(...)
+      - pattern: http.PostForm(...)
+      - pattern: http.Head(...)
+      - pattern: http.DefaultClient
+      - pattern: "&http.Client{...}"
+
+  - id: std.go.sql-sprintf
+    languages: [go]
+    severity: ERROR
+    message: "SQL built with Sprintf/concatenation — use placeholders (SEC-2)."
+    metadata: { standard: [SEC-2] }
+    patterns:
+      - pattern-either:
+          - pattern: $DB.$M(fmt.Sprintf(...), ...)
+          - pattern: $DB.$M($CTX, fmt.Sprintf(...), ...)
+          - pattern: $DB.$M("..." + $X, ...)
+          - pattern: $DB.$M($CTX, "..." + $X, ...)
+      - metavariable-regex: { metavariable: $M, regex: '^(Query|QueryRow|Exec|QueryContext|QueryRowContext|ExecContext|Prepare|PrepareContext|Raw|Select|Get)$' }
+
+  - id: std.go.tls-bypass
+    languages: [go]
+    severity: ERROR
+    message: "InsecureSkipVerify disables certificate checks (SEC-12)."
+    metadata: { standard: [SEC-12] }
+    paths: { exclude: ["*_test.go"] }
+    pattern: "tls.Config{..., InsecureSkipVerify: true, ...}"
+
+  - id: std.go.ignored-error
+    languages: [go]
+    severity: ERROR
+    message: "Empty error branch swallows the error — log it or return it wrapped (COR-3)."
+    metadata: { standard: [COR-3] }
+    pattern: |
+      if $ERR != nil {
+      }

@@ -1,0 +1,118 @@
+# ENGINEERING_STANDARD banned-API rules — Dart / Flutter.  Test: semgrep --test semgrep/
+# Each rule names the core module to use instead. Suppress a single justified line with
+#   // nosemgrep: <rule-id> -- <reason>
+# Regex rules (generic mode) ignore matches inside // comments.
+rules:
+  - id: std.dart.raw-color
+    languages: [generic]
+    severity: ERROR
+    message: "Raw colour literal — use a semantic token: context.colors.<token> (THEME-8, CORE-13)."
+    metadata: { standard: [THEME-8, UX-2] }
+    paths:
+      include: ["*.dart"]
+      exclude: ["**/design/**", "**/generated/**", "*.g.dart", "*.freezed.dart", "**/test/**", "**/integration_test/**"]
+    patterns:
+      - pattern-regex: '\bColor\(\s*0x[0-9A-Fa-f]+\s*\)|\bColor\.from(ARGB|RGBO)\('
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.material-colors
+    languages: [generic]
+    severity: ERROR
+    message: "Colors.* — use a semantic token: context.colors.<token> (THEME-8)."
+    metadata: { standard: [THEME-8] }
+    paths:
+      include: ["*.dart"]
+      exclude: ["**/design/**", "**/generated/**", "*.g.dart", "**/test/**", "**/integration_test/**"]
+    patterns:
+      - pattern-regex: '\b(Colors|CupertinoColors)\.(?!transparent\b)\w+'
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.style-literal
+    languages: [generic]
+    severity: ERROR
+    message: "Literal font size / inset — use AppFontSize / AppSpace tokens (THEME-8, THEME-10)."
+    metadata: { standard: [THEME-8, THEME-10] }
+    paths:
+      include: ["*.dart"]
+      exclude: ["**/design/**", "**/generated/**", "**/test/**", "**/integration_test/**"]
+    patterns:
+      - pattern-either:
+          - pattern-regex: '\bfontSize\s*:\s*\d'
+          - pattern-regex: 'EdgeInsets\.(all|symmetric|only|fromLTRB)\(\s*(\w+:\s*)?\d*\.?\d*[1-9]'
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.icons-direct
+    languages: [generic]
+    severity: ERROR
+    message: "Icon package used directly — use AppIcons.<name> from the icon registry (THEME-5)."
+    metadata: { standard: [THEME-5] }
+    paths:
+      include: ["*.dart"]
+      exclude: ["**/design/**", "**/generated/**", "**/test/**", "**/integration_test/**"]
+    patterns:
+      - pattern-regex: '\b(Icons|CupertinoIcons|LucideIcons|Symbols|FontAwesomeIcons)\.\w+'
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.print
+    languages: [generic]
+    severity: ERROR
+    message: "print/debugPrint — log through the logger module (LOG-2, CORE-3)."
+    metadata: { standard: [LOG-2, LOG-8] }
+    paths:
+      include: ["*.dart"]
+      exclude: ["**/logging/**", "**/logger/**", "**/log/**", "**/log.dart", "**/logger.dart", "**/test/**", "**/integration_test/**", "**/tool/**", "**/bin/**"]
+    patterns:
+      - pattern-regex: '(?<![\w.])(print|debugPrint)\('
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.env-read
+    languages: [generic]
+    severity: ERROR
+    message: "Environment read outside the config module — use the typed config (CORE-1)."
+    metadata: { standard: [CORE-1] }
+    paths:
+      include: ["*.dart"]
+      exclude: ["**/config/**", "**/config.dart", "**/env.dart", "**/env/**", "**/test/**", "**/integration_test/**"]
+    patterns:
+      - pattern-regex: 'Platform\.environment|String\.fromEnvironment\(|bool\.fromEnvironment\(|int\.fromEnvironment\(|dotenv\.(env|get)\b'
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.raw-http
+    languages: [generic]
+    severity: ERROR
+    message: "Raw HTTP client — use the shared API client (timeouts, retries, request_id, logging) (CORE-6)."
+    metadata: { standard: [CORE-6, PERF-2] }
+    paths:
+      include: ["*.dart"]
+      exclude: ["**/api/**", "**/http/**", "**/network/**", "**/test/**", "**/integration_test/**"]
+    patterns:
+      - pattern-regex: '\bhttp\.(get|post|put|patch|delete|head)\(|\bDio\(|\bHttpClient\(\)'
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.insecure-token-storage
+    languages: [generic]
+    severity: ERROR
+    message: "Secret-looking value written to SharedPreferences — use flutter_secure_storage (MOB-1)."
+    metadata: { standard: [MOB-1] }
+    paths: { include: ["*.dart"] }
+    patterns:
+      - pattern-regex: '(?i)\.set(String|StringList)\(\s*[''"][^''"]*(token|secret|password|jwt|session|api_?key)'
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.tls-bypass
+    languages: [generic]
+    severity: ERROR
+    message: "Certificate validation bypass (SEC-12)."
+    metadata: { standard: [SEC-12] }
+    paths: { include: ["*.dart"], exclude: ["**/test/**"] }
+    patterns:
+      - pattern-regex: 'badCertificateCallback\s*=.*=>\s*true'
+      - pattern-not-regex: '//.*'
+
+  - id: std.dart.empty-catch
+    languages: [generic]
+    severity: ERROR
+    message: "Empty catch swallows the error — log it or rethrow with context (COR-3)."
+    metadata: { standard: [COR-3] }
+    paths: { include: ["*.dart"] }
+    pattern-regex: '\bcatch\s*\([^)]*\)\s*\{\s*\}'

@@ -1,0 +1,150 @@
+# ENGINEERING_STANDARD banned-API rules — TypeScript / JavaScript / CSS.  Test: semgrep --test semgrep/
+# Suppress one justified line:  // nosemgrep: <rule-id> -- <reason>
+rules:
+  # ── Theme (THEME-5/8) ──────────────────────────────────────────────────────
+  - id: std.web.raw-color
+    languages: [generic]
+    severity: ERROR
+    message: "Raw colour literal — use a semantic token (Tailwind class from the token preset, or var(--color-…)) (THEME-8)."
+    metadata: { standard: [THEME-8, UX-2] }
+    paths:
+      include: ["*.ts", "*.tsx", "*.js", "*.jsx", "*.vue", "*.svelte", "*.css", "*.scss"]
+      exclude: ["**/design/**", "**/generated/**", "**/node_modules/**", "**/dist/**", "**/.next/**", "*.config.*", "*.test.*", "*.spec.*", "**/e2e/**", "*.d.ts"]
+    patterns:
+      - pattern-either:
+          - pattern-regex: '[''"`(\s:,\[]#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3,4})(?![\w-])'
+          - pattern-regex: '\b(rgba?|hsla?|oklch|oklab)\(\s*\d'
+      - pattern-not-regex: '(^|\s)//.*'
+      - pattern-not-regex: '/\*[\s\S]*?\*/'
+      - pattern-not-regex: '(href|to|id)=["''`]#[\w-]*'
+      - pattern-not-regex: '\[#[0-9a-fA-F]{3,8}\]'
+
+  - id: std.web.tailwind-palette
+    languages: [generic]
+    severity: ERROR
+    message: "Tailwind default-palette or arbitrary colour class — use the semantic classes from the token preset (bg-surface-base, text-status-danger …) (THEME-8)."
+    metadata: { standard: [THEME-8] }
+    paths:
+      include: ["*.tsx", "*.jsx", "*.ts", "*.js", "*.vue", "*.svelte", "*.html", "*.css"]
+      exclude: ["**/design/**", "**/generated/**", "**/node_modules/**", "**/dist/**", "*.config.*", "*.test.*", "*.spec.*"]
+    pattern-regex: '(?<![\w-])(?:[a-z]+:)*(?:bg|text|border(?:-[trblxy])?|ring|ring-offset|fill|stroke|from|via|to|outline|divide|placeholder|decoration|shadow|accent|caret)-(?:(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}|black|white|\[#[0-9a-fA-F]{3,8}\])(?:/\d+)?(?![\w-])'
+
+  - id: std.web.icons-direct
+    languages: [generic]
+    severity: ERROR
+    message: "Icon package imported directly — use <Icon name=\"action.delete\" /> from the generated icon registry (THEME-5)."
+    metadata: { standard: [THEME-5] }
+    paths:
+      include: ["*.ts", "*.tsx", "*.js", "*.jsx", "*.vue", "*.svelte"]
+      exclude: ["**/design/**", "**/generated/**", "**/node_modules/**"]
+    pattern-regex: 'from\s+[''"](lucide-react|lucide-vue-next|@heroicons/[^''"]+|react-icons(/[^''"]*)?|@mui/icons-material(/[^''"]*)?|@tabler/icons-react|@phosphor-icons/react|@fortawesome/[^''"]+)[''"]'
+
+  # ── Logging (LOG-2) ────────────────────────────────────────────────────────
+  - id: std.web.console
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "console.* — log through the logger module (structured, redacted, correlated) (LOG-2, CORE-3)."
+    metadata: { standard: [LOG-2, LOG-8] }
+    paths:
+      exclude: ["**/logger/**", "**/logging/**", "**/log/**", "**/log.ts", "**/log.js", "**/logger.ts", "**/logger.js", "**/logging.ts", "*.test.*", "*.spec.*", "**/scripts/**", "*.config.*"]
+    pattern: console.$METHOD(...)
+
+  - id: std.web.secret-in-log
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Possible secret passed to a log call — log ids, never credentials (LOG-4, SEC-11)."
+    metadata: { standard: [LOG-4, SEC-11] }
+    patterns:
+      - pattern-either:
+          - pattern: $LOG.$LEVEL(..., <... $X.password ...>, ...)
+          - pattern: $LOG.$LEVEL(..., <... $X.token ...>, ...)
+          - pattern: $LOG.$LEVEL(..., <... $X.secret ...>, ...)
+          - pattern: $LOG.$LEVEL(..., <... $X.apiKey ...>, ...)
+          - pattern: $LOG.$LEVEL(..., <... $X.authorization ...>, ...)
+      - metavariable-regex: { metavariable: $LEVEL, regex: '^(log|debug|info|warn|error|trace|fatal)$' }
+
+  # ── Config / HTTP (CORE-1, CORE-6) ─────────────────────────────────────────
+  - id: std.web.process-env
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "process.env outside the config module — read typed, validated config instead (CORE-1)."
+    metadata: { standard: [CORE-1] }
+    paths:
+      exclude: ["**/config/**", "**/env.*", "*.config.*", "**/scripts/**", "*.test.*", "*.spec.*", "**/e2e/**"]
+    pattern-either:
+      - pattern: process.env
+      - pattern: import.meta.env
+
+  - id: std.web.raw-http
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Raw fetch/axios — use the shared HTTP client / fetch hook (timeouts, retries, request_id, SSRF guard) (CORE-6, CORE-12)."
+    metadata: { standard: [CORE-6, CORE-12, PERF-2] }
+    paths:
+      exclude: ["**/api/client*", "**/http/**", "**/lib/api*", "*.test.*", "*.spec.*", "**/e2e/**", "**/scripts/**"]
+    pattern-either:
+      - pattern: fetch(...)
+      - pattern: axios(...)
+      - pattern: axios.$M(...)
+      - pattern: axios.create(...)
+
+  # ── Security (SEC-*) ───────────────────────────────────────────────────────
+  - id: std.web.eval
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "eval/new Function executes strings as code (SEC-2)."
+    metadata: { standard: [SEC-2] }
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: std.web.dangerous-html
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: "dangerouslySetInnerHTML — sanitize (DOMPurify) and justify with nosemgrep + reason (SEC-3)."
+    metadata: { standard: [SEC-3] }
+    pattern: <$EL dangerouslySetInnerHTML={...} />
+
+  - id: std.web.sql-template
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "SQL built from a template literal — use parameters / the query builder (SEC-2)."
+    metadata: { standard: [SEC-2] }
+    patterns:
+      - pattern-either:
+          - pattern: $DB.query(`...${$X}...`, ...)
+          - pattern: $DB.execute(`...${$X}...`, ...)
+          - pattern: $DB.$queryRawUnsafe(...)
+          - pattern: $DB.$executeRawUnsafe(...)
+          - pattern: $DB.raw(`...${$X}...`, ...)
+
+  - id: std.web.token-in-localstorage
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Credential in localStorage/sessionStorage is readable by any XSS — use HttpOnly cookies (SEC-9, MOB-1)."
+    metadata: { standard: [SEC-9] }
+    patterns:
+      - pattern-either:
+          - pattern: localStorage.setItem($K, ...)
+          - pattern: sessionStorage.setItem($K, ...)
+      - metavariable-regex: { metavariable: $K, regex: '(?i).*(token|jwt|secret|password|session|api_?key).*' }
+
+  - id: std.web.tls-bypass
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "TLS verification disabled (SEC-12)."
+    metadata: { standard: [SEC-12] }
+    pattern-either:
+      - pattern: "{..., rejectUnauthorized: false, ...}"
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
+  # ── Correctness (COR-3) ────────────────────────────────────────────────────
+  - id: std.web.empty-catch
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Empty catch swallows the error — log it or rethrow with context (COR-3)."
+    metadata: { standard: [COR-3] }
+    pattern-either:
+      - pattern: "try { ... } catch ($E) { }"
+      - pattern: "try { ... } catch { }"
+      - pattern: $P.catch(() => {})

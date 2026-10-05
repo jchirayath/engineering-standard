@@ -1,0 +1,27 @@
+# engineering-standard default .semgrepignore — copied by bin/adopt.sh; extend per repo.
+# Ignore ONLY generated, vendored or third-party code here. Never ignore app code to make a rule pass —
+# use `nosemgrep: <rule-id> -- <reason>` on the line, or an entry in docs/STANDARD_EXCEPTIONS.md.
+:include .gitignore
+.git/
+node_modules/
+build/
+dist/
+out/
+.next/
+.dart_tool/
+.venv/
+Pods/
+vendor/
+coverage/
+*.min.js
+*.g.dart
+*.freezed.dart
+*.gen.dart
+*.pb.go
+*_generated.*
+# Flutter/native platform shells (boilerplate, not app code)
+ios/Runner/
+macos/Runner/
+android/app/src/main/
+# Generated web workers / bundles
+web/*_worker.js

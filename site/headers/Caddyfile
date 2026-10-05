@@ -1,0 +1,17 @@
+# Baseline security headers (ENGINEERING_STANDARD WEB-3). CSP allows self + GA4 + Google Fonts; add each extra origin a page needs, never 'unsafe-inline' for scripts. Roll out as Content-Security-Policy-Report-Only first if unsure.
+# Import inside a site block:  import security_headers
+(security_headers) {
+  header {
+    Content-Security-Policy "default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    X-Frame-Options "DENY"
+    Referrer-Policy "strict-origin-when-cross-origin"
+    Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+    Cross-Origin-Opener-Policy "same-origin"
+    -Server
+    -X-Powered-By
+  }
+  @private path /.git/* /.env* *.bak *.sql *.log *.map
+  respond @private 404
+}
