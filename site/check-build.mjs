@@ -1,14 +1,20 @@
 #!/usr/bin/env node
 // Pre-deploy scan of the EXACT directory about to be uploaded (ENGINEERING_STANDARD §2A, WEB-*). Zero deps.
-//   node check-build.mjs <publish-dir> [--allow-sourcemaps] [--allow <glob> ...] [--json]
+//   node check-build.mjs <publish-dir> [--host swa|netlify|apache|caddy|nginx] [--allow-sourcemaps] [--allow <glob> ...] [--json]
+// Also runs csp.mjs verify when a header config with a CSP exists (an edited inline script must not ship uncovered),
+// and flags server config written for a different host (e.g. .htaccess on Caddy is served as a plain file).
 // Run it in deploy.sh after staging and before upload; a non-zero exit must abort the deploy.
 // Catches: private files that followed the build (.git, .env, keys, backups, server code, DB dumps, auth files),
 // secrets inside shipped files, public source maps, mixed content, third-party scripts without SRI.
 import { readdirSync, statSync, readFileSync } from 'node:fs'
-import { join, relative, resolve, basename } from 'node:path'
+import { join, relative, resolve, basename, dirname } from 'node:path'
+import { spawnSync } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
 
 const argv = process.argv.slice(2)
-const dir = resolve(argv.find(a => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--allow') || '')
+const VALUED = ['--allow', '--host']
+const dir = resolve(argv.find((a, i) => !a.startsWith('--') && !VALUED.includes(argv[i - 1])) || '')
+const hostType = argv.includes('--host') ? argv[argv.indexOf('--host') + 1] : null
 const allowMaps = argv.includes('--allow-sourcemaps'), json = argv.includes('--json')
 const allow = argv.flatMap((a, i) => a === '--allow' ? [argv[i + 1]] : [])
 const SRI_EXEMPT = ['www.googletagmanager.com', 'www.google-analytics.com', 'fonts.googleapis.com']
@@ -71,6 +77,14 @@ for (const abs of files) {
   if (inlineHandlers) add('WARN', 'WEB-3', rel, `${inlineHandlers} inline on*= handler(s) — blocked by a strict CSP; move to a script file`)
   for (const f of src.match(/<form\b[^>]*>/gi) || []) if (/action\s*=\s*["']http:\/\//i.test(f)) add('ERROR', 'WEB-5', rel, 'form posts over http://')
 }
+
+// Server config for the wrong host is shipped as a readable file.
+const FOREIGN = { caddy: [/(^|\/)\.htaccess$/, /(^|\/)_headers$/, /(^|\/)_redirects$/], nginx: [/(^|\/)\.htaccess$/], swa: [/(^|\/)\.htaccess$/], netlify: [/(^|\/)\.htaccess$/] }
+if (hostType) for (const abs of files) { const rel = relative(dir, abs); if ((FOREIGN[hostType] || []).some(re => re.test(rel))) add('ERROR', 'WEB-8', rel, `config for a different server — ${hostType} serves it as a public file; remove it from the deploy`) }
+
+// CSP drift: the policy in the header config must still cover every inline script/handler and origin.
+const cspRun = spawnSync(process.execPath, [join(dirname(fileURLToPath(import.meta.url)), 'csp.mjs'), 'verify', dir], { encoding: 'utf8' })
+for (const line of cspRun.stdout.split('\n').filter(l => l.startsWith('✗ CSP does not allow'))) add('ERROR', 'WEB-3', '(header config)', line.slice(2))
 
 const errors = findings.filter(f => f.level === 'ERROR').length
 if (json) console.log(JSON.stringify({ dir, files: files.length, findings }, null, 2))

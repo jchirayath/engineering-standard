@@ -12,7 +12,11 @@ bin/check.sh                 tokens → generated-code drift → site build scan
 bin/check-tests.mjs          TEST-7: every feature has tagged unit / integration / e2e / walkthrough tests
 site/check-build.mjs         pre-deploy scan of the publish dir (private files, secrets, source maps, mixed content, SRI)
 site/check-site.mjs          post-deploy + weekly check of the live URL (TLS, redirects, headers, cookies, exposure, DNS)
+site/harden.mjs              APPLIES the website profile to a site repo: computed CSP (inline hashes), headers, https, private-path blocks, security.txt
+site/csp.mjs                 derive (suggest) / check (verify) a site's CSP from its own files — verify runs inside check-build
 site/headers/                security-header templates: Azure SWA, Netlify, Apache/.htaccess, Caddy, nginx, security.txt
+fleet/sites.json             your website fleet + expected GA IDs; fleet/report.mjs renders results
+.github/workflows/sites-weekly.yml   Monday check of every hostname → opens/updates/closes a `site-check` issue
 design-tokens/schema/        semantic-keys.json — the canonical token + icon names (THEME-4)
 design-tokens/scripts/       validate.mjs (keys, refs, WCAG contrast, icons) · build.mjs (css, tailwind, ts, dart, swift) — zero deps
 design-tokens/template/      starter tokens + icons that pass validation (copied into a repo's design/ if absent)
@@ -66,13 +70,15 @@ tools/standard/check.sh --baseline                        # measure; record toda
 ```bash
 ~/code/engineering-standard/bin/adopt.sh ~/web/<site> --site swa|netlify|apache|caddy|nginx --url https://<domain>
 ```
-1. Write `deploy.sh` to **stage an allowlist** (copy `a staged-allowlist deploy.sh`), set
-   `standard.config.json → site.publishDir`/`site.forbid`, and put the generated header config
-   (`staticwebapp.config.json`, `netlify.toml`, `.htaccess`, or the Caddy/nginx snippet) in the shipped files.
-2. In `deploy.sh`: `check-build.mjs "$STAGE"` **before** upload, `check-site.mjs --config standard.config.json`
-   **after** — both abort on ERROR.
-3. Fill in `.well-known/security.txt`, add CAA/SPF/DMARC records, add the URL to Uptime Kuma.
-4. The first deploy is done when `check-site.mjs` shows **0 errors** on every hostname.
+1. Write `deploy.sh` to **stage an allowlist** (copy `a staged-allowlist deploy.sh`) and set
+   `standard.config.json → site.publishDir`/`site.forbid`.
+2. `node tools/standard/site/harden.mjs . --host <host> --domain <domain>` — writes the header config with a CSP
+   computed from the site's own files (report-only first), https redirect, private-path blocks and
+   `security.txt`. Re-run it whenever pages change; re-run with `--enforce` after a clean week.
+3. In `deploy.sh`: `check-build.mjs "$STAGE" --host <host>` **before** upload (also catches CSP drift and
+   config for the wrong server), `check-site.mjs --config standard.config.json` **after** — both abort on ERROR.
+4. Add the site to `fleet/sites.json` (with its GA ID) so the weekly check covers it; add CAA/SPF/DMARC.
+5. The first deploy is done when `check-site.mjs` shows **0 errors** on every hostname.
 
 ### Existing website
 
@@ -80,9 +86,9 @@ tools/standard/check.sh --baseline                        # measure; record toda
 node ~/code/engineering-standard/site/check-site.mjs https://<domain> https://www.<domain>   # measure the live site
 ~/code/engineering-standard/bin/adopt.sh ~/web/<site> --site <host> --url https://<domain>
 ```
-1. Fix live ERRORs in this order: exposed files / directory listing → https redirect + HSTS → CSP +
-   clickjacking → nosniff. Ship the header template; roll CSP out as `Content-Security-Policy-Report-Only`
-   for one deploy if the site has third-party embeds, then enforce.
+1. `node tools/standard/site/harden.mjs . --host <host>` fixes most live ERRORs in one pass (headers, CSP,
+   https redirect, directory listing, private paths); deploy, re-run `check-site.mjs`, then `--enforce` the
+   CSP after a clean week. Remaining items (GA gaps, vulnerable libraries, DNS) come with a `↳ fix` line.
 2. Run `check-build.mjs` on whatever the current deploy uploads; if it fails on the repo root, switch the
    deploy to a staged allowlist (WEB-1).
 3. Wire both checks into `deploy.sh`, then schedule a weekly `check-site.mjs` run (cron / CI schedule /

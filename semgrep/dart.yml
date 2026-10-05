@@ -116,3 +116,13 @@ rules:
     metadata: { standard: [COR-3] }
     paths: { include: ["*.dart"] }
     pattern-regex: '\bcatch\s*\([^)]*\)\s*\{\s*\}'
+
+  - id: std.dart.insecure-random
+    languages: [generic]
+    severity: ERROR
+    message: "Random() for a secret/token — use Random.secure() (SEC-21)."
+    metadata: { standard: [SEC-21] }
+    paths: { include: ["*.dart"], exclude: ["**/test/**"] }
+    patterns:
+      - pattern-regex: '(?i)\b\w*(token|secret|password|nonce|salt|otp|code|key|session)\w*\s*=\s*[^;\n]*\bRandom\(\s*\d*\s*\)'
+      - pattern-not-regex: '//.*'

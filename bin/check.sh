@@ -29,7 +29,8 @@ if [ -f standard.config.json ] && grep -q '"site"' standard.config.json; then
   if [ -n "$PUB" ] && [ "$PUB" != "." ]; then
     echo "▸ site: pre-deploy scan of $PUB (WEB-*)"
     SB="tools/standard/site/check-build.mjs"; [ -f "$SB" ] || SB="$(cd "$(dirname "$0")/.." && pwd)/site/check-build.mjs"
-    node "$SB" "$PUB" || status=1
+    HT="$(node -e "console.log(require('./standard.config.json').site.host||'')")"
+    node "$SB" "$PUB" ${HT:+--host "$HT"} || status=1
   fi
 fi
 

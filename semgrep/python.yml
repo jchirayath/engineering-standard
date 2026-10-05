@@ -68,3 +68,55 @@ rules:
               ...
           except:
               pass
+
+  - id: std.py.insecure-random
+    languages: [python]
+    severity: ERROR
+    message: "random module for a secret/token — use secrets.token_urlsafe() / secrets.choice() (SEC-21)."
+    metadata: { standard: [SEC-21] }
+    patterns:
+      - pattern: $X = <... random.$F(...) ...>
+      - metavariable-regex: { metavariable: $X, regex: '(?i).*(token|secret|password|nonce|salt|otp|code|key|session)$' }
+
+  - id: std.py.weak-password-hash
+    languages: [python]
+    severity: ERROR
+    message: "Password hashed with a fast hash — use argon2-cffi / bcrypt / hashlib.scrypt (SEC-22)."
+    metadata: { standard: [SEC-22] }
+    patterns:
+      - pattern-either:
+          - pattern: hashlib.$ALG(<... $PW ...>)
+          - pattern: hashlib.new($N, <... $PW ...>)
+      - metavariable-regex: { metavariable: $PW, regex: '(?i).*(password|passwd|pwd)\b.*' }
+
+  - id: std.py.unsafe-deserialization
+    languages: [python]
+    severity: ERROR
+    message: "Unsafe deserialization — never unpickle/yaml.load untrusted data; use json or yaml.safe_load (SEC-27)."
+    metadata: { standard: [SEC-27] }
+    pattern-either:
+      - pattern: pickle.loads(...)
+      - pattern: pickle.load(...)
+      - pattern: yaml.load($X)
+      - pattern: yaml.load($X, Loader=yaml.Loader)
+      - pattern: yaml.load($X, Loader=yaml.UnsafeLoader)
+      - pattern: marshal.loads(...)
+
+  - id: std.py.shell-true
+    languages: [python]
+    severity: ERROR
+    message: "shell=True runs a string through the shell — pass an argument list (SEC-28)."
+    metadata: { standard: [SEC-28] }
+    pattern-either:
+      - pattern: subprocess.$F(..., shell=True, ...)
+      - pattern: os.system(...)
+      - pattern: os.popen(...)
+
+  - id: std.py.jwt-unverified
+    languages: [python]
+    severity: ERROR
+    message: "JWT decoded without signature verification (SEC-23)."
+    metadata: { standard: [SEC-23] }
+    pattern-either:
+      - pattern: 'jwt.decode(..., options={..., "verify_signature": False, ...}, ...)'
+      - pattern: jwt.decode(..., verify=False, ...)

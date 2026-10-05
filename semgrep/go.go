@@ -1,11 +1,13 @@
 package fixture
 
 import (
+	"crypto/sha256"
 	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 )
 
 func f(db DB, id string) {
@@ -39,4 +41,20 @@ func f(db DB, id string) {
 	if err != nil {
 		return
 	}
+}
+
+func pitfalls(password string, name string) {
+	// ruleid: std.go.math-rand-secret
+	resetToken := rand.Int63()
+	// ok: std.go.math-rand-secret
+	jitter := rand.Intn(100)
+	// ruleid: std.go.weak-password-hash
+	h := sha256.Sum256([]byte(salt + password))
+	// ok: std.go.weak-password-hash
+	e := sha256.Sum256(body)
+	// ruleid: std.go.shell-exec
+	exec.Command("sh", "-c", "ls "+name)
+	// ok: std.go.shell-exec
+	exec.Command("ls", name)
+	_, _, _, _ = resetToken, jitter, h, e
 }

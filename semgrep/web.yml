@@ -148,3 +148,59 @@ rules:
       - pattern: "try { ... } catch ($E) { }"
       - pattern: "try { ... } catch { }"
       - pattern: $P.catch(() => {})
+
+  # ── Implementation pitfalls (SEC-21..28) ───────────────────────────────────
+  - id: std.web.insecure-random
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Math.random() for a secret/token/id — use crypto.randomUUID() / crypto.getRandomValues() (SEC-21)."
+    metadata: { standard: [SEC-21] }
+    patterns:
+      - pattern-either:
+          - pattern: $X = <... Math.random() ...>
+          - pattern: const $X = <... Math.random() ...>
+          - pattern: let $X = <... Math.random() ...>
+      - metavariable-regex: { metavariable: $X, regex: '(?i).*(token|secret|password|nonce|salt|otp|code|key|session|id)$' }
+
+  - id: std.web.weak-password-hash
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Password hashed with a fast hash — use Argon2id/bcrypt/scrypt (SEC-22)."
+    metadata: { standard: [SEC-22] }
+    patterns:
+      - pattern: $C.createHash($ALG).update(<... $PW ...>)
+      - metavariable-regex: { metavariable: $PW, regex: '(?i).*(password|passwd|pwd|pw)\b.*' }
+
+  - id: std.web.jwt-decode-unverified
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "jwt.decode() does not verify the signature — use jwt.verify() with pinned algorithms, iss and aud (SEC-23)."
+    metadata: { standard: [SEC-23] }
+    pattern-either:
+      - pattern: jwt.decode(...)
+      - pattern: jsonwebtoken.decode(...)
+
+  - id: std.web.open-redirect
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "Redirect to a request-controlled URL — check it against an allow-list (SEC-28)."
+    metadata: { standard: [SEC-28] }
+    patterns:
+      - pattern-either:
+          - pattern: $RES.redirect($REQ.$SRC.$P)
+          - pattern: $RES.redirect($S + $REQ.$SRC.$P)
+          - pattern: $RES.redirect(`...${$REQ.$SRC.$P}...`)
+          - pattern: $RES.redirect($CODE, $REQ.$SRC.$P)
+      - metavariable-regex: { metavariable: $SRC, regex: '^(query|body|params)$' }
+
+  - id: std.web.path-from-request
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: "File path built from request input — resolve it and confirm it stays inside the allowed root (SEC-26)."
+    metadata: { standard: [SEC-26] }
+    patterns:
+      - pattern-either:
+          - pattern: $FS.$READ(<... $REQ.query.$P ...>, ...)
+          - pattern: $FS.$READ(<... $REQ.params.$P ...>, ...)
+          - pattern: $FS.$READ(<... $REQ.body.$P ...>, ...)
+      - metavariable-regex: { metavariable: $READ, regex: '^(readFile|readFileSync|createReadStream|writeFile|writeFileSync|unlink|unlinkSync|sendFile|open)$' }

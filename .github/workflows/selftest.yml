@@ -21,3 +21,13 @@ jobs:
         run: |
           for f in bin/*.sh; do bash -n "$f"; done
           for f in bin/*.mjs site/*.mjs design-tokens/scripts/*.mjs; do node --check "$f"; done
+      - name: Website kit — harden a fixture, then the build gate must pass (and catch drift)
+        run: |
+          cp -R site/fixtures/demo /tmp/demo
+          node site/harden.mjs /tmp/demo --host apache --publish /tmp/demo/public --domain example.com
+          node site/check-build.mjs /tmp/demo/public --host apache
+          echo '<script>alert(2)</script>' >> /tmp/demo/public/index.html
+          if node site/check-build.mjs /tmp/demo/public --host apache; then echo "drift not caught"; exit 1; fi
+      - name: TEST-7 checker runs
+        run: node bin/check-tests.mjs --config /dev/null || true
+

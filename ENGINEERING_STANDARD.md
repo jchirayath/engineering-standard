@@ -136,14 +136,57 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   top abuse cases (STRIDE is fine), and which control above mitigates each. Updated when a trust
   boundary changes.
 
+
+### Implementation pitfalls (the bugs that keep shipping)
+- **SEC-21 MUST** Tokens, IDs used as secrets, reset codes and nonces come from a **CSPRNG**
+  (`crypto.randomBytes`/`crypto.getRandomValues`, Go `crypto/rand`, Python `secrets`, Dart
+  `Random.secure()`) — never `Math.random`, `math/rand`, `random`, `Random()`.
+- **SEC-22 MUST** Passwords are hashed with **Argon2id** (or bcrypt/scrypt) via a maintained library —
+  never a bare `md5/sha1/sha256(salt + password)`. Secret comparisons are constant-time
+  (`crypto.timingSafeEqual`, `hmac.compare_digest`, `subtle.ConstantTimeCompare`).
+- **SEC-23 MUST** JWTs are **verified**, never just decoded: pinned algorithm (no `none`, no
+  HS/RS confusion), `iss`, `aud`, `exp`, `nbf` checked, keys from JWKS with caching and rotation.
+- **SEC-24 MUST** Inbound webhooks verify the provider's signature (HMAC over the raw body, constant-time,
+  with a timestamp tolerance) before parsing; replays are rejected by event id.
+- **SEC-25 MUST** OAuth/OIDC uses Authorization Code + **PKCE** with `state` and `nonce`; redirect URIs are
+  exact-match allow-listed; no implicit flow.
+- **SEC-26 MUST** File paths from input are resolved and confirmed inside an allowed root (no `../`,
+  no absolute paths, no symlink escape); archive extraction checks every entry (zip-slip).
+- **SEC-27 MUST** No unsafe deserialization: no `pickle`/`yaml.load`/`Marshal`/Java serialization of
+  untrusted data; XML parsers have external entities and DTDs disabled (XXE).
+- **SEC-28 MUST** Redirects to user-supplied URLs go through an allow-list (open redirect); user input
+  never reaches a regex without a length cap and a linear-time engine or timeout (ReDoS); shell commands
+  take argument arrays, never `shell=True`/string concatenation.
+- **SEC-29 MUST** Log injection: CR/LF and control characters in user input are escaped by the logger
+  (CORE-3), never written raw.
+- **SEC-30 MUST** Least-privilege runtime identities: the app's DB role cannot `DROP`/`ALTER`/`GRANT`,
+  migrations run as a separate role; cloud identities (managed identity / service account) are scoped
+  to the resources they touch; no long-lived keys where workload identity exists.
+- **SEC-31 MUST** **AI-assisted code** is reviewed like any other code and must pass the same gates.
+  Every dependency an AI suggests is verified to exist, be the intended package and be maintained
+  before install (slopsquatting / typosquatting); generated code never weakens a control to make a
+  test pass.
+- **SEC-32 SHOULD** Releases are reproducible and signed (tags signed; build provenance via GitHub
+  artifact attestations / SLSA); production deploys only from CI, never from a laptop.
+
 ---
 
 ## 2A · Websites — secure build & deploy profile
 
 Applies to every site, static or dynamic, on any host (Azure Static Web Apps, Netlify, cPanel/Apache,
-Caddy, nginx). Enforced at **three points**: when the site is **created** (`adopt.sh --site`), on every
-**deploy** (`check-build.mjs` before upload, `check-site.mjs` after), and **weekly** against the live
-URLs (so certificate, DNS and host-config drift is caught even when nobody deploys).
+Caddy, nginx). Enforced at **three points**: when the site is **created** (`adopt.sh --site`, then
+`harden.mjs` to apply the profile), on every **deploy** (`check-build.mjs` before upload — including CSP
+drift — and `check-site.mjs` after), and **weekly** against every live hostname (`fleet/sites.json`;
+failures open a GitHub issue), so certificate, DNS, vulnerability and analytics drift is caught even
+when nobody deploys. Every finding carries a one-line fix; header/exposure fixes are applied by
+`harden.mjs`, never hand-edited.
+
+- **WEB-15 MUST** **Analytics coverage:** every public page carries the site's analytics tag with the
+  expected property ID (from the fleet config), and the CSP allows it. `check-site.mjs` crawls the site
+  and reports pages without it. Preview/staging hosts must never report to production properties.
+- **WEB-16 MUST** **Known-vulnerable front-end libraries** are not shipped: detected library versions
+  are checked against OSV on every run; a hit is an ERROR until upgraded or removed. Server software
+  (PHP, CMS core) must be on a supported release (endoflife.date).
 
 - **WEB-1 MUST** **Ship an allowlist, not a folder.** The deploy copies only listed public files into a
   staging directory and uploads that (pattern: `a staged-allowlist deploy.sh`). Repo roots are never document
@@ -212,6 +255,88 @@ Budgets are defaults — override per app in §1, but **every app has numbers**.
 - **PERF-8 MUST** **Profile before optimizing.** A perf change cites a before/after measurement.
 - **PERF-9 MUST** Simplicity is a performance feature: no dead code, no unused deps, no speculative
   abstraction, no feature flags older than 90 days. (`/simplify`, `knip`, `deadcode`, `vulture`.)
+
+
+### Backend & data
+- **PERF-10 MUST** Connection pooling for every DB/HTTP client (sized to the DB's limits); HTTP
+  keep-alive / HTTP/2; prepared statements for hot queries.
+- **PERF-11 MUST** No unbounded work on the request path: anything > ~200 ms or touching third parties
+  in bulk goes to a background job (CORE-10); large exports stream instead of buffering.
+- **PERF-12 MUST** Know the complexity: no O(n²) over user-controlled n; batch DB writes and external
+  calls; select only the columns you use; covering indexes for the top queries; archive or partition
+  tables that grow without bound.
+- **PERF-13 SHOULD** Cache in layers with explicit ownership — CDN (static, hashed assets), HTTP
+  (`ETag`/`Cache-Control`), application (keyed, TTL'd, tenant-scoped), DB — and measure hit rates.
+
+### Web front end
+- **PERF-14 MUST** Static assets have content-hashed filenames and `Cache-Control: public,
+  max-age=31536000, immutable`; HTML is `no-cache` (revalidate). Compression (br/gzip) on text.
+- **PERF-15 MUST** Images: modern formats (AVIF/WebP), `width`/`height` set (no layout shift),
+  responsive `srcset`/`sizes`, `loading="lazy"` below the fold, `fetchpriority="high"` on the LCP image.
+- **PERF-16 MUST** Fonts: self-hosted WOFF2, subset, `font-display: swap`, the 1–2 critical files
+  preloaded; no more than two families.
+- **PERF-17 MUST** JavaScript budget enforced in CI (`size-limit` / bundle analyzer); route-level code
+  splitting; third-party scripts loaded `async`/`defer`, each one justified (it costs performance,
+  privacy and CSP surface); no render-blocking scripts in `<head>`.
+- **PERF-18 SHOULD** Real-user monitoring of Core Web Vitals (`web-vitals` → analytics) so budgets are
+  checked against real devices, not just Lighthouse.
+
+### Mobile (Flutter / native)
+- **PERF-19 MUST** Flutter: `const` constructors wherever possible; rebuild only what changed
+  (`select`/granular providers, no `setState` at the root); heavy work (parsing, crypto, image
+  processing) in an isolate (`compute`/`Isolate.run`); lists via `ListView.builder`; images decoded at
+  display size (`cacheWidth`/`cacheHeight`); startup work deferred until after first frame.
+- **PERF-20 MUST** Profile in **profile/release mode** on a real mid-tier device (DevTools, Instruments,
+  Android Studio profiler) — debug builds lie about performance.
+
+### Measurement
+- **PERF-21 MUST** Each stack's profiler is part of the toolkit and used before optimizing:
+  Go `pprof`, Node `--cpu-prof`/clinic, Python `py-spy`/`scalene`, Flutter DevTools, Chrome Performance
+  panel, `EXPLAIN (ANALYZE, BUFFERS)` for SQL. Regressions in PERF-1 budgets fail CI.
+
+---
+
+## 3A · Clean code & maintainability
+
+Code is read far more than it is written; these rules keep it cheap to read, change and review.
+
+- **CLEAN-1 MUST** **Strict types everywhere:** TS `strict` + `noUncheckedIndexedAccess`, no `any`
+  (use `unknown` + narrowing); Dart `strict-casts`/`strict-inference`/`strict-raw-types`; Python typed
+  and `mypy --strict`/`pyright strict` on new code; Go vet-clean. Typed IDs (`UserId`, not `string`)
+  for anything crossing a boundary.
+- **CLEAN-2 MUST** **Complexity limits, lint-enforced:** cyclomatic ≤ 10 per function (≤ 15 with a
+  comment explaining why), cognitive complexity ≤ 15, functions ≤ ~50 lines, files ≤ ~400 lines,
+  ≤ 4 parameters (use an options object), nesting ≤ 3. Exceeding one is a refactor signal, not a target.
+- **CLEAN-3 MUST** **Layering with enforced dependency direction:** UI → application → domain ←
+  infrastructure. The domain has no framework, DB or HTTP imports; no circular dependencies.
+  Enforced by `dependency-cruiser` (TS), `import-linter` (Python), `go-arch-lint`/`depguard` (Go),
+  `custom_lint`/import rules (Dart).
+- **CLEAN-4 MUST** **Names say what, not how:** functions are verbs, booleans read as predicates
+  (`isExpired`, `hasAccess`), no abbreviations beyond the domain's own, units in names where ambiguous
+  (`timeoutMs`). One concept, one name across the codebase (and the same name in the UI and help).
+- **CLEAN-5 MUST** **No dead weight:** no commented-out code, no unused exports/deps (`knip`,
+  `deadcode`, `vulture`, `dart fix`), no `TODO` without an issue link and owner, no speculative
+  parameters or abstractions with one implementation.
+- **CLEAN-6 MUST** **Errors are explicit:** expected failures are typed results or typed errors
+  (CORE-7), not exceptions for control flow; every error carries context on the way up
+  (`fmt.Errorf("load invoice %s: %w", id, err)`); no catch-and-ignore (COR-3).
+- **CLEAN-7 SHOULD** **Immutability and pure functions by default:** domain logic is pure and
+  data is immutable (`final`, `readonly`, frozen dataclasses); side effects live at the edges where they
+  are easy to test and log.
+- **CLEAN-8 MUST** **Comments explain why, not what;** public functions/types of shared modules have
+  doc comments with an example; an ADR records any decision that constrains future work.
+- **CLEAN-9 MUST** **Small, reviewable changes:** PRs ≤ ~400 changed lines of non-generated code, one
+  concern each; generated files and lockfiles reviewed separately. Every PR states which standard rules
+  it touches and links tests (PR template).
+- **CLEAN-10 MUST** **Adding a dependency is a decision:** check it is maintained (release in the last
+  year), widely used, licence-compatible (REPO-4), small, and not replaceable by ~20 lines of code or
+  the platform; record why in the PR. Dependencies are updated on a schedule (Renovate, grouped,
+  weekly) — not in a yearly panic.
+- **CLEAN-11 MUST** **Formatting is automatic and non-negotiable** (`gofmt`, `prettier`, `dart format`,
+  `ruff format`, `swift-format`); no style debates in review.
+- **CLEAN-12 SHOULD** **Review checklist** (in the PR template): correctness and edge cases · authz on
+  every new path · input validation · logging/audit via the core · tests of all four kinds · help/docs ·
+  performance of new queries · no new dependency without CLEAN-10 · no secrets · standard rule IDs.
 
 ---
 
@@ -500,6 +625,7 @@ what here) · tips · troubleshooting (common errors and fixes) · link to the f
 | Types | `go vet` | `tsc --noEmit` (strict) | `mypy`/`pyright` | analyzer | compiler |
 | Tests | `go test -race ./...` | `vitest`/`jest` + Playwright | `pytest` | `flutter test` + `integration_test` | XCTest |
 | Dep CVEs | `govulncheck` | `osv-scanner` / `npm audit --audit-level=high` | `pip-audit` | `osv-scanner` | `osv-scanner` |
+| Complexity + architecture (CLEAN-2/3) | `gocyclo`/`gocognit` (golangci), `depguard` | ESLint `complexity`, `max-lines*`, `max-params`, `sonarjs`; `dependency-cruiser`; `knip`; `size-limit` | `ruff` `C901`/`PLR09xx`; `import-linter`; `vulture` | `very_good_analysis` lints; `custom_lint` | `swiftlint` `cyclomatic_complexity`, `function_body_length` |
 | **All stacks** | `gitleaks` (secrets) · `semgrep --config p/default p/owasp-top-ten` + repo custom rules (SAST) · `trivy fs/config` · `zizmor` (CI) · client-bundle secret allow-list check · Lighthouse CI / bundle-size budget (web) |
 
 ### 7.2 Banned-API rules (one per CORE row) — shipped in the kit

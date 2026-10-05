@@ -68,3 +68,44 @@ rules:
     pattern: |
       if $ERR != nil {
       }
+
+  - id: std.go.math-rand-secret
+    languages: [go]
+    severity: ERROR
+    message: "math/rand for a secret/token — use crypto/rand (SEC-21)."
+    metadata: { standard: [SEC-21] }
+    # math/rand call shapes only (crypto/rand.Int takes (rand.Reader, max) and is not matched).
+    patterns:
+      - pattern-either:
+          - pattern: $X := <... rand.Int() ...>
+          - pattern: $X := <... rand.Int31() ...>
+          - pattern: $X := <... rand.Int63() ...>
+          - pattern: $X := <... rand.Uint32() ...>
+          - pattern: $X := <... rand.Uint64() ...>
+          - pattern: $X := <... rand.Intn($N) ...>
+          - pattern: $X := <... rand.Int63n($N) ...>
+          - pattern: $X := <... rand.IntN($N) ...>
+      - metavariable-regex: { metavariable: $X, regex: '(?i).*(token|secret|password|nonce|salt|otp|code|key|session)$' }
+
+  - id: std.go.weak-password-hash
+    languages: [go]
+    severity: ERROR
+    message: "Password hashed with a fast hash — use golang.org/x/crypto/argon2 or bcrypt (SEC-22)."
+    metadata: { standard: [SEC-22] }
+    patterns:
+      - pattern-either:
+          - pattern: $H.Sum256(<... $PW ...>)
+          - pattern: $H.Sum(<... $PW ...>)
+          - pattern: md5.Sum(<... $PW ...>)
+      - metavariable-regex: { metavariable: $PW, regex: '(?i).*(password|passwd|pwd)\b.*' }
+
+  - id: std.go.shell-exec
+    languages: [go]
+    severity: ERROR
+    message: "Command run through a shell with a built string — pass arguments to exec.Command directly (SEC-28)."
+    metadata: { standard: [SEC-28] }
+    pattern-either:
+      - pattern: exec.Command("sh", "-c", $X)
+      - pattern: exec.Command("bash", "-c", $X)
+      - pattern: exec.CommandContext($C, "sh", "-c", $X)
+      - pattern: exec.CommandContext($C, "bash", "-c", $X)

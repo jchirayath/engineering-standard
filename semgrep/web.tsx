@@ -63,4 +63,27 @@ export function Row({ user, logger, db, id }: any) {
   // ruleid: std.web.dangerous-html
   const h = <div dangerouslySetInnerHTML={{ __html: html }} />
   return <span className={c4}>{i}{h}</span>
+
 }
+
+export function pitfalls(req: any, res: any, fs: any, crypto: any, password: string) {
+  // ruleid: std.web.insecure-random
+  const resetToken = Math.random().toString(36)
+  // ok: std.web.insecure-random
+  const jitter = Math.random() * 100
+  // ruleid: std.web.weak-password-hash
+  const h = crypto.createHash('sha256').update(salt + password)
+  // ok: std.web.weak-password-hash
+  const etag = crypto.createHash('sha256').update(body)
+  // ruleid: std.web.jwt-decode-unverified
+  const claims = jwt.decode(token)
+  // ok: std.web.jwt-decode-unverified
+  const ok = jwt.verify(token, key, { algorithms: ['RS256'], issuer, audience })
+  // ruleid: std.web.open-redirect
+  res.redirect(req.query.next)
+  // ok: std.web.open-redirect
+  res.redirect(safeNext(req.query.next) ? '/home' : '/')
+  // ruleid: std.web.path-from-request
+  fs.readFile('/data/' + req.params.name, cb)
+}
+

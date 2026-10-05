@@ -33,3 +33,27 @@ def f(cur, uid):
         work()
     except ValueError:
         log.exception("work.failed")
+
+
+def pitfalls(password, data, cmd):
+    import random, hashlib, pickle, yaml, subprocess, jwt
+    # ruleid: std.py.insecure-random
+    reset_token = str(random.random())
+    # ok: std.py.insecure-random
+    delay = random.uniform(0, 1)
+    # ruleid: std.py.weak-password-hash
+    h = hashlib.sha256((salt + password).encode())
+    # ok: std.py.weak-password-hash
+    etag = hashlib.sha256(data)
+    # ruleid: std.py.unsafe-deserialization
+    obj = pickle.loads(data)
+    # ruleid: std.py.unsafe-deserialization
+    cfg = yaml.load(data)
+    # ok: std.py.unsafe-deserialization
+    cfg2 = yaml.safe_load(data)
+    # ruleid: std.py.shell-true
+    subprocess.run(cmd, shell=True, timeout=5)
+    # ok: std.py.shell-true
+    subprocess.run(["ls", "-l"], timeout=5)
+    # ruleid: std.py.jwt-unverified
+    claims = jwt.decode(token, options={"verify_signature": False})

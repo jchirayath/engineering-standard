@@ -66,3 +66,12 @@ Future<void> misc(SharedPreferences prefs) async {
   // ok: std.dart.empty-catch
   } catch (e, st) { log.error('work.failed', e, st); }
 }
+
+void pitfalls() {
+  // ruleid: std.dart.insecure-random
+  final resetToken = Random().nextInt(999999).toString();
+  // ok: std.dart.insecure-random
+  final resetCode = Random.secure().nextInt(999999).toString();
+  // ok: std.dart.insecure-random
+  final jitter = Random().nextInt(100);
+}
