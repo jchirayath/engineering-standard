@@ -151,7 +151,8 @@ CI stays the backstop.
 
 MCP tools (server `standard`): `rules_for`, `rule`, `check`, `verify_dependency`, `exception_add`, `review_plan`.
 Commands: `/engineering-standard:adopt`, `:check`, `:review`, `:exception`.
-Overrides, used sparingly and visibly: `STANDARD_ALLOW_YOUNG_DEP=<pkg>` (security fixes only, SUP-1/VULN-5),
+Overrides — set by a human in the environment Claude Code starts with, never inside a command (the agent
+writes commands, so it can't grant itself an exception): `STANDARD_ALLOW_YOUNG_DEP=<pkg>` (security fixes only, SUP-1/VULN-5),
 `STANDARD_ALLOW_TEST_EDIT=1` (a human approved an assertion change, AGT-8), `STANDARD_STOP_MODE=notify`.
 
 Repos that hand-added the older per-repo `PostToolUse` semgrep hook remove it when they enable the plugin.
