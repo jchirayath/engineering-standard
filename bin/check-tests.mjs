@@ -1,9 +1,13 @@
 #!/usr/bin/env node
-// TEST-7: every feature has tagged tests of every required kind. Zero dependencies.
-//   node check-tests.mjs [--config standard.config.json] [--report]
+// TEST-7 (client mode) / TEST-14 (quick mode): every feature has tagged tests of every required kind. Zero deps.
+//   node check-tests.mjs [--config standard.config.json] [--mode quick|client] [--report]
+// Required kinds: tests.required if set, else by mode — quick: unit + e2e; client: all four.
+// Mode: --mode > env STANDARD_MODE > config "mode" > client (same precedence as the plugin's lib/modes.mjs;
+// this file is vendored standalone into repos, so it can't import it).
 //
 // standard.config.json (repo-owned):
 // {
+//   "mode": "client",                                         // quick | client (ENF-4)
 //   "tests": {
 //     "features": ["home", "invoices"],                       // explicit inventory (optional)
 //     "discover": [                                            // pull feature keys from the nav/router source
@@ -29,8 +33,14 @@ const args = process.argv.slice(2)
 const cfgPath = resolve(args.includes('--config') ? args[args.indexOf('--config') + 1] : 'standard.config.json')
 const report = args.includes('--report')
 if (!existsSync(cfgPath)) { console.log(`– no ${relative(process.cwd(), cfgPath)}; TEST-7 check skipped (add a "tests" block to enable it)`); process.exit(0) }
-const cfg = JSON.parse(readFileSync(cfgPath, 'utf8')).tests
-if (!cfg) { console.log('– no "tests" block in standard.config.json; TEST-7 check skipped'); process.exit(0) }
+const full = JSON.parse(readFileSync(cfgPath, 'utf8')), cfg = full.tests
+const MODES = ['quick', 'client'], modeArg = args.includes('--mode') ? args[args.indexOf('--mode') + 1] : null
+const [modeRaw, modeSrc] = modeArg ? [modeArg, '--mode'] : process.env.STANDARD_MODE ? [process.env.STANDARD_MODE, 'env STANDARD_MODE']
+  : full.mode != null ? [full.mode, 'standard.config.json'] : ['client', 'default']
+const mode = String(modeRaw).toLowerCase().trim()
+if (!MODES.includes(mode)) { console.error(`✗ invalid mode "${modeRaw}" (${modeSrc}) — valid modes: ${MODES.join(', ')}`); process.exit(1) }
+const RULE = mode === 'quick' ? 'TEST-14' : 'TEST-7'
+if (!cfg) { console.log(`– no "tests" block in standard.config.json; ${RULE} check skipped`); process.exit(0) }
 const root = process.cwd()
 
 const globRe = (g) => new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&')
@@ -59,7 +69,7 @@ if (!features.size) { console.error('✗ no features found — set tests.feature
 
 // 2. Scan tests for @feature tags and classify by kind
 const kinds = Object.entries(cfg.kinds || {}).map(([k, gs]) => [k, gs.map(globRe)])
-const required = cfg.required || ['unit', 'integration', 'e2e', 'walkthrough']
+const required = cfg.required || (mode === 'quick' ? ['unit', 'e2e'] : ['unit', 'integration', 'e2e', 'walkthrough'])
 const cover = {}  // feature → kind → [files]
 const unknownTags = new Set()
 for (const f of walk(root)) {
@@ -95,5 +105,5 @@ if (report || failures) for (const [feat, cells] of rows) {
   if (report || bad) console.log(`${bad ? '✗' : '✓'} ${feat.padEnd(24)} ${cells.join('  ')}`)
 }
 for (const u of unknownTags) console.warn(`⚠ @feature tag for unknown feature: ${u}`)
-console.log(`${failures ? '✗' : '✓'} TEST-7: ${features.size} features × ${required.length} kinds — ${failures} missing, ${waived} waived`)
+console.log(`${failures ? '✗' : '✓'} ${RULE} (mode ${mode}, ${modeSrc}): ${features.size} features × ${required.length} kinds [${required.join(', ')}]${cfg.required ? ' (tests.required)' : ''} — ${failures} missing, ${waived} waived`)
 process.exit(failures ? 1 : 0)

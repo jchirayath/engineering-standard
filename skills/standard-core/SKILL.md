@@ -10,7 +10,7 @@ holds no rule text; fetch the rules, apply them, cite their IDs.
 
 ## Fetch the applicable rules
 
-1. Call the MCP tool `rules_for` (server `standard`, full name
+1. Call the MCP tool `rules_for` (server `standard`; it returns the repo's mode — quick or client — only; full name
    `mcp__plugin_engineering-standard_standard__rules_for`) with `stacks: ["all"]` and a `topic` naming
    what is being changed (e.g. "auth session", "logging audit", "pagination", "tests"). Add the repo's stacks (the SessionStart context lists them) to include their rules.
 2. Call `rule` with each ID that the change touches to get its full text, ASVS mapping and enforcement.

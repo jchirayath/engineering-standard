@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Stop — cheap TEST-0 reminder: source files changed (git working tree) but no test file changed.
+// Stop — cheap TEST-0 (client) / TEST-14 (quick) reminder: source files changed (git working tree) but no test file changed.
 // Never runs test suites. Blocks ONCE per distinct change set so Claude sees the reminder; the marker file
 // and stop_hook_active guarantee the next stop goes through (no loops). STANDARD_STOP_MODE=notify only
 // shows it to the user.
@@ -11,6 +11,7 @@ import { createHash } from 'node:crypto'
 import { hook, emit, projectDir } from '../lib/hookio.mjs'
 import { isTestFile } from '../lib/guards.mjs'
 import { CODE_EXT } from '../lib/semgrep.mjs'
+import { resolveMode } from '../lib/modes.mjs'
 
 hook((input) => {
   if (input.stop_hook_active) return
@@ -24,8 +25,10 @@ hook((input) => {
   const mark = join(tmpdir(), `engineering-standard-stop-${String(input.session_id || 'x').replace(/\W/g, '')}`)
   if (existsSync(mark) && readFileSync(mark, 'utf8') === key) return
   writeFileSync(mark, key)
-  const msg = `TEST-0: ${src.length} source file(s) changed with no test changes (${src.slice(0, 5).join(', ')}${src.length > 5 ? ', …' : ''}). ` +
-    'Add or update the unit/integration/e2e/walkthrough tests, run them and tools/standard/check.sh, and report the real output — never "should pass".'
+  let mode = 'client'; try { mode = resolveMode({ root: projectDir(input) }).mode } catch {}
+  const what = mode === 'quick' ? 'TEST-14 (quick mode)' : 'TEST-0', kinds = mode === 'quick' ? 'unit tests and the main-journey e2e' : 'unit/integration/e2e/walkthrough tests'
+  const msg = `${what}: ${src.length} source file(s) changed with no test changes (${src.slice(0, 5).join(', ')}${src.length > 5 ? ', …' : ''}). ` +
+    `Add or update the ${kinds}, run them and tools/standard/check.sh, and report the real output — never "should pass".`
   if (process.env.STANDARD_STOP_MODE === 'notify') emit({ systemMessage: `[engineering-standard] ${msg}` })
   emit({ decision: 'block', reason: `[engineering-standard] ${msg} If tests are genuinely not applicable, say why and stop.` })
 })

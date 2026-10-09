@@ -53,6 +53,34 @@ deploy and weekly against the live URL.
 
 ---
 
+## 0A · Modes — quick and client
+
+Every repo runs the standard in one **mode**, declared in `standard.config.json` → `"mode"` (ENF-4).
+The MCP tools, hooks, test checker and review profile all read it.
+
+| | **quick** | **client** (default) |
+|---|---|---|
+| For | prototypes, spikes, personal and internal tools with no outside users | anything a customer, the public, a store or a regulator can see |
+| Rule set | the **security floor** + a lean build bar (≈ 100 rules, list in [`MODES.md`](MODES.md)) | every rule in this document |
+| Tests | TEST-14: unit tests for logic + one e2e of the main journey; denied-path and regression tests | TEST-0: unit + integration + e2e + walkthrough per feature |
+| Review | `APP_REVIEW.md` profile `quick` | profile `standard` (pre-release) / `full` (client acceptance) |
+
+- **Nested:** quick ⊂ client. Moving up only adds rules; nothing in quick is ever relaxed by client.
+- **The floor never moves:** secrets, identity and ownership checks, input handling and injection,
+  honesty (§4), dependency verification and every §2C agent rule apply in both modes, and the plugin's
+  hooks behave identically in both.
+- **External obligations aren't a mode choice:** store rules, privacy law, public websites (§2A) and
+  regulation are client-only *because* quick mode is allowed only while none of them applies (ENF-4).
+- In quick mode, a quick rule's reference to a client-only rule is a pointer ("see X"), never a way to
+  pull that rule in; where a quick rule needs part of a client rule, it states that part itself.
+- In quick mode a client-only rule is **deferred, not waived** — no exception entry is needed until the
+  repo moves to client mode, when every client rule applies (existing repos burn down via `--baseline`).
+- Which mode each rule belongs to is kept in `plugin/modes.json` and published in `MODES.md`;
+  `bin/build-rules.mjs --check` fails when they drift and lists any quick rule that leans on a
+  client-only one.
+
+---
+
 ## 1 · Platform core — the shared modules every app MUST have
 
 The single biggest source of security, logging and consistency defects is a concern implemented
@@ -110,7 +138,8 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   operation, default-deny. `SECURITY DEFINER` functions re-check authz and pin `search_path`.
 - **SEC-9 MUST** Sessions: short-lived access tokens, rotating refresh, `HttpOnly; Secure;
   SameSite=Lax|Strict` cookies (prefix and flags per BRW-2), CSRF protection on cookie-auth mutations,
-  MFA per AUTH-4 (every user, not only admins), rate-limited login with lockout/backoff (AUTH-1).
+  rate-limited login with lockout/backoff; in client mode MFA for every user (AUTH-4) and the
+  documented lockout design (AUTH-1).
   Passwords (if any) hashed per CRY-3 / AUTH-2.
 - **SEC-10 MUST** No mass assignment — map request DTOs to models explicitly.
 
@@ -133,8 +162,8 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   (`osv-scanner`, `govulncheck`, `npm audit`, `pip-audit` in CI). A CVE published against a version
   **already shipped** is fixed within the VULN-2 deadlines; past its deadline it blocks releases.
 - **SEC-16 MUST** Container base images are pinned by digest and run as non-root; images are scanned
-  (`trivy image`); prefer hardened/distroless bases (SUP-5). An SBOM is generated per release (`syft`) —
-  the same requirement as CFG-3, stated once there.
+  (`trivy image`); prefer hardened/distroless bases (SUP-5). In client mode an SBOM is also generated per
+  release (`syft`, CFG-3).
 - **SEC-17 MUST** CI actions pinned to a commit SHA; workflows lint-clean under `zizmor`; least-privilege
   `permissions:` block; no secrets exposed to PR builds from forks.
 - **SEC-18 MUST** IaC scanned (`trivy config` / `checkov`): no public buckets, no `*` IAM, no open
@@ -461,7 +490,8 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   behaviour changed, and quarantining a flaky test in its own PR (TEST-5). *Enforced by:* plugin
   `PreToolUse` hook on test edits; CI requires a label when assertions are removed or skips added.
 - **AGT-9 MUST** **Agent configuration is privileged code:** `CLAUDE.md`, `.claude/**`, `.mcp.json`,
-  skills, hooks and agent definitions are covered by `CODEOWNERS` (REPO-2). The agent never copies
+  skills, hooks and agent definitions are covered by `CODEOWNERS` in client mode (REPO-2); in quick mode
+  a change to them is called out in the commit message. The agent never copies
   fetched or otherwise untrusted text into memory or instruction files (memory poisoning).
 - **AGT-10 SHOULD** Agent sessions export OpenTelemetry (with tool details) through CORE-3 to the LOG-9 store so tool
   and MCP use is auditable.
@@ -490,7 +520,7 @@ URLs to untrusted content (OpenSSF *Security-Focused Guide for AI Code Assistant
   not the model's summary of them.
 - **AI-7 MUST** *If we build an MCP server* reachable over HTTP: OAuth 2.1 with PKCE (S256), protected-
   resource metadata (RFC 9728), audience-checked tokens (RFC 8707), no token passthrough to upstream
-  APIs, no session-based auth, SSRF-safe metadata fetching (CFG-1). *Test:* wrong-audience token → 401.
+  APIs, no session-based auth, SSRF-safe metadata fetching (SEC-5). *Test:* wrong-audience token → 401.
   Local stdio servers take no network listener.
 - **AI-8 MUST** **EU AI Act Art. 50** (applies from 2026-08-02) for apps offered in the EU: a chatbot or
   assistant discloses that it is AI at the first interaction, and realistic generated images, audio or
@@ -1087,10 +1117,10 @@ the number is today's value.
   *Enforced by:* a CI version-floor assertion + `osv-scanner`.
 - **NEXT-5 MUST** `images.remotePatterns` lists exact protocol, hostname and path prefix — no wildcards;
   `dangerouslyAllowSVG` stays off; rewrites and redirects never build a destination host from request
-  input (SSRF, CFG-1).
+  input (SSRF, SEC-5).
 - **NEXT-6 MUST** Cached code (`'use cache'`, Cache Components, `unstable_cache`) never reads cookies,
   headers or the session, and never returns per-user data unless the user is part of the cache key
-  (PERF-6). *Test:* e2e as user A then user B — B sees none of A's data.
+  (PERF-27). *Test:* e2e as user A then user B — B sees none of A's data.
 - **SUPA-1 MUST** Clients use **publishable** keys (`sb_publishable_…`); **secret** keys (`sb_secret_…`)
   live only in servers and Edge Functions; the legacy `anon`/`service_role` JWT keys are disabled before
   Supabase removes them (end of 2026). `verify_jwt` doesn't authenticate a caller that sends only an API
@@ -1122,7 +1152,7 @@ the number is today's value.
 **A feature is not done until its tests exist, run in CI, and pass.** Writing them is part of building
 the feature — in the same PR, by whoever builds it (person or Claude) — not a follow-up ticket.
 
-- **TEST-0 MUST** Every new or changed feature/screen ships with **four kinds of test** in the same PR:
+- **TEST-0 MUST** *(client mode; quick mode uses TEST-14)* Every new or changed feature/screen ships with **four kinds of test** in the same PR:
 
   | Kind | Proves | Typical tooling |
   |---|---|---|
@@ -1166,6 +1196,11 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
 - **TEST-13 MUST** **Automated accessibility checks** in CI: `@axe-core/playwright` on every walkthrough
   page (web), Flutter `meetsGuideline` (tap targets, contrast, labels) in widget tests — zero serious
   violations.
+- **TEST-14 MUST** *(quick mode — §0A)* Every new or changed feature ships in the same PR with **unit
+  tests** for its logic (edge cases included) and **one e2e test of its main journey**, tagged
+  `@feature:<key>`; TEST-2 (denied path), TEST-5 (quarantine) and TEST-8 (regression test per bug) still
+  apply. `bin/check-tests.mjs` requires `unit` + `e2e` in quick mode. TEST-0 replaces this rule when the
+  repo moves to client mode.
 - **TEST-9 SHOULD** Contract tests between client and API are generated from the API-1 schema; load
   smoke (`k6`) at expected peak for APIs with a PERF-1 budget; visual-regression goldens for the shared
   components.
@@ -1316,6 +1351,12 @@ direct icon imports, `print`/`console`, env reads outside config, raw HTTP clien
 - **ENF-2 MUST** A single line may be suppressed only with `nosemgrep: <rule-id> -- <reason>`; anything
   broader goes in `docs/STANDARD_EXCEPTIONS.md` with an expiry. `.semgrepignore` lists only generated,
   vendored or third-party code.
+- **ENF-4 MUST** **Declare the mode** (§0A) in `standard.config.json` (`"mode": "quick" | "client"`;
+  absent = client). Quick mode is allowed only while the app has **no** users outside the owner's team,
+  is not in an app store or on a public URL (access-controlled previews are fine, WEB-17), and holds no
+  personal data of third parties. The day any of these changes, the repo switches to client mode in the
+  same PR and runs `APP_REVIEW.md` profile `standard` before release. The plugin's `SessionStart` hook
+  warns when a quick-mode repo shows store or website deploy config.
 - **ENF-3 SHOULD** Stack-native linters mirror the most common rules for in-editor feedback
   (`forbidigo`, ESLint `no-restricted-imports`, `ruff` banned-api, `custom_lint`), but Semgrep is the
   CI source of truth.
@@ -1353,7 +1394,8 @@ direct icon imports, `print`/`console`, env reads outside config, raw HTTP clien
 
 ## 8 · Definition of "meets the standard"
 
-A repo meets the standard when:
+A repo meets the standard **for its declared mode** (§0A, ENF-4) when every rule of that mode holds —
+in quick mode the items below that name client-only rules are deferred. In client mode, when:
 - [ ] §1 platform-core table is filled in and every CORE row exists.
 - [ ] Kit adopted (`tools/standard/VERSION` current); `tools/standard/check.sh` runs in CI and is
       **blocking**; any `.semgrep/baseline.json` is shrinking release over release.

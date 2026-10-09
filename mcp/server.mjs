@@ -7,16 +7,18 @@ import { join, resolve, dirname } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { ROOT, loadRules, rulesFor, ruleById, readJSON, kitVersion } from '../lib/rules.mjs'
 import { verifyDependency, ECOSYSTEMS } from '../lib/deps.mjs'
+import { resolveMode, loadModes, PROMOTION_TRIGGERS } from '../lib/modes.mjs'
 import { runSemgrep } from '../lib/semgrep.mjs'
 
 const SUPPORTED = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']
 const projectRoot = (p) => resolve(p || process.env.CLAUDE_PROJECT_DIR || process.cwd())
 
 const TOOLS = [
-  { name: 'rules_for', description: 'Standard rules that apply to the given stacks (optionally filtered by topic words). Compact list; use `rule` for full text.',
+  { name: 'rules_for', description: 'Standard rules that apply to the given stacks in the repo\'s mode (optionally filtered by topic words). Compact list; use `rule` for full text.',
     inputSchema: { type: 'object', properties: {
       stacks: { type: 'array', items: { type: 'string' }, description: 'e.g. ["flutter","supabase"]; "all" = core rules' },
       topic: { type: 'string', description: 'keywords, e.g. "auth session"' },
+      mode: { type: 'string', enum: ['quick', 'client'], description: 'default: the repo\'s declared mode (see `mode`)' },
       level: { type: 'string', enum: ['MUST', 'SHOULD', 'MAY'] },
       include_core: { type: 'boolean', description: 'include rules tagged all (default true)' } }, required: ['stacks'] },
     annotations: { readOnlyHint: true } },
@@ -35,18 +37,29 @@ const TOOLS = [
       rule: { type: 'string' }, reason: { type: 'string' }, owner: { type: 'string' }, expiry: { type: 'string', description: 'YYYY-MM-DD' },
       repo_path: { type: 'string' }, where: { type: 'string', description: 'file/area the exception covers' } }, required: ['rule', 'reason', 'owner', 'expiry', 'repo_path'] },
     annotations: { destructiveHint: false } },
-  { name: 'review_plan', description: 'APP_REVIEW.md lens roster for a profile: quick | standard | full (deep = full).',
-    inputSchema: { type: 'object', properties: { profile: { type: 'string', enum: ['quick', 'standard', 'full', 'deep'] } }, required: ['profile'] },
+  { name: 'review_plan', description: 'APP_REVIEW.md lens roster for a profile: quick | standard | full (deep = full). Default from the mode: quick→quick, client→standard.',
+    inputSchema: { type: 'object', properties: { profile: { type: 'string', enum: ['quick', 'standard', 'full', 'deep'] } } },
     annotations: { readOnlyHint: true } },
+  { name: 'mode', description: 'The repo\'s standard mode (quick | client), where it was set, and the ENF-4 triggers that require client mode.',
+    inputSchema: { type: 'object', properties: { repo_path: { type: 'string' } } }, annotations: { readOnlyHint: true } },
 ]
 
 // ── tool implementations ────────────────────────────────────────────────────────────────────────
-function toolRulesFor({ stacks, topic, level, include_core }) {
+function toolRulesFor({ stacks, topic, level, include_core, mode }) {
   if (!Array.isArray(stacks) || !stacks.length) throw new Error('stacks must be a non-empty array')
-  const all = rulesFor({ stacks, topic, level, include_core }), LIMIT = 120
+  const m = resolveMode({ arg: mode, root: projectRoot() })
+  const any = rulesFor({ stacks, topic, level, include_core }), all = any.filter((r) => r.modes.includes(m.mode)), LIMIT = 120
   const lines = all.slice(0, LIMIT).map((r) => `${r.id} ${r.levelText} — ${r.title}`)
-  const head = `${all.length} rule(s) for [${stacks.join(', ')}]${topic ? ` topic "${topic}"` : ''} (v${loadRules().version}). Full text: rule(id).`
-  return [head, ...lines, ...(all.length > LIMIT ? [`… +${all.length - LIMIT} more — narrow with topic/level or include_core:false`] : [])].join('\n')
+  const head = `${all.length} rule(s) for [${stacks.join(', ')}]${topic ? ` topic "${topic}"` : ''}, mode: ${m.mode} (${m.source}) (v${loadRules().version}). Full text: rule(id).`
+  const note = m.mode === 'quick' ? [`quick mode — ${any.length - all.length} client-only rules deferred; they apply once ENF-4's triggers hold`] : []
+  return [head, ...note, ...lines, ...(all.length > LIMIT ? [`… +${all.length - LIMIT} more — narrow with topic/level or include_core:false`] : [])].join('\n')
+}
+
+function toolMode({ repo_path } = {}) {
+  const m = resolveMode({ root: projectRoot(repo_path) }), enf4 = ruleById('ENF-4'), c = loadRules().counts.byMode
+  return { ...m, valid: loadModes().modes, default: loadModes().default, rules: { quick: c.quick.total, client: c.client.total },
+    set: 'standard.config.json → "mode", or env STANDARD_MODE', promoteToClientWhenAny: PROMOTION_TRIGGERS,
+    ...(enf4 ? { 'ENF-4': enf4.text } : { note: 'ENF-4 not yet defined in this kit version' }) }
 }
 
 let asvs
@@ -63,7 +76,7 @@ function toolRule({ id }) {
 }
 
 function toolCheck({ paths, repo_path }) {
-  const cwd = projectRoot(repo_path), out = { repo: cwd, semgrep: null, tests: null, findings: [] }
+  const cwd = projectRoot(repo_path), m = resolveMode({ root: cwd }), out = { repo: cwd, mode: `${m.mode} (${m.source})`, semgrep: null, tests: null, findings: [] }
   if (!Array.isArray(paths) || !paths.length) throw new Error('paths must be a non-empty array')
   const files = []
   const walk = (p) => {
@@ -74,14 +87,18 @@ function toolCheck({ paths, repo_path }) {
   for (const p of paths) walk(p)
   const sg = runSemgrep(files.slice(0, 2000), { cwd, timeoutMs: 120000 })
   out.semgrep = sg.available ? { ran: true, files: files.length, baselined: sg.baselined || 0, errors: sg.error ? [sg.error] : sg.errors } : { ran: false, message: sg.error }
-  out.findings.push(...sg.findings.map((f) => ({ tool: 'semgrep', ...f })))
+  // Lint is the same floor in every mode; in quick mode, mark findings that cite only client-only rules.
+  const clientOnly = (ids) => ids.length && ids.every((id) => ruleById(id) && !ruleById(id).modes.includes('quick'))
+  out.findings.push(...sg.findings.map((f) => ({ tool: 'semgrep', ...f, ...(m.mode === 'quick' && clientOnly(f.standard || []) ? { clientOnly: true } : {}) })))
   const cfg = join(cwd, 'standard.config.json')
   if (existsSync(cfg)) {
-    const r = spawnSync(process.execPath, [join(ROOT, 'bin/check-tests.mjs'), '--config', cfg], { cwd, encoding: 'utf8', timeout: 60000 })
+    const r = spawnSync(process.execPath, [join(ROOT, 'bin/check-tests.mjs'), '--config', cfg, '--mode', m.mode], { cwd, encoding: 'utf8', timeout: 60000 })
     out.tests = { ran: true, exitCode: r.status, output: (r.stdout + r.stderr).trim().split('\n').slice(-40).join('\n') }
-    if (r.status) out.findings.push({ tool: 'check-tests', rule: 'TEST-7', standard: ['TEST-7'], message: 'features missing a required test kind — see tests.output' })
+    const tr = m.mode === 'quick' ? 'TEST-14' : 'TEST-7'
+    if (r.status) out.findings.push({ tool: 'check-tests', rule: tr, standard: [tr], message: 'features missing a required test kind — see tests.output' })
   } else out.tests = { ran: false, message: 'no standard.config.json — TEST-7 check skipped' }
-  out.summary = `${out.findings.length} finding(s)${sg.available ? '' : '; semgrep NOT run (not installed)'}`
+  const deferred = out.findings.filter((f) => f.clientOnly).length
+  out.summary = `${out.findings.length} finding(s)${deferred ? ` (${deferred} cite only client-only rules — deferred in quick mode)` : ''}${sg.available ? '' : '; semgrep NOT run (not installed)'}`
   return out
 }
 
@@ -102,8 +119,9 @@ function toolExceptionAdd({ rule, reason, owner, expiry, repo_path, where }) {
     note: r.level === 'MUST' ? 'MUST rule: an exception needs a compensating control and a P1 review finding until fixed (§8).' : undefined }
 }
 
-function toolReviewPlan({ profile }) {
-  const p = profile === 'deep' ? 'full' : profile
+function toolReviewPlan({ profile } = {}) {
+  const m = profile ? null : resolveMode({ root: projectRoot() })
+  const p = profile === 'deep' ? 'full' : profile || (m.mode === 'quick' ? 'quick' : 'standard')
   if (!['quick', 'standard', 'full'].includes(p)) throw new Error('profile must be quick | standard | full (deep)')
   const md = readFileSync(join(ROOT, 'APP_REVIEW.md'), 'utf8')
   const sec = md.slice(md.search(/^## 6 · Lens roster/m), md.search(/^## 7 /m))
@@ -122,12 +140,12 @@ function toolReviewPlan({ profile }) {
   const active = lenses.filter((l) => all || named.has(l.key)).map((l) => ({ ...l,
     fanOut: p === 'full' && named.has(l.key) && /group/i.test(l.scope) ? 'one agent per menu-group' : 'app-wide' }))
   const preamble = (sec.match(/\*\*Shared preamble[^\n]*\n\n((?:>.*\n?)+)/) || [, ''])[1].replace(/^> ?/gm, '').trim()
-  return { profile: p, when: def.when, selection: def.rule, lenses: active, preamble,
+  return { profile: p, ...(m ? { mode: `${m.mode} (${m.source})` } : {}), when: def.when, selection: def.rule, lenses: active, preamble,
     steps: ['Phase −1 auto-detect stack + kit evidence (APP_REVIEW.md)', 'Phase 0 shared context', 'one read-only agent per lens (agents/standard-reviewer.md), findings in the §7 schema citing rule IDs',
       'verify every P0/P1 claim', 'synthesize report per §10; release gate §9'] }
 }
 
-const IMPL = { rules_for: toolRulesFor, rule: toolRule, check: toolCheck, verify_dependency: verifyDependency, exception_add: toolExceptionAdd, review_plan: toolReviewPlan }
+const IMPL = { rules_for: toolRulesFor, rule: toolRule, check: toolCheck, verify_dependency: verifyDependency, exception_add: toolExceptionAdd, review_plan: toolReviewPlan, mode: toolMode }
 
 // ── JSON-RPC plumbing ───────────────────────────────────────────────────────────────────────────
 const send = (msg) => process.stdout.write(JSON.stringify({ jsonrpc: '2.0', ...msg }) + '\n')
@@ -142,7 +160,7 @@ async function handle(msg) {
       const v = SUPPORTED.includes(params.protocolVersion) ? params.protocolVersion : SUPPORTED[0]
       return ok(id, { protocolVersion: v, capabilities: { tools: { listChanged: false } },
         serverInfo: { name: 'engineering-standard', version: kitVersion() },
-        instructions: 'Rules of ENGINEERING_STANDARD.md. Use rules_for/rule instead of guessing a rule; verify_dependency before adding any package; cite rule IDs.' })
+        instructions: 'Rules of ENGINEERING_STANDARD.md for the repo\'s mode (quick ⊂ client; see mode). Use rules_for/rule instead of guessing a rule; verify_dependency before adding any package; cite rule IDs.' })
     }
     case 'notifications/initialized': case 'notifications/cancelled': return
     case 'ping': return ok(id, {})

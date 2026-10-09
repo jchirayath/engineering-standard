@@ -1,10 +1,12 @@
 #!/usr/bin/env node
-// SessionStart — detect the repo's stack and inject the four pillars + the stack's MUST rule IDs/titles
-// (~1–1.5 KB, never the 78 KB document), plus warnings: kit VERSION behind, AGT-1 settings, AGT-7 subagents.
+// SessionStart — detect the repo's stack and mode and inject the four pillars + that mode's MUST rule IDs/titles
+// (~1–1.5 KB, never the 78 KB document), plus warnings: kit VERSION behind, AGT-1 settings, AGT-7 subagents,
+// and a quick-mode repo that looks shipped (ENF-4).
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { hook, emit, projectDir } from '../lib/hookio.mjs'
 import { loadRules, loadStacks, expandStacks, kitVersion, cmpSemver } from '../lib/rules.mjs'
+import { resolveMode } from '../lib/modes.mjs'
 
 const BUDGET = 1500
 const has = (d, f) => existsSync(join(d, f))
@@ -39,6 +41,17 @@ export function detectStacks(root) {
   return [...expandStacks([...s], loadStacks())]
 }
 
+// Cheap signs that a quick-mode repo already has a store release or a public website (→ ENF-4: client mode).
+const STORE_CI = /upload-google-play|app-store-connect|\b(pilot|supply)\b(?![-_ ]chain)/
+export function shippedSignals(root) {
+  const sig = []
+  if (has(root, 'fastlane')) sig.push('fastlane/ (store release)')
+  if (has(root, 'android/key.properties')) sig.push('android/key.properties (release signing)')
+  try { for (const f of readdirSync(join(root, '.github/workflows'))) if (STORE_CI.test(read(join(root, '.github/workflows', f)))) { sig.push(`.github/workflows/${f} (store upload)`); break } } catch {}
+  for (const f of ['staticwebapp.config.json', 'netlify.toml', 'vercel.json', 'CNAME', 'public/CNAME']) if (has(root, f)) sig.push(`${f} (website deploy)`)
+  return sig
+}
+
 export function warnings(root) {
   const w = [], plugin = kitVersion(), isRepo = has(root, '.git')
   const vendored = read(join(root, 'tools/standard/VERSION')).trim()
@@ -63,16 +76,19 @@ export function warnings(root) {
 }
 
 export function context(root) {
-  const { rules, pillars, version } = loadRules()
+  const { rules: allRules, pillars, version } = loadRules()
   const stacks = detectStacks(root), specific = new Set(stacks)
   const warn = warnings(root)
+  let m; try { m = resolveMode({ root }) } catch (e) { m = { mode: 'client', source: 'fallback' }; warn.unshift(`${e.message} — using client`) }
+  const rules = allRules.filter((r) => (r.modes || ['client']).includes(m.mode))
+  if (m.mode === 'quick') { const sig = shippedSignals(root); if (sig.length) warn.unshift(`quick mode, but this repo looks released: ${sig.join(', ')}. ENF-4: once it has external users, a store listing, a public URL or third-party personal data, set "mode": "client" in standard.config.json.`) }
   const shortBar = (b) => b.replace(/\.$/, "")
   const head = [
-    `[engineering-standard v${version}] Stack: ${stacks.join(', ') || 'unknown'}. Build to ENGINEERING_STANDARD.md and cite rule IDs. Full rule text: MCP server "standard" (rule, rules_for) — never guess a rule.`,
+    `[engineering-standard v${version}] mode: ${m.mode} (${m.source}). Stack: ${stacks.join(', ') || 'unknown'}. Build to ENGINEERING_STANDARD.md and cite rule IDs. Full rule text: MCP server "standard" (rule, rules_for) — never guess a rule.`,
     `Pillars: ${pillars.map((p) => `${p.name}: ${shortBar(p.bar)}`).join(' | ')}`,
   ]
   const core = [...new Set(rules.filter((r) => r.stacks.includes('all') && r.level === 'MUST').map((r) => r.prefix))]
-  const tailLines = [`Core MUST (every repo): ${core.join(' ')} — rules_for(["all"], topic) before touching auth, data, logging, deps or tests.`,
+  const tailLines = [`Core MUST (${m.mode} mode): ${core.join(' ')} — rules_for(["all"], topic) before touching auth, data, logging, deps or tests.`,
     ...warn.map((x) => `⚠ ${x}`)]
   const PRIO = ['nextjs', 'flutter', 'supabase', 'firebase', 'llm', 'azure', 'go', 'python', 'swift', 'ios', 'android', 'mobile', 'node', 'web', 'website', 'agent']
   const rank = (r) => Math.min(...r.stacks.filter((s) => specific.has(s)).map((s) => (PRIO.indexOf(s) + 1) || 99))

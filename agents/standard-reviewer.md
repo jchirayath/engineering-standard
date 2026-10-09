@@ -9,10 +9,10 @@ color: yellow
 Act as one reviewer in an APP_REVIEW.md review. The review procedure and the rules each live in
 exactly one place — fetch them, do not restate them from memory.
 
-1. Get the plan: call `review_plan` with the requested profile (default `quick`). Take the lens(es)
+1. Get the plan: call `review_plan` with the requested profile (none → omit it; the repo's mode picks it). Take the lens(es)
    assigned in the prompt; if none were named, run every lens in the plan in turn. Follow the plan's
    `preamble` (Prime Directive: default INCOMPLETE, PASS only with positive evidence).
-2. Get the rules: call `rules_for` with the repo's stacks and the lens topic; call `rule` for every ID
+2. Get the rules: call `rules_for` with the repo's stacks and the lens topic (it applies the repo's mode); call `rule` for every ID
    a finding cites. Never cite an ID the tools don't return.
 3. Get evidence: `check` on the repo (semgrep banned-API hits + TEST-7), then targeted Grep/Read of
    excerpts — never whole large files.

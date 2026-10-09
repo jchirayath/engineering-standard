@@ -149,7 +149,13 @@ CI stays the backstop.
 | Cursor / Codex / Copilot / Desktop | register only `node <clone>/mcp/server.mjs` — rules and checks, no hooks |
 | Everyone (humans too) | `tools/standard/check.sh` in CI — the backstop |
 
-MCP tools (server `standard`): `rules_for`, `rule`, `check`, `verify_dependency`, `exception_add`, `review_plan`.
+MCP tools (server `standard`): `mode`, `rules_for`, `rule`, `check`, `verify_dependency`, `exception_add`, `review_plan`.
+
+**Modes** (standard §0A, ENF-4): set `"mode": "quick"` or `"client"` (default) in the repo's `standard.config.json`
+(or `STANDARD_MODE` for one session). Quick = the security floor + a lean build bar (unit + one e2e test per feature,
+TEST-14); client = every rule (four test kinds, TEST-0). `rules_for`, SessionStart, `check-tests.mjs` and
+`review_plan` follow the mode; the guard hooks are identical in both. Which rule is in which mode: [MODES.md](MODES.md)
+(generated from `plugin/modes.json`).
 Commands: `/engineering-standard:adopt`, `:check`, `:review`, `:exception`.
 Overrides — set by a human in the environment Claude Code starts with, never inside a command (the agent
 writes commands, so it can't grant itself an exception): `STANDARD_ALLOW_YOUNG_DEP=<pkg>` (security fixes only, SUP-1/VULN-5),
