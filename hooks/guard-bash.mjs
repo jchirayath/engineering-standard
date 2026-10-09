@@ -30,7 +30,9 @@ hook(async (input) => {
   if (process.env.STANDARD_DEP_CHECK === 'off') return
   const pkgs = all
   const allow = new Set([process.env.STANDARD_ALLOW_YOUNG_DEP].filter(Boolean).flatMap((s) => s.split(',')).map((s) => s.trim()))
-  const results = await Promise.all(pkgs.map((p) => verifyDependency({ ...p, security_fix: allow.has(p.name), osv: false, timeoutMs: 3000 })))
+  const results = await Promise.all(pkgs.map((p) => verifyDependency({ ...p, security_fix: allow.has(p.name), osv: false, timeoutMs: 8000 })))
+  const slow = results.filter((r) => r.verdict === 'unverified')
+  if (slow.length) block(`Couldn't finish verifying ${slow.map((r) => r.name).join(', ')} (${slow.flatMap((r) => r.errors).join('; ')}). Retry; if the registry is genuinely slow, ask the user — they can start Claude Code with STANDARD_DEP_CHECK=off (SEC-31).`)
   const blocks = results.filter((r) => r.verdict === 'block')
   if (blocks.length) block(blocks.flatMap((r) => r.reasons).join(' | ') + ' — verify with the MCP tool verify_dependency; for a security fix inside the cooldown, ask the user to restart Claude Code with STANDARD_ALLOW_YOUNG_DEP=<name> in its environment (VULN-5) — it is not honoured inside the command.')
   const notes = results.flatMap((r) => [...r.warnings, ...r.errors.map((e) => `${r.name}: ${e} — dependency NOT verified (fail-open; CI still checks)`)])
