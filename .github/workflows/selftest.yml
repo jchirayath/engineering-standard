@@ -13,6 +13,8 @@ jobs:
       - run: pip install semgrep
       - name: Plugin — rules.json current, every rule ID defined once, versions match VERSION
         run: node bin/build-rules.mjs --check
+      - name: Sources gateway — registry pinned, reviewed, rule IDs defined
+        run: node bin/sources.mjs --check
       - name: Plugin — MCP server, hooks, parser self-test
         run: node plugin/test/run.mjs --offline
       - name: Lint rules pass their must-fail / must-pass tests

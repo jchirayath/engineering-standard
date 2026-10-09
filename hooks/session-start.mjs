@@ -8,7 +8,7 @@ import { hook, emit, projectDir } from '../lib/hookio.mjs'
 import { loadRules, loadStacks, expandStacks, kitVersion, cmpSemver } from '../lib/rules.mjs'
 import { resolveMode } from '../lib/modes.mjs'
 
-const BUDGET = 1500
+const BUDGET = 1900   // bytes
 const has = (d, f) => existsSync(join(d, f))
 const read = (p) => { try { return readFileSync(p, 'utf8') } catch { return '' } }
 const LLM_DEP = /["'\s](openai|@anthropic-ai\/sdk|anthropic|ai|@ai-sdk\/[\w-]+|langchain|@langchain\/[\w-]+|llamaindex|google-generativeai|@google\/genai|firebase_ai|google_generative_ai)["'\s=<>~^:]/
@@ -86,6 +86,7 @@ export function context(root) {
   const head = [
     `[engineering-standard v${version}] mode: ${m.mode} (${m.source}). Stack: ${stacks.join(', ') || 'unknown'}. Build to ENGINEERING_STANDARD.md and cite rule IDs. Full rule text: MCP server "standard" (rule, rules_for) — never guess a rule.`,
     `Pillars: ${pillars.map((p) => `${p.name}: ${shortBar(p.bar)}`).join(' | ')}`,
+    `Loop: clarify (AGT-11) → plan (AGT-12) → failing test (TEST-15) → least code (CLEAN-13) → run tests + check.sh → report output + what was NOT run (AGT-13). Tests: ${m.mode === 'quick' ? 'unit + 1 e2e (TEST-14)' : 'unit+integration+e2e+walkthrough (TEST-0)'}.`,
   ]
   const core = [...new Set(rules.filter((r) => r.stacks.includes('all') && r.level === 'MUST').map((r) => r.prefix))]
   const tailLines = [`Core MUST (${m.mode} mode): ${core.join(' ')} — rules_for(["all"], topic) before touching auth, data, logging, deps or tests.`,
@@ -94,13 +95,14 @@ export function context(root) {
   const rank = (r) => Math.min(...r.stacks.filter((s) => specific.has(s)).map((s) => (PRIO.indexOf(s) + 1) || 99))
   const stackRules = rules.filter((r) => r.level === 'MUST' && !r.stacks.includes('all') && r.stacks.some((s) => specific.has(s)))
     .map((r, i) => [rank(r) * 10 + Math.min(r.stacks.length, 9), i, r]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map((x) => x[2])
-  let room = BUDGET - [...head, ...tailLines].join('\n').length - 40
+  const B = (x) => Buffer.byteLength(x)
+  let room = BUDGET - B([...head, ...tailLines].join('\n')) - 40
   const items = []
   for (const r of stackRules) {
     const t = r.title.length > 44 ? r.title.slice(0, 42).replace(/\s\S*$/, '') + '…' : r.title
     const item = `${r.id} ${t}`
-    if (room - item.length - 3 < 0) break
-    items.push(item); room -= item.length + 3
+    if (room - B(item) - 4 < 0) break
+    items.push(item); room -= B(item) + 4
   }
   const more = stackRules.length - items.length
   const mid = stackRules.length ? [`Stack MUST: ${items.join(' · ')}${more ? ` · +${more} more (rules_for)` : ''}`] : []

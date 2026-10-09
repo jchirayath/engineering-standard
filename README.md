@@ -165,6 +165,24 @@ Repos that hand-added the older per-repo `PostToolUse` semgrep hook remove it wh
 After editing `ENGINEERING_STANDARD.md`, run `node bin/build-rules.mjs` and commit `build/rules.json`
 (CI runs `--check`: every rule ID defined once, every reference defined, rules.json current, versions match).
 
+## Sources gateway — bringing in an open-source skill, plugin or prompt
+
+Nothing third-party reaches your agents directly (AGT-5). Run `/engineering-standard:intake <owner/repo>`: it pins a commit,
+audits what would run (hooks, scripts, MCP), maps every instruction against the standard (both modes) and writes
+`proposals/sources/<id>.md` plus a `"proposed"` entry in `sources/registry.json`. On approval the source is either
+**distilled** (its ideas become rules here, citing it) or kept as a pinned **companion** with a written precedence note
+(this standard wins); otherwise **reference** or **rejected**. `node bin/sources.mjs --check` runs in CI; the
+`sources-weekly` workflow opens a `source-drift` issue when a watched file changes upstream.
+
+| Source | Disposition | Rules it informs |
+|---|---|---|
+| ponytail | distilled | CLEAN-13, CLEAN-5 `shortcut:`, AGT-14, APP_REVIEW finding discipline |
+| superpowers | distilled | AGT-11–14, TEST-15 |
+| grill-me (mattpocock/skills) | distilled | AGT-11 |
+| caveman | distilled | AGT-15 |
+| frontend-design (anthropics/skills) | companion | THEME-12 |
+| skill-creator (anthropics/skills) | reference | AGT-16 |
+
 ## Changing the kit
 
 - **Token names** (`schema/semantic-keys.json`): adding a key is minor (bump `version`, add it to

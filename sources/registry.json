@@ -1,0 +1,85 @@
+{
+  "$comment": "Sources gateway (AGT-5). Every third-party skill, plugin, prompt or rule set that informs this standard, pinned to the commit that was reviewed. Validated by `node bin/sources.mjs --check`; `sources-weekly` opens an issue when a watched path changes upstream. Add entries only via /engineering-standard:intake; the review lives in proposals/sources/<id>.md. Dispositions: distilled (ideas became rules here; nothing of theirs is loaded) · companion (installed, pinned, with a written scope + precedence: this standard wins) · reference (read, not loaded) · rejected · proposed (awaiting the owner).",
+  "sources": [
+    {
+      "id": "ponytail",
+      "repo": "DietrichGebert/ponytail",
+      "commit": "9cc65d03aa2da1db7121b912d03596409ee340b8",
+      "version": "v5.1.0",
+      "reviewed": "2026-10-09",
+      "license": "MIT",
+      "kind": "plugin",
+      "disposition": "distilled",
+      "paths": ["skills/ponytail/SKILL.md", "AGENTS.md", "skills/ponytail-review/", "skills/ponytail-audit/", "skills/ponytail-debt/"],
+      "informs": ["CLEAN-13", "CLEAN-5", "AGT-14"],
+      "notes": "Plugin not installed: hooks inject a persona into every session and every subagent (breaks standard-reviewer's JSON output), write under ~/.claude and nudge settings.json edits; weaker test/help/logging floor; 'lite' still injects all rules. Review-discipline ideas went to APP_REVIEW §7."
+    },
+    {
+      "id": "superpowers",
+      "repo": "obra/superpowers",
+      "commit": "8ca22dba9a94f28898bbce59f2537ff4d87c747d",
+      "version": "v6.4.2",
+      "reviewed": "2026-10-09",
+      "license": "MIT",
+      "kind": "plugin",
+      "disposition": "distilled",
+      "paths": ["skills/brainstorming/", "skills/writing-plans/", "skills/executing-plans/", "skills/test-driven-development/", "skills/systematic-debugging/", "skills/verification-before-completion/", "hooks/"],
+      "informs": ["AGT-11", "AGT-12", "AGT-13", "AGT-14", "TEST-15"],
+      "notes": "Plugin not installed: SessionStart injects an <EXTREMELY_IMPORTANT> skill-first directive; subagent templates have no tools: allow-list (AGT-7); auto-commits specs/plans; specs under docs/superpowers/; 'rulings, not stalls' lets the agent decide ambiguities alone (AGT-12 narrows that); no integration/e2e/walkthrough tiers."
+    },
+    {
+      "id": "grill-me",
+      "repo": "mattpocock/skills",
+      "commit": "49dd158d1076134a641b33efb035946536778336",
+      "reviewed": "2026-10-09",
+      "license": "MIT",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": ["skills/productivity/grilling/SKILL.md", "skills/productivity/grill-me/SKILL.md"],
+      "informs": ["AGT-11"],
+      "notes": "No executable code. Unbounded rounds and no written output by design; AGT-11 bounds it per mode, adds the standard's client-mode branches (SEC-20, AZ-1, BL-2, HELP-1) and records decisions as ADRs. 'Yes accepts my recommendation' kept, with recommendations never weaker than the mode."
+    },
+    {
+      "id": "caveman",
+      "repo": "JuliusBrussee/caveman",
+      "commit": "e20f07e8152a0c0360f58c09e79d30ac94329991",
+      "version": "v3.2.0",
+      "reviewed": "2026-10-09",
+      "license": "Apache-2.0 (from 3.0.0; 'Caveman' is a trademark)",
+      "kind": "plugin",
+      "disposition": "distilled",
+      "paths": ["skills/caveman/SKILL.md", "src/hooks/", ".claude-plugin/"],
+      "informs": ["AGT-15", "AGT-13"],
+      "notes": "Plugin/CLI/proxy not installed: hooks inject into every session and subagent and read the full transcript; CLI telemetry on by default; install.sh pulls main without checksums; 'no hedging' can turn 'should work' into 'yes' (COR-1). The 65% claim is withdrawn upstream (docs/HONEST-NUMBERS.md)."
+    },
+    {
+      "id": "anthropic-frontend-design",
+      "repo": "anthropics/skills",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "reviewed": "2026-10-09",
+      "license": "Apache-2.0",
+      "kind": "skill",
+      "disposition": "companion",
+      "paths": ["skills/frontend-design/"],
+      "informs": ["THEME-12", "UX-1"],
+      "companion": {
+        "install": "/plugin install frontend-design@claude-plugins-official (already installed at user scope; identical to anthropics/skills at the pinned commit)",
+        "scope": "web UI design in client-mode repos; prompt-only skill, no executable code",
+        "precedence": "THEME-12: §6A is the brief — values for existing semantic tokens only, no hex/palette classes/literals in screens, ≤ 2 self-hosted WOFF2 fonts, AA contrast in light and dark, four states per screen."
+      },
+      "notes": "Marketplace plugins auto-update; sources-weekly flags any change to skills/frontend-design/ for re-review."
+    },
+    {
+      "id": "anthropic-skill-creator",
+      "repo": "anthropics/skills",
+      "commit": "dbd4588f9e1033efb41dad4bef2f7947c8993d44",
+      "reviewed": "2026-10-09",
+      "license": "Apache-2.0",
+      "kind": "skill",
+      "disposition": "reference",
+      "paths": ["skills/skill-creator/"],
+      "informs": ["AGT-16"],
+      "notes": "Its eval loop runs a nested `claude -p` with the user's full permissions and writes into .claude/commands/; it encourages long, 'pushy' skills that restate domain rules. Use only per AGT-16 (throwaway worktree, explicit --allowedTools, reviewed diff)."
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+name: sources-weekly
+# Weekly check of every pinned external source in sources/registry.json (AGT-5): if a watched file (the
+# prompt, hooks or rules we reviewed) changed upstream, open/update one issue labelled source-drift so it is
+# re-reviewed before the pin moves. Closed automatically when every pin is current.
+on:
+  schedule: [{ cron: "0 14 * * 1" }]   # Mondays 14:00 UTC
+  workflow_dispatch:
+permissions: { contents: read, issues: write }
+concurrency: { group: sources-weekly, cancel-in-progress: false }
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683   # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: 22 }
+      - name: Compare pins with upstream
+        id: drift
+        env: { GITHUB_TOKEN: "${{ github.token }}" }
+        run: |
+          set +e
+          node bin/sources.mjs --upstream > report.md; echo "drift=$?" >> "$GITHUB_OUTPUT"
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Open, update or close the source-drift issue
+        env: { GH_TOKEN: "${{ github.token }}", DRIFT: "${{ steps.drift.outputs.drift }}" }
+        run: |
+          gh label create source-drift --color 5319E7 --description "Pinned external source changed upstream" 2>/dev/null || true
+          n=$(gh issue list --label source-drift --state open --json number --jq '.[0].number')
+          if [ "$DRIFT" != "0" ]; then
+            if [ -n "$n" ]; then gh issue edit "$n" --body-file report.md && gh issue comment "$n" --body "Re-checked $(date -u +%F)."
+            else gh issue create --title "Source drift — $(date -u +%F)" --label source-drift --body-file report.md; fi
+          elif [ -n "$n" ]; then gh issue close "$n" --comment "All pinned sources current as of $(date -u +%F)."; fi

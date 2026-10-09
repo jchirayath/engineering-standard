@@ -273,7 +273,7 @@ else P1 (SHR-2).
 | **L3 · Config & Entry** | 4 | app | **Owns E.** Classify every env var (user-tunable vs deploy-secret); each tunable without UI gets a `field_spec`. Run the no-mutation detector. *Usually the highest yield — be exhaustive.* |
 | **L4 · Product Value & IA** | 5,6,7,9 | group | **Owns B + D.** "The user opened this to decide ___" per feature; viability verdict for every feature; drill-down, filters/segments, export, standing reports. Think like the product owner on a Monday morning. |
 | **L5 · Honesty Auditor** ⭐⭐ | 8 | app | **Owns H + I.** For every success path: what did it ACTUALLY do? Follow the write to the real system. For every subsystem: does anything call it? Seeds and their missing inputs. *Finds the P0s nobody else can see.* |
-| **L6 · AppSec & Supply Chain** | 15 | app | **Runs the §9.1 scanners** and checks VULN-1…7 (SECURITY.md, fix-time targets, Scorecard) (incl. `check-site.mjs` on the live URLs and `check-build.mjs` on the publish dir for anything web-facing — standard §2A) and triages output; SAST review for injection/XSS/SSRF/path traversal/deserialization/weak crypto; headers & CORS; IaC; CI hardening; LLM features vs SEC-19 and AI-1…9; agent configuration vs §2C (AGT-1…10: `.claude/settings.json` deny rules, subagent `tools:`, `.mcp.json` pins, headless workflows); supply chain vs §2E (cooldowns, trusted publishing, attestation verified at deploy, EOL). Paste real scan output. |
+| **L6 · AppSec & Supply Chain** | 15 | app | **Runs the §9.1 scanners** and checks VULN-1…7 (SECURITY.md, fix-time targets, Scorecard) (incl. `check-site.mjs` on the live URLs and `check-build.mjs` on the publish dir for anything web-facing — standard §2A) and triages output; SAST review for injection/XSS/SSRF/path traversal/deserialization/weak crypto; headers & CORS; IaC; CI hardening; LLM features vs SEC-19 and AI-1…9; agent configuration vs §2C (AGT-1…16 — incl. skills/agents per AGT-16: `.claude/settings.json` deny rules, subagent `tools:`, `.mcp.json` pins, headless workflows); supply chain vs §2E (cooldowns, trusted publishing, attestation verified at deploy, EOL). Paste real scan output. |
 | **L7 · Identity, Authz & Privacy** | 15 | app | **RBAC boundary test** (every admin-only route 403s for lower roles); IDOR (user A vs B, tenant X vs Y); identity derived server-side; RLS per operation; session/cookie/CSRF; PII inventory, retention, deletion; threat model current (SEC-20). |
 | **L8 · Observability & Sinks** | 3, 14 | app | **Owns C.** Producer × sink matrix (log, audit, activity, metrics) with misses named. Schema conformance to LOG-1 (OTel attribute names); SLOs + burn-rate alerts (REL-1); redaction (LOG-4); actor **and** role; request_id end-to-end; silent catches; alerting exists. |
 | **L9 · Architecture & Reuse** | 13 | app | **Owns J.** Every CORE module exists and is the only path; triage `standard-scan.json` (`std.*` rule hits = bypasses, grouped by CORE module); copy-paste to promote (name the unit + call sites); dead code and unused deps. Kit adopted and baseline shrinking? |
@@ -319,6 +319,13 @@ Required: `id, q, lens, screen, cell, severity, evidence, confidence` (+ `unconf
 Severity per the standard §8: **P0** blocks release · **P1** customer can't get the value / MUST broken ·
 **P2** consistency · **P3** polish · **PASS** positive evidence · **INCOMPLETE** honest default.
 Effort: **S** ≤ ½ day · **M** ≤ 2 days · **L** > 2 days / needs design.
+
+**Finding discipline** (adapted from ponytail's review, `sources/registry.json`): every defect finding names a
+**concrete case** — an input, a request or a sequence that goes wrong — re-read at the cited lines before it is
+reported; no case, no finding (use `INCOMPLETE` + `unconfirmed`). Before calling code unused (L5 inert, L9 dead
+code), grep the whole tree — tests, fixtures, config, string references, dynamic imports. Name the load you assumed
+for any performance finding. The final report numbers findings across lenses so the owner can say "fix 3 and 7",
+and ends with one *Lean* line: lines and dependencies that could be removed (CLEAN-13).
 
 ---
 

@@ -221,13 +221,13 @@ writeFileSync(join(fr, '.claude/agents/rev.md'), '---\nname: rev\ndescription: x
 const fctx = JSON.parse(hookRun('session-start.mjs', { cwd: fr }, { CLAUDE_PROJECT_DIR: fr }).stdout).hookSpecificOutput.additionalContext
 t('session-start detects flutter+supabase, lists FLT rules', /flutter/.test(fctx) && /supabase/.test(fctx) && /FLT-1/.test(fctx), fctx.slice(0, 300))
 t('session-start warns: kit behind, AGT-1 settings, AGT-7 tools', /v1\.0\.0/.test(fctx) && /AGT-1:/.test(fctx) && /AGT-7: .*rev\.md/.test(fctx))
-t('session-start budget ≤ 1.6 KB', Buffer.byteLength(fctx) <= 1600, `(${Buffer.byteLength(fctx)})`)
+t('session-start budget ≤ 2 KB', Buffer.byteLength(fctx) <= 2000, `(${Buffer.byteLength(fctx)})`)
 t('session-start shows mode: client (default)', /mode: client \(default\)/.test(fctx))
 const qr = join(tmp, 'quick-site'); mkdirSync(join(qr, '.git'), { recursive: true })
 writeFileSync(join(qr, 'standard.config.json'), '{ "mode": "quick" }'); writeFileSync(join(qr, 'package.json'), '{ "dependencies": { "next": "15.0.0" } }'); writeFileSync(join(qr, 'netlify.toml'), '[build]\n')
 const qctx = JSON.parse(hookRun('session-start.mjs', { cwd: qr }, { CLAUDE_PROJECT_DIR: qr }).stdout).hookSpecificOutput.additionalContext
 t('session-start quick repo: mode + source, quick MUST only', /mode: quick \(standard\.config\.json\)/.test(qctx) && /Core MUST \(quick mode\)/.test(qctx) && !/\bPRIV\b/.test(qctx.split('\n').find((l) => l.startsWith('Core MUST')) || ''), qctx.slice(0, 400))
-t('session-start quick + netlify.toml → promotion warning (ENF-4)', /⚠ quick mode, but this repo looks released: netlify\.toml \(website deploy\).*ENF-4/.test(qctx) && Buffer.byteLength(qctx) <= 1600, qctx)
+t('session-start quick + netlify.toml → promotion warning (ENF-4)', /⚠ quick mode, but this repo looks released: netlify\.toml \(website deploy\).*ENF-4/.test(qctx) && Buffer.byteLength(qctx) <= 2000, qctx)
 rmSync(join(qr, 'netlify.toml'))
 t('session-start quick, no deploy signal → no promotion warning', !/looks released/.test(JSON.parse(hookRun('session-start.mjs', { cwd: qr }, { CLAUDE_PROJECT_DIR: qr }).stdout).hookSpecificOutput.additionalContext))
 

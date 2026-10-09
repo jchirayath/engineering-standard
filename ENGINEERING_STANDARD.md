@@ -60,7 +60,7 @@ The MCP tools, hooks, test checker and review profile all read it.
 
 | | **quick** | **client** (default) |
 |---|---|---|
-| For | prototypes, spikes, personal and internal tools with no outside users | anything a customer, the public, a store or a regulator can see |
+| For | prototypes, experiments, personal and internal tools with no outside users | anything a customer, the public, a store or a regulator can see |
 | Rule set | the **security floor** + a lean build bar (≈ 100 rules, list in [`MODES.md`](MODES.md)) | every rule in this document |
 | Tests | TEST-14: unit tests for logic + one e2e of the main journey; denied-path and regression tests | TEST-0: unit + integration + e2e + walkthrough per feature |
 | Review | `APP_REVIEW.md` profile `quick` | profile `standard` (pre-release) / `full` (client acceptance) |
@@ -71,6 +71,7 @@ The MCP tools, hooks, test checker and review profile all read it.
   hooks behave identically in both.
 - **External obligations aren't a mode choice:** store rules, privacy law, public websites (§2A) and
   regulation are client-only *because* quick mode is allowed only while none of them applies (ENF-4).
+- Where a rule says "PR" and a quick-mode repo has no PR flow, the commit message is the place.
 - In quick mode, a quick rule's reference to a client-only rule is a pointer ("see X"), never a way to
   pull that rule in; where a quick rule needs part of a client rule, it states that part itself.
 - In quick mode a client-only rule is **deferred, not waived** — no exception entry is needed until the
@@ -473,8 +474,13 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   test asserts no outbound call happens.
 - **AGT-5 MUST** **MCP servers and plugins are dependencies** (SEC-15, CLEAN-10): allow-listed by command
   or URL, stdio packages pinned to an exact version (never bare `npx -y <pkg>` or `@latest`), and their
-  tool descriptions re-reviewed when they change (tool poisoning / rug pull). *Enforced by:* `.mcp.json`
-  lint; managed `allowedMcpServers` where available.
+  tool descriptions re-reviewed when they change (tool poisoning / rug pull). Third-party skills,
+  plugins, prompts and rule sets reach agents **only through the sources gateway**: an entry in
+  `sources/registry.json` pinned to a reviewed commit, with an intake review in `proposals/sources/`
+  (`/engineering-standard:intake`) — its ideas are either distilled into this standard or it runs as a
+  pinned *companion* whose scope and precedence are written down (this standard wins). *Enforced by:*
+  `.mcp.json` lint; managed `allowedMcpServers` where available; `bin/sources.mjs --check` in CI; the
+  weekly `sources-weekly` job opens an issue when a pinned source changes upstream.
 - **AGT-6 MUST** **Headless agents on code you didn't write** (`claude -p`, Agent SDK,
   `claude-code-action` on PRs or issues) don't load that code's project settings or hooks
   (`--setting-sources user`, `disableAllHooks`), get a minimal `--allowedTools` list, a turn and time cap,
@@ -482,7 +488,8 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   hooks run without a trust prompt, so a malicious PR can run code in CI. Workflows pass `zizmor`
   (SEC-17).
 - **AGT-7 MUST** Every project subagent (`.claude/agents/*.md`) declares a `tools:` allow-list — an
-  omitted list inherits every tool, including MCP. Review and research agents are read-only.
+  omitted list inherits every tool, including MCP. Review and research agents don't edit files (no
+  Edit/Write); a reviewer without a shell reports "tests not re-run" (AGT-13).
 - **AGT-8 MUST** **The agent never loosens tests to get green:** in a change that makes tests pass it
   never deletes or weakens an assertion, adds a skip/`only`, or special-cases test inputs in production
   code (extends SEC-31 from security controls to tests). Allowed and stated in the PR description:
@@ -495,6 +502,54 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   fetched or otherwise untrusted text into memory or instruction files (memory poisoning).
 - **AGT-10 SHOULD** Agent sessions export OpenTelemetry (with tool details) through CORE-3 to the LOG-9 store so tool
   and MCP use is auditable.
+
+**How the agent works — one workflow** (distilled from reviewed sources, `sources/registry.json`: grill-me,
+superpowers, ponytail, caveman, skill-creator; this standard wins over any of them):
+
+- **AGT-11 MUST** **Clarify before building.** Before writing code for a new feature or a change in
+  behaviour (not for a typo, a rename or a bug whose fix is clear), the agent settles open decisions
+  with the owner: questions in numbered rounds, each with a recommended answer that is
+  **never weaker than the repo's mode requires**; it looks facts up itself and puts only decisions to the
+  owner; it never fills a gap with a silent assumption. In client mode the rounds cover, where the change
+  touches them, trust boundaries and abuse cases (SEC-20), roles and field access (AZ-1), business limits
+  (BL-2) and user-facing help (HELP-1); in quick mode one round, and only when the request is ambiguous.
+  Decisions that constrain future work become an ADR in `docs/adr/` (REPO-1); the rest go in the PR
+  description (the commit message where the repo has no PR flow — quick mode).
+- **AGT-12 MUST** **Plan in proportion to the change.** Changes AGT-11 exempts need no design. A change is
+  **architectural** when it alters a CORE module, a public API or schema, a data model or a trust
+  boundary — it gets a design spec with its plan as a section in `docs/specs/YYYY-MM-DD-<topic>.md`, whose
+  plan steps each name the files, the interfaces and the failing test that starts them, plus a *review
+  focus* (failure modes no step's test covers); the decisions in it that constrain future work are also
+  ADRs the spec links (REPO-1). Every other change is **bounded**: a short design in chat, then wait for
+  the owner's yes (quick mode: a one-line design note, then proceed unless AGT-11 left a decision open).
+  When unsure which, the agent says which it chose and why. A *spike* — a throwaway experiment inside a
+  task, not a quick-mode repo — answers a question and its code isn't merged. In client mode plans split
+  into PRs within CLEAN-9's size limit. While executing, the agent **stops and asks** when an ambiguity
+  touches a MUST rule, security, data, money or user-visible behaviour; other judgement calls are listed
+  under "Rulings I made" in the PR (or commit message). **With no owner reachable** (headless runs,
+  AGT-6) the agent makes no change that needs an answer: it writes the open questions, with recommended
+  answers, into the PR or issue and stops.
+- **AGT-13 MUST** **No completion claim without fresh evidence** (the agent's form of COR-1): "done",
+  "fixed" or "passes" only after running the command in this session and reading its output — tests,
+  `tools/standard/check.sh`, the build. "Should", "probably" and "seems to" never describe verification
+  state. Every final report ends with what was **not** run or verified. An agent reviewing another
+  agent's work checks the diff itself; it re-runs the tests when it has a shell, and a read-only reviewer
+  (AGT-7) says "tests not re-run" instead of trusting the report.
+- **AGT-14 MUST** **Debug from the root cause:** reproduce, find the cause, then fix it once at its source
+  — the shared module when the cause is there (grep every caller first) — with a test proven per
+  TEST-15. After three failed fixes the agent stops patching and raises the design question with the
+  owner (headless: AGT-12's no-owner rule).
+- **AGT-15 SHOULD** **Brief chat, complete facts.** Chat replies answer first, without greetings, recaps
+  or filler; code, commands, paths, numbers, negations and error text stay verbatim. Brevity never
+  drops uncertainty or verification state ("not run", "failed", "unverified" — AGT-13), and full
+  sentences are used for security warnings, irreversible actions and questions to the owner. It applies
+  to chat only — never to code comments, docs, help and error text, UI copy, commits or PRs.
+- **AGT-16 MUST** **Skills and agent instructions in a repo under this standard stay small and owned:** a
+  skill says when to use it and calls `rules_for` / `rule` instead of restating rules; project agents
+  declare `tools:` (AGT-7). Skill evaluation tools that start nested agents (e.g. Anthropic's
+  skill-creator eval loop) run only in a throwaway worktree with an explicit `--allowedTools`, never in a
+  permission-bypass mode outside AGT-3's container, and a person reviews the resulting skill diff — in
+  both modes.
 
 **Instruction files** (`CLAUDE.md`, skills): short and specific — point at this standard and the repo's
 §1 map instead of restating rules, no persona prompts ("act as a security expert"), and no secrets or
@@ -797,7 +852,19 @@ Code is read far more than it is written; these rules keep it cheap to read, cha
   (`timeoutMs`). One concept, one name across the codebase (and the same name in the UI and help).
 - **CLEAN-5 MUST** **No dead weight:** no commented-out code, no unused exports/deps (`knip`,
   `deadcode`, `vulture`, `dart fix`), no `TODO` without an issue link and owner, no speculative
-  parameters or abstractions with one implementation.
+  parameters or abstractions with one implementation. A deliberate shortcut is recorded where it lives,
+  in the language's comment syntax, as `shortcut: <the limit>, <when to upgrade> (#issue, @owner)` — a
+  TODO with its reason — and `grep -rn "shortcut:"` is the debt ledger reviewed each release. A shortcut
+  never covers a MUST rule of the repo's mode; that is an exception in `docs/STANDARD_EXCEPTIONS.md`
+  (ENF-2).
+- **CLEAN-13 MUST** **Least code that fully does the task** (distilled from ponytail): in order, ask
+  whether it is needed at all → reuse what the codebase has (the CORE modules first) → the platform /
+  standard library → a dependency already installed → a one-liner → the minimum new code — which, for the
+  second caller of a cross-cutting concern, is the core module (SHR-1). Never add a dependency for what
+  ~20 lines would do (CLEAN-10). **Least never means incomplete:** the change still reaches
+  every caller, and everything the repo's mode requires ships with it — validation, error handling,
+  security, accessibility, the mode's tests (TEST-14 or TEST-0), and in client mode help, `record()` and
+  docs. Deletion beats addition.
 - **CLEAN-6 MUST** **Errors are explicit:** expected failures are typed results or typed errors
   (CORE-7), not exceptions for control flow; every error carries context on the way up
   (`fmt.Errorf("load invoice %s: %w", id, err)`); no catch-and-ignore (COR-3).
@@ -979,6 +1046,15 @@ between apps except the structure, the semantic names and the tooling.
 - **THEME-9 MUST** Visual regression in **both modes**: golden tests (Flutter) / Playwright screenshots
   (web) for a smoke set of screens per mode and preset, in CI.
 - **THEME-10 SHOULD** Typography, spacing, radius, elevation, motion and breakpoints are tokens too.
+- **THEME-12 MUST** **Design skills work inside the token system.** A design-generation skill (e.g.
+  Anthropic's `frontend-design`, a pinned companion — `sources/registry.json`) treats this section as the
+  brief: its palette/typography step proposes primitive values and semantic mappings for the THEME-4
+  keys in `design/tokens/*.json` (THEME-2; new keys only under `color.domain.*`), AA-validated in every
+  mode and preset (THEME-7); generated
+  screens use only semantic tokens and the icon registry — no hex/rgb, palette classes, size or spacing
+  literals (THEME-8); fonts are at most two families, self-hosted WOFF2 (PERF-16); every screen has its
+  four states (UX-1). Its taste guidance (avoiding generic AI looks, hierarchy, copy) applies within that.
+  In quick mode the skill may be used freely; THEME-12 applies from client mode.
 - **THEME-11 SHOULD** A living reference page per app (Storybook / Widgetbook / a `/design` route in
   dev builds) renders every token, icon and shared component in every mode.
 
@@ -1183,7 +1259,12 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   tests tagged with it (`@feature:<key>` in the test name or tag) covering all four TEST-0 kinds — unit,
   integration, e2e and walkthrough (`bin/check-tests.mjs`; a feature with no server side records
   `integration` under `allowMissing` with a reason); a CI step lists features missing any kind and fails. A new route without tagged tests cannot merge.
-- **TEST-8 MUST** Bugs get a regression test that fails before the fix and passes after, in the same PR.
+- **TEST-8 MUST** Bugs get a regression test that fails before the fix and passes after (proven per TEST-15), in the same PR.
+- **TEST-15 MUST** **Every new test is proven able to fail.** For new logic and every bug fix, write the
+  test first and see it fail for the expected reason, then write the code (red → green → refactor) —
+  the preferred order. If the code came first: revert the change, see the test fail for the expected
+  reason (an assertion, not a compile or import error), restore it, see it pass. A test not proven able
+  to fail doesn't count toward TEST-14 / TEST-0.
 - **TEST-10 MUST** **Fuzz anything that parses untrusted input** (file formats, decoders, URL/filter
   parsers, import code): Go native fuzzing, Atheris (Python), Jazzer.js; fuzz targets run in CI for a
   short budget and nightly for longer; crashes become regression tests (TEST-8).
@@ -1309,7 +1390,7 @@ what here) · tips · troubleshooting (common errors and fixes) · link to the f
   reference stable widget/test ids and a test asserts every anchor resolves.
 - **HELP-6 MUST** **Living docs** in `docs/user/<feature>.md` (one page per feature, docs-as-code,
   reviewed in the same PR as the feature); every registry entry links to its page; served in-app or on
-  the docs site. Developer docs (`docs/adr/`, `RUNBOOK.md`, API schema) are separate from user docs.
+  the docs site. Developer docs (`docs/adr/`, `docs/specs/`, `RUNBOOK.md`, API schema) are separate from user docs.
 - **HELP-7 MUST** **Help is tested and kept current:**
   (a) a test asserts every route resolves to a registry entry and every entry's doc link resolves;
   (b) a test or lint asserts every form field/column id used in screens has a field-help entry or is
@@ -1371,9 +1452,11 @@ direct icon imports, `print`/`console`, env reads outside config, raw HTTP clien
   `verify_dependency`. Repos that hand-added the older per-repo Semgrep hook remove it when they enable
   the plugin, so the check doesn't run twice. Hooks are a convenience for the agent; CI (§7.1) is still
   the gate.
-- **Agent rule (put in every repo's `CLAUDE.md`):** when Claude adds or changes a feature it also writes
-  or updates that feature's unit, integration, e2e and walkthrough tests (TEST-0), runs them and
-  `tools/standard/check.sh`, and reports the real output — never "should pass". It never loosens a
+- **The agent loop** (injected by the plugin's `SessionStart` hook — a repo's `CLAUDE.md` holds only the
+  one adoption line at the top of this document, per the instruction-files rule): when Claude adds or
+  changes a feature it also writes or updates that feature's tests for the repo's mode (TEST-14 or
+  TEST-0), test first (TEST-15), runs them and `tools/standard/check.sh`, and reports the real output —
+  never "should pass" (AGT-13). It never loosens a
   test to get green (AGT-8), and asks before installing a dependency the plugin flags (SEC-31, SUP-1).
 
 ### 7.4 Claude Code plugins & skills that apply this standard
