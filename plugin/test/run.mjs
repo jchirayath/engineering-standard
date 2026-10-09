@@ -130,6 +130,9 @@ for (const [c, code] of [
 rmSync(join(repo, 'notes.txt')); rmSync(join(repo, '.env'))
 if (!OFFLINE) {
   expect('guard-bash npm i <nonexistent>', 'guard-bash.mjs', tool('Bash', { command: 'npm i this-package-should-not-exist-es-9f3k2' }), 2)
+  expect('guard-bash npm i foo/../bar@1.0.0 (path in name) blocked', 'guard-bash.mjs', tool('Bash', { command: 'npm i foo/../bar@1.0.0' }), 2)
+  expect('guard-bash pip install "requests%2F..==2.31.0" blocked', 'guard-bash.mjs', tool('Bash', { command: 'pip install requests%2F..==2.31.0' }), 2)
+  expect('guard-bash npm i JSONStream@1.3.5 (legacy capitals) allowed', 'guard-bash.mjs', tool('Bash', { command: 'npm i JSONStream@1.3.5' }), 0)
   expect('guard-bash inline STANDARD_ALLOW_YOUNG_DEP is ignored', 'guard-bash.mjs', tool('Bash', { command: 'STANDARD_ALLOW_YOUNG_DEP=this-package-should-not-exist-es-9f3k2 npm i this-package-should-not-exist-es-9f3k2' }), 2)
   expect('guard-bash npm i left-pad@1.3.0 (old)', 'guard-bash.mjs', tool('Bash', { command: 'npm i left-pad@1.3.0' }), 0)
   expect('guard-bash pip install requests==2.31.0', 'guard-bash.mjs', tool('Bash', { command: 'pip install requests==2.31.0' }), 0)
