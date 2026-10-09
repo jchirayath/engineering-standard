@@ -112,6 +112,14 @@ for (const [c, code] of [
   ['env npm i foo@npm:evil', 2], ['sudo -E npm i github:a/b', 2], ['bash -c "npm i foo@npm:evil"', 2], ['npx github:a/b', 2], ['pnpm dlx foo@npm:evil', 2],
   ['npm i ' + Array.from({ length: 13 }, (_, i) => `pkg${i}@1.0.0`).join(' '), 2], ['npm i ./local-pkg', 0], ['pnpm add workspace:*', 0]])
   expect(`guard-bash ${c}`, 'guard-bash.mjs', tool('Bash', { command: c }), code)
+for (const [c, code] of [
+  ['cat .e\\nv', 2], ["cat $'\\x2eenv'", 2], ["cat $'\\056env'", 2], ['cat .{env,x}', 2], ['cat .env{,.bak}', 2], ['cat ".e"nv', 2],
+  ['n\\pm i foo@npm:evil', 2], ['npm --global install foo@npm:evil', 2], ['npm --prefix /tmp i github:a/b', 2], ['npm isntal foo@^1.0.0', 2],
+  ['bun a foo@npm:evil', 2], ['pip -q install "requests<3"', 2], ['python3 -I -m pip install "requests>=2"', 2], ['pip install requests~=2.0', 2],
+  ['pip install requests==2.*', 2], ['uv --quiet pip install "x<2"', 2], ['npm i foo@^1.2.3', 2], ['npm i foo@~1.2.0', 2], ['npm i foo@1.x', 2],
+  ['flutter pub add http:^1.2.0', 2], ['dart pub add "http:>=1.0.0 <2.0.0"', 2], ['go get example.com/m@master', 2], ['go get example.com/m@abc123', 2],
+  ['npm i pkg{a,b}', 2], ['npm i $PKG', 2], ['corepack pnpm add foo@npm:evil', 2], ['pip install "requests==2.31.0; python_version>\'3.8\'"', 0 /* exact pin */ ]])
+  expect(`guard-bash ${c}`, 'guard-bash.mjs', tool('Bash', { command: c }), code)
 rmSync(join(repo, 'notes.txt')); rmSync(join(repo, '.env'))
 if (!OFFLINE) {
   expect('guard-bash npm i <nonexistent>', 'guard-bash.mjs', tool('Bash', { command: 'npm i this-package-should-not-exist-es-9f3k2' }), 2)
