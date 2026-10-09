@@ -79,7 +79,7 @@ fi
 copy_if_absent "$KIT/design-tokens/template/tokens"     "$REPO/design/tokens"
 copy_if_absent "$KIT/design-tokens/template/icons.json" "$REPO/design/icons.json"
 if [ ! -e "$REPO/design/tokens.config.json" ]; then
-  plats='"css", "tailwind", "ts"'; out='{}'
+  plats='"css", "tailwind4", "ts"'; out='{}'
   [ -f "$REPO/pubspec.yaml" ] && { plats='"dart"'; out='{ "dart": "lib/core/design/generated" }'; }
   ls "$REPO"/*.xcodeproj >/dev/null 2>&1 && plats='"swift"'
   printf '{\n  "platforms": [%s],\n  "out": %s\n}\n' "$plats" "$out" > "$REPO/design/tokens.config.json"

@@ -1,0 +1,79 @@
+{
+  "$comment": "Hand-maintained. Tags each rule with the stacks it applies to (bin/build-rules.mjs). Precedence: ids > subsections > sections > prefixes > default [all]. A rule tagged 'all' applies to every repo. 'implies' widens a detected/requested stack. 'enforcedBy' lists non-semgrep enforcement (semgrep ids are read from semgrep/*.yml). Every rule prefix should be listed under 'prefixes' — build-rules --check warns otherwise, and only listed/defined prefixes count as rule references.",
+  "stacks": ["all", "web", "nextjs", "node", "flutter", "ios", "android", "mobile", "supabase", "firebase", "python", "go", "swift", "azure", "website", "llm", "agent"],
+  "implies": {
+    "nextjs": ["web", "node"],
+    "flutter": ["mobile"],
+    "ios": ["mobile"],
+    "android": ["mobile"],
+    "swift": ["ios", "mobile"]
+  },
+  "prefixes": {
+    "CORE": ["all"], "SHR": ["all"],
+    "SEC": ["all"], "INP": ["all"], "BL": ["all"], "BRW": ["all"], "FILE": ["all"], "AUTH": ["all"],
+    "SESS": ["all"], "AZ": ["all"], "TOK": ["all"], "CRY": ["all"], "TLS": ["all"], "CFG": ["all"],
+    "DATA": ["all"], "SLOG": ["all"],
+    "WEB": ["website", "web"],
+    "PERF": ["all"], "CLEAN": ["all"], "COR": ["all"], "LOG": ["all"], "UX": ["all"], "THEME": ["all"],
+    "API": ["all"], "MOB": ["mobile", "flutter", "ios", "android"], "TEST": ["all"], "OPS": ["all"], "REL": ["all"],
+    "VULN": ["all"], "REPO": ["all"], "HELP": ["all"], "ENF": ["all"],
+    "AGT": ["all", "agent"],
+    "AI": ["llm"],
+    "NEXT": ["nextjs"],
+    "NPM": ["node", "web", "nextjs"],
+    "SUP": ["all"],
+    "PRIV": ["all"],
+    "COMPAT": ["web", "node", "nextjs"],
+    "STORE": ["mobile", "flutter", "ios", "android"],
+    "FLT": ["flutter"],
+    "SUPA": ["supabase"],
+    "FB": ["firebase"],
+    "REG": ["all"],
+    "LIFE": ["all"],
+    "AZR": ["azure"],
+    "SBD": ["all"]
+  },
+  "sections": {
+    "2A": ["website", "web"],
+    "2C": ["all", "agent"],
+    "6C": ["mobile", "flutter", "ios", "android"]
+  },
+  "subsections": {
+    "AI / LLM features (if any)": ["llm"],
+    "Web front end": ["web", "website", "nextjs"],
+    "Mobile (Flutter / native)": ["mobile", "flutter", "ios", "android"]
+  },
+  "ids": {
+    "SEC-8": ["all", "supabase"],
+    "SEC-19": ["llm"],
+    "PERF-19": ["flutter"],
+    "MOB-5": ["mobile", "firebase"],
+    "SUP-6": ["python"]
+  },
+  "enforcedBy": {
+    "AGT-1": ["hook:PreToolUse secret-path block (Read/Edit/Write/Grep/Bash)", "hook:SessionStart settings check"],
+    "AGT-3": ["hook:PreToolUse(Bash) blocks --dangerously-skip-permissions"],
+    "AGT-7": ["hook:SessionStart subagent tools: check"],
+    "AGT-8": ["hook:PreToolUse(Edit|Write) test-loosening block"],
+    "TEST-5": ["hook:PreToolUse(Edit|Write) skip needs quarantine owner+date"],
+    "TEST-0": ["hook:Stop test-less change reminder"],
+    "TEST-7": ["kit:bin/check-tests.mjs"],
+    "SEC-31": ["hook:PreToolUse(Bash) dependency verification", "mcp:verify_dependency"],
+    "NPM-1": ["hook:PreToolUse(Bash) 7-day cooldown", "mcp:verify_dependency"],
+    "SUP-1": ["hook:PreToolUse(Bash) 7-day cooldown", "mcp:verify_dependency"],
+    "VULN-5": ["override:STANDARD_ALLOW_YOUNG_DEP (security fixes only)"],
+    "REPO-2": ["hook:PreToolUse(Bash) blocks force-push to main/master"],
+    "ENF-2": ["hook:PreToolUse(Bash) blocks --no-verify"],
+    "THEME-1": ["kit:design-tokens/scripts/validate.mjs"],
+    "THEME-4": ["kit:design-tokens/scripts/validate.mjs"],
+    "THEME-7": ["kit:design-tokens/scripts/validate.mjs"],
+    "WEB-1": ["kit:site/check-build.mjs"],
+    "WEB-3": ["kit:site/check-build.mjs (CSP drift)", "kit:site/check-site.mjs"],
+    "WEB-7": ["kit:site/check-build.mjs"],
+    "WEB-11": ["kit:site/check-build.mjs"],
+    "WEB-2": ["kit:site/check-site.mjs"],
+    "WEB-8": ["kit:site/check-site.mjs"],
+    "WEB-15": ["kit:site/check-site.mjs"],
+    "WEB-16": ["kit:site/check-site.mjs"]
+  }
+}

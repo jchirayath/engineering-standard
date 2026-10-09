@@ -1,0 +1,28 @@
+{
+  "name": "engineering-standard",
+  "version": "1.3.0",
+  "description": "Applies ENGINEERING_STANDARD.md in every session: hooks enforce (secret reads, risky git/shell, dependency cooldown, test loosening, kit semgrep), skills + an MCP server inform (stack-scoped rules, dependency verification, exceptions, review plans).",
+  "author": {
+    "name": "Jacob Chirayath",
+    "url": "https://github.com/jchirayath"
+  },
+  "homepage": "https://github.com/jchirayath/engineering-standard",
+  "repository": "https://github.com/jchirayath/engineering-standard",
+  "keywords": [
+    "engineering-standard",
+    "security",
+    "owasp-asvs",
+    "supply-chain",
+    "testing",
+    "hooks",
+    "mcp"
+  ],
+  "mcpServers": {
+    "standard": {
+      "command": "node",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/mcp/server.mjs"
+      ]
+    }
+  }
+}

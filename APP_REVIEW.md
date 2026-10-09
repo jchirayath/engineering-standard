@@ -12,7 +12,7 @@
 > (audit procedure), `QA_PLAYBOOK.md` (release checklist → §9).
 
 **Reading order:** Prime Directive → §3 archetypes → §4 Day-1 walkthrough → §5 rubric → your lens card
-in §6 → §7 schema. §1–§2 are reference.
+in §6 → §7 schema. Phase −1, Phase 0 and §2 are reference.
 
 ---
 
@@ -75,8 +75,8 @@ exists run it; otherwise run the kit directly — `pipx run semgrep --metrics=of
 Save counts per rule to `{{QA_DIR}}/standard-scan.json`. No `design/tokens/` ⇒ THEME-1 finding.
 
 **Pattern signals** (grep; blank ⇒ cell flagged as *missing*, which is itself a finding against the standard):
-platform-core modules CORE-1…12 from the standard (config, secrets, logger, `record()`/audit, authz,
-HTTP client, errors, store, validation, jobs, UI grid, fetch hook) · help registry · docs path · auth
+platform-core modules CORE-1…16 from the standard (config, secrets, logger, `record()`/audit, authz,
+HTTP client, errors, store, validation, jobs, UI grid, fetch hook, theme/tokens, notifications, flags, help registry) · help registry · docs path · auth
 model + admin-only routes · destructive ops (delete/rotate/apply/disable) · segment dimension
 (tenant/provider/type) · declared data sources · seed/demo data and its gate.
 
@@ -143,11 +143,11 @@ inside the code.
 | **C** | Missing producers | Does every subsystem actually feed this aggregation surface? | P0/P1 |
 | **D** | Vestigial | Does this earn its slot in the navigation? | P2 + verdict |
 | **E** | No entry path | Can I create/edit/delete the objects this screen manages? | P1 |
-| **F** | Design drift | Does it look like the same product as the last screen? | P2/P1 |
+| **F** | Design drift | Does it look like the same product as the last screen? | P1 (UX-2, CORE-11) |
 | **G** | Theme break | Legible in both light and dark? | P1 + NOT-SHIPPABLE |
 | **H** | Fabricated success ⭐ | Does it report a success it didn't perform? | **P0** |
 | **I** | Inert code ⭐ | Does anything actually *call* this? | P0/P1 |
-| **J** | Bypassed core ⭐ | Does this go around a platform-core module (authz, logger, HTTP, config, secrets)? | P0 if security/audit, else P2 |
+| **J** | Bypassed core ⭐ | Does this go around a platform-core module (authz, logger, HTTP, config, secrets)? | P0 if it skips authz, audit, redaction, secrets or HTTP/SSRF; else P1 (SHR-2) |
 
 **A · Orphaned input.** A scanner that reads targets only from an env var: engine works, screen is
 beautiful, customer can never point it at their hosts. *Test:* trace backwards screen → API → store →
@@ -202,7 +202,7 @@ module it should use.
 | 1 | **Understand** what it's for, from the screen itself? | help |
 | 2 | **Configure** it — point it at *my* data, from the UI? | **A** · P1 |
 | 3 | **Populate** it — trigger/schedule the job, see when it last ran? | populate |
-| 4 | **Trust** it — real data or seed, honestly labelled? | **A/H** · P1 |
+| 4 | **Trust** it — real data or seed, honestly labelled? | **A** · P1 / **H** · P0 |
 | 5 | **Understand the answer** — ranked/grouped, not a wall of rows? | **B** · P1 |
 | 6 | **Drill in** to the row that worries me? | drill |
 | 7 | **Act** — remediate/assign/suppress/approve from here? | **B** |
@@ -249,8 +249,8 @@ positive evidence.
 
 **Calibration.** honest fail = **P0** always · authz/IDOR/secret leak = **P0** · live or audit fail on a
 security/compliance path = **P0** · source / insight (analysis screen) / entry / seed-covering-a-source
-= **P1** · darkmode break = **P1 + NOT-SHIPPABLE** · core bypass = P0 if it skips authz/audit/redaction,
-else P2.
+= **P1** · darkmode break = **P1 + NOT-SHIPPABLE** · core bypass = P0 if it skips authz, audit, redaction, secrets or HTTP/SSRF,
+else P1 (SHR-2).
 
 ---
 
@@ -273,7 +273,7 @@ else P2.
 | **L3 · Config & Entry** | 4 | app | **Owns E.** Classify every env var (user-tunable vs deploy-secret); each tunable without UI gets a `field_spec`. Run the no-mutation detector. *Usually the highest yield — be exhaustive.* |
 | **L4 · Product Value & IA** | 5,6,7,9 | group | **Owns B + D.** "The user opened this to decide ___" per feature; viability verdict for every feature; drill-down, filters/segments, export, standing reports. Think like the product owner on a Monday morning. |
 | **L5 · Honesty Auditor** ⭐⭐ | 8 | app | **Owns H + I.** For every success path: what did it ACTUALLY do? Follow the write to the real system. For every subsystem: does anything call it? Seeds and their missing inputs. *Finds the P0s nobody else can see.* |
-| **L6 · AppSec & Supply Chain** | 15 | app | **Runs the §9.1 scanners** and checks VULN-1…7 (SECURITY.md, fix-time targets, Scorecard) (incl. `check-site.mjs` on the live URLs and `check-build.mjs` on the publish dir for anything web-facing — standard §2A) and triages output; SAST review for injection/XSS/SSRF/path traversal/deserialization/weak crypto; headers & CORS; IaC; CI hardening; LLM features vs SEC-19. Paste real scan output. |
+| **L6 · AppSec & Supply Chain** | 15 | app | **Runs the §9.1 scanners** and checks VULN-1…7 (SECURITY.md, fix-time targets, Scorecard) (incl. `check-site.mjs` on the live URLs and `check-build.mjs` on the publish dir for anything web-facing — standard §2A) and triages output; SAST review for injection/XSS/SSRF/path traversal/deserialization/weak crypto; headers & CORS; IaC; CI hardening; LLM features vs SEC-19 and AI-1…9; agent configuration vs §2C (AGT-1…10: `.claude/settings.json` deny rules, subagent `tools:`, `.mcp.json` pins, headless workflows); supply chain vs §2E (cooldowns, trusted publishing, attestation verified at deploy, EOL). Paste real scan output. |
 | **L7 · Identity, Authz & Privacy** | 15 | app | **RBAC boundary test** (every admin-only route 403s for lower roles); IDOR (user A vs B, tenant X vs Y); identity derived server-side; RLS per operation; session/cookie/CSRF; PII inventory, retention, deletion; threat model current (SEC-20). |
 | **L8 · Observability & Sinks** | 3, 14 | app | **Owns C.** Producer × sink matrix (log, audit, activity, metrics) with misses named. Schema conformance to LOG-1 (OTel attribute names); SLOs + burn-rate alerts (REL-1); redaction (LOG-4); actor **and** role; request_id end-to-end; silent catches; alerting exists. |
 | **L9 · Architecture & Reuse** | 13 | app | **Owns J.** Every CORE module exists and is the only path; triage `standard-scan.json` (`std.*` rule hits = bypasses, grouped by CORE module); copy-paste to promote (name the unit + call sites); dead code and unused deps. Kit adopted and baseline shrinking? |
@@ -459,18 +459,20 @@ behaviour is backed by having watched it work.
 ## 9 · Release gate
 
 ### 9.1 Security gate — must be green before any deploy (L6 runs it; paste output)
-- [ ] `gitleaks detect` (full history) — zero findings, or each rotated + documented.
-- [ ] Dependency CVEs: `osv-scanner` / `govulncheck` / `npm audit --audit-level=high` / `pip-audit` — zero Critical/High unmitigated.
+- [ ] `gitleaks detect` (full history) — zero findings; any secret found in history is rotated and recorded in STANDARD_EXCEPTIONS (SEC-11).
+- [ ] Dependency CVEs: `osv-scanner` / `govulncheck` / `npm audit --audit-level=high` / `pip-audit` — no Critical/High introduced by this release, and none past its VULN-2 fix-time target (SEC-15).
+- [ ] Agent config (§2C): AGT-1 deny rules and bypass disabled, AGT-7 subagent `tools:`, AGT-5 pinned MCP servers; headless agent workflows meet AGT-6.
+- [ ] Supply chain (§2E): NPM-1/SUP-1 cooldown config present; images verified before deploy (SUP-4); nothing deployable within 90 days of EOL (LIFE-1).
 - [ ] SAST: `semgrep --config p/default --config p/owasp-top-ten` — zero unwaived High.
 - [ ] Standard kit: `tools/standard/check.sh` green — token validation, no generated-code drift, zero **new** `std.*` violations vs baseline (any `std.*.sql-*`, `*tls-bypass`, `*insecure-token-storage`, `*token-in-localstorage`, `*secret-in-log` hit is a P0 regardless of baseline).
-- [ ] `trivy fs .` and `trivy config .` (IaC/Dockerfiles) — zero Critical/High; images: `trivy image`.
+- [ ] `trivy fs .` and `trivy config .` (IaC/Dockerfiles) — zero Critical/High introduced by this release or past their VULN-2 deadline (SEC-15); images: `trivy image`.
 - [ ] CI: `zizmor .github/workflows` clean; actions pinned to SHA.
 - [ ] Client bundle / mobile artifact contains only allow-listed public keys (fetch live bundle; `unzip` IPA/AAB).
 - [ ] RBAC boundary test + IDOR test pass against a running instance.
 - [ ] Live URL: `node ~/code/engineering-standard/site/check-site.mjs <every hostname>` — **zero ERRORs** (TLS, http→https, CSP/HSTS/nosniff/frame-ancestors, cookies, exposed files, directory listing, public source maps); CORS is an explicit allow-list.
 - [ ] Websites: `site/check-build.mjs` passes on the exact directory the deploy uploads (WEB-1, WEB-11).
 - [ ] OWASP Top 10, **OWASP API Security Top 10** (API-12) and LLM Top 10 if applicable: pass/fail per item; ASVS Level 1–2 gaps from `mappings/ASVS-5.0.md` that apply to this app are listed.
-- [ ] Vulnerability management: `SECURITY.md` present; no findings past their VULN-2 fix-time target; OpenSSF Scorecard ≥ 7/10 (VULN-6).
+- [ ] Vulnerability management: `SECURITY.md` present; no findings past their VULN-2 fix-time target; OpenSSF Scorecard running, score and any drop reported (target ≥ 7/10, VULN-6).
 
 ### 9.2 Release checklist (from QA_PLAYBOOK; tags: [web] [mobile] [api] — skip tags that don't apply)
 - [ ] **Screen × state matrix**: happy path + empty/error/loading for every route; dead links; edge cases (0/1/max items, deleting in-use objects, last member leaves).
@@ -483,7 +485,8 @@ behaviour is backed by having watched it work.
 - [ ] **Network**: offline launch, slow network with timeouts, token expiry mid-session, reconnect backfill, 5xx shows actionable error with request_id.
 - [ ] **Observability**: crash reporter live with release tag + symbols (dSYM / R8 mapping); alert rules fire in a test.
 - [ ] **Build hardening**: release builds minified/obfuscated; min-version / kill-switch on cold start; versioned API routes.
-- [ ] **Data**: migrations dry-run in a transaction with rollback tested; backups restored once, for real.
+- [ ] [mobile] **Store floors** (§6J): target API / SDK floor (STORE-1), 16 KB alignment (STORE-2), Android 16 readiness (STORE-3), account deletion in-app and on the web (STORE-4), no secrets in the binary (FLT-1), rollout halts on vitals thresholds (STORE-8).
+- [ ] **Data**: migrations dry-run in a transaction with rollback tested; a backup restore test within the last quarter (OPS-3).
 - [ ] **Reliability**: `docs/SLO.md` with burn-rate alerts (REL-1), incident section of `docs/RUNBOOK.md` (REL-3), last DR rehearsal date within 6 months (REL-5).
 - [ ] **A11y / i18n / legal**: accessibility scan (`@axe-core/playwright`, platform inspectors); strings externalized; privacy policy, terms, data export/delete reachable; store listing parity.
 

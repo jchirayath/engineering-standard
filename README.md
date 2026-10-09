@@ -21,7 +21,7 @@ mappings/ASVS-5.0.md         every OWASP ASVS 5.0 requirement → our rule IDs (
 fleet/sites.json             your website fleet + expected GA IDs; fleet/report.mjs renders results
 .github/workflows/sites-weekly.yml   Monday check of every hostname → opens/updates/closes a `site-check` issue
 design-tokens/schema/        semantic-keys.json — the canonical token + icon names (THEME-4)
-design-tokens/scripts/       validate.mjs (keys, refs, WCAG contrast, icons) · build.mjs (css, tailwind, ts, dart, swift) — zero deps
+design-tokens/scripts/       validate.mjs (keys, refs, WCAG contrast, icons) · build.mjs (css, tailwind4, ts, dart, swift; tailwind = legacy v3) — zero deps
 design-tokens/template/      starter tokens + icons that pass validation (copied into a repo's design/ if absent)
 semgrep/*.yml                rules (std.<lang>.<rule>), each citing the standard rule it enforces
 semgrep/*.{dart,tsx,go,py,swift}  rule tests — run `pipx run semgrep --test semgrep/` after any rule change
@@ -44,10 +44,11 @@ mkdir ~/code/<app> && cd ~/code/<app> && git init        # or flutter create / n
 2. Build the platform core (§1 of the standard) **before** the first feature: config, logger + `record()`,
    authz, HTTP client, errors. Ask Claude: *"Scaffold the platform core for this repo per
    ENGINEERING_STANDARD §1"* (`feature-dev:code-architect` is a good fit).
-3. Add to `CLAUDE.md`: `Follow ~/code/ENGINEERING_STANDARD.md (kit in tools/standard). Every feature ships
-   with unit, integration, e2e and walkthrough tests tagged @feature:<key> (TEST-0/7).`
+3. Add to `CLAUDE.md`: `Follow ~/code/ENGINEERING_STANDARD.md (kit in tools/standard). Deviations are
+   listed in docs/STANDARD_EXCEPTIONS.md. Every feature ships with unit, integration, e2e and walkthrough
+   tests tagged @feature:<key> (TEST-0/7).`
 4. Add a `tests` block to `standard.config.json` (template in `bin/check-tests.mjs`), the CI job below,
-   and the Claude Code hook. Everything is **blocking from commit 1** — no baseline.
+   and enable the `engineering-standard` plugin (see below). Everything is **blocking from commit 1** — no baseline.
 5. Before the first release: run `APP_REVIEW.md` with profile `quick`.
 
 ### Existing app repo
@@ -64,7 +65,7 @@ tools/standard/check.sh --baseline                        # measure; record toda
    `context.colors.*`, `Icons.*` → `AppIcons.*`). Re-run `--baseline` after each batch so it only shrinks.
 3. **Tests:** add the `tests` block with `allowMissing` entries (each with an `until` date) for features
    that lack a kind today; new features get no waiver.
-4. Add the `CLAUDE.md` line, CI job and hook. CI fails only on **new** violations and expired waivers.
+4. Add the `CLAUDE.md` line and CI job, and enable the plugin. CI fails only on **new** violations and expired waivers.
 5. Track the burn-down: baseline count and waiver count go down every release; delete
    `.semgrep/baseline.json` when it reaches zero. Re-run `APP_REVIEW.md` (`standard`) before a release.
 
@@ -106,7 +107,8 @@ commit. `tools/standard/VERSION` records which kit version a repo is on.
 | Platform | Generated | Wire-up |
 |---|---|---|
 | Web (CSS) | `design/build/css/tokens.css` | import once; theme = `<html data-theme="light\|dark\|<preset>">`, no attribute follows the OS |
-| Tailwind v3 | `design/build/tailwind/preset.cjs` | `presets: [require('./design/build/tailwind/preset.cjs')]` — **replaces** the default palette, so `bg-red-500` stops existing |
+| Tailwind v4 | `design/build/tailwind/theme.css` | in your main CSS: `@import "tailwindcss";` then `@import ".../design/build/css/tokens.css";` and `@import ".../design/build/tailwind/theme.css";` (needs the `css` platform) — **replaces** the default palette/spacing/breakpoints, so `bg-red-500`, `p-4` and `sm:` stop existing; token classes (`bg-surface-base`, `p-md`, `medium:`) follow `data-theme` (COMPAT-4) |
+| Tailwind v3 (legacy) | `design/build/tailwind/preset.cjs` | only when `"tailwind"` is listed in `tokens.config.json`: `presets: [require('./design/build/tailwind/preset.cjs')]` + import `tokens.css` once — **replaces** the default palette, so `bg-red-500` stops existing |
 | TS | `design/build/ts/tokens.ts`, `icons.tsx` | `<Icon name="action.delete" />`; raw values only for canvas/charts/emails |
 | Flutter | `app_tokens.dart`, `app_icons.dart` | `ThemeData(extensions: [AppColors.light])`; screens use `context.colors.statusDanger`, `AppSpace.md`, `AppIcons.actionDelete` |
 | SwiftUI | `AppTokens.swift`, `AppIcons.swift` | `AppColors.forScheme(colorScheme)`, `AppIcon.actionDelete` |
@@ -128,17 +130,33 @@ Set `design/tokens.config.json` → `{ "platforms": [...], "out": { "dart": "lib
         env: { CI: "true" }
 ```
 
-## Claude Code hook (instant feedback while editing)
+## Claude Code plugin (every agent gets the standard)
 
-Add via `/update-config` (project `.claude/settings.json`):
+This repo is also a Claude Code plugin with an MCP server inside it. Hooks enforce, skills + MCP inform,
+CI stays the backstop.
 
-```json
-{ "hooks": { "PostToolUse": [ { "matcher": "Edit|Write",
-  "hooks": [ { "type": "command",
-    "command": "f=$(jq -r '.tool_input.file_path'); semgrep --metrics=off --config .semgrep/standard -q --error \"$f\" >&2 || exit 2" } ] } ] } }
+```
+/plugin marketplace add jchirayath/engineering-standard
+/plugin install engineering-standard@engineering-standard     # user scope = every repo on this machine
 ```
 
-Exit code 2 feeds the violation back to Claude, which fixes it in the same turn.
+| Where the agent runs | How it gets the standard |
+|---|---|
+| Claude Code, any repo | user-scope install: `SessionStart` injects the repo's stack rules; `PreToolUse` blocks secret reads, `--no-verify`, force-push to main, `curl\|sh`, unverified/too-new packages, loosened tests; `PostToolUse` runs the kit semgrep rules on each edited file |
+| Cloud sessions, collaborators | repo `.claude/settings.json`: `extraKnownMarketplaces` + `enabledPlugins` (AGT-1) |
+| Subagents | inherit the session's hooks and MCP tools; `engineering-standard:standard-reviewer` runs the APP_REVIEW.md lenses read-only |
+| Agent SDK | `plugins: [{ type: "local", path: "<clone>" }]` |
+| Cursor / Codex / Copilot / Desktop | register only `node <clone>/mcp/server.mjs` — rules and checks, no hooks |
+| Everyone (humans too) | `tools/standard/check.sh` in CI — the backstop |
+
+MCP tools (server `standard`): `rules_for`, `rule`, `check`, `verify_dependency`, `exception_add`, `review_plan`.
+Commands: `/engineering-standard:adopt`, `:check`, `:review`, `:exception`.
+Overrides, used sparingly and visibly: `STANDARD_ALLOW_YOUNG_DEP=<pkg>` (security fixes only, SUP-1/VULN-5),
+`STANDARD_ALLOW_TEST_EDIT=1` (a human approved an assertion change, AGT-8), `STANDARD_STOP_MODE=notify`.
+
+Repos that hand-added the older per-repo `PostToolUse` semgrep hook remove it when they enable the plugin.
+After editing `ENGINEERING_STANDARD.md`, run `node bin/build-rules.mjs` and commit `build/rules.json`
+(CI runs `--check`: every rule ID defined once, every reference defined, rules.json current, versions match).
 
 ## Changing the kit
 

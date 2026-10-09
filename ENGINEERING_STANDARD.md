@@ -1,4 +1,4 @@
-# Engineering Standard — Secure · Optimized · Shared · Observable (v2)
+# Engineering Standard — Secure · Optimized · Shared · Observable (v1.3)
 
 > The **minimum bar** every application under `~/code` is built to. Stack-agnostic. It answers
 > *"what does good look like?"* — its companion [`APP_REVIEW.md`](APP_REVIEW.md) answers *"does this
@@ -9,9 +9,18 @@
 > then fill in §1 (the platform-core map) for that repo. Every rule has an ID (`SEC-4`, `LOG-2`…) so
 > review findings, PRs and exceptions can cite it.
 >
-> **Keywords.** **MUST** = blocking; violating it is a finding. **SHOULD** = default; deviate only with
-> a written reason in `docs/STANDARD_EXCEPTIONS.md`. **Enforced by** = the tool that makes the rule
+> **Keywords.** **MUST** = blocking for new code: an unexcepted violation is a finding of at least P1
+> (§8 Severity — only P0 blocks a release). **SHOULD** = default. Any deviation — SHOULD, or a MUST with
+> compensating controls — is an entry in `docs/STANDARD_EXCEPTIONS.md` with rule ID, reason, owner and
+> expiry (ENF-2). **Enforced by** = the tool that makes the rule
 > mechanical. *A rule with no enforcement is a wish* — prefer adding a guard over adding a sentence.
+>
+> **When two rules seem to disagree** (they shouldn't — report it as a bug in this document):
+> (1) the more **specific** rule wins over the general one, and a rule that names an exception to another
+> rule wins for that case; (2) a security MUST wins over a performance, UX or convenience rule;
+> (3) a dated external requirement (law, store policy) wins over an internal default; (4) otherwise stop
+> and ask — never pick the weaker reading silently. Every known overlap is resolved inline with a
+> "see X" pointer; `bin/build-rules.mjs --check` fails on duplicate or undefined rule IDs.
 
 Supersedes: `SecureApplication.md` (controls), `QA_PLAYBOOK.md` (build-time rules). Review procedure
 lives in `APP_REVIEW.md`. Tooling lives in [`~/code/engineering-standard/`](README.md).
@@ -63,7 +72,7 @@ column per repo (it becomes the review's "shared seams" table).
 | CORE-9 | **Validation** | Schema at every boundary (zod / pydantic / go-playground / json-schema); shared with client. | Hand-rolled field checks | |
 | CORE-10 | **Background jobs** | Registry with schedule, lease/lock, idempotency key, last-run + status surfaced to UI. | Bare goroutines/`setInterval`/cron scripts | |
 | CORE-11 | **UI primitives** | Grid/table (filter, sort, page, **export**), page chrome, empty/error/loading states, tokens. | Hand-rolled tables, raw hex colors | |
-| CORE-12 | **Data fetch (client)** | One fetch hook + response envelope (`{data, error:{code,message}, meta}`). | Ad-hoc `fetch` in components | |
+| CORE-12 | **Data fetch (client)** | One fetch hook; success bodies are `{data, meta}`, errors are RFC 9457 Problem Details (API-5) parsed into one typed client error. | Ad-hoc `fetch` in components | |
 | CORE-13 | **Theme, tokens & icons** | Generated from the app's one token source + icon registry (§6A); semantic tokens, light/dark/preset switching. | Raw hex/rgb, `Colors.*`, palette classes (`bg-red-500`), `fontSize`/spacing literals, direct icon-package imports | |
 | CORE-14 | **Notifications** | One sender for email/push/SMS: templates, per-user preferences, retry, `record()` on send. | Direct SMTP/FCM/APNs calls | |
 | CORE-15 | **Feature flags / kill switch** | Central flag read (remote or DB), typed, defaulted, with expiry; min-version check for clients. | `if (env === 'prod')` branching | |
@@ -86,7 +95,8 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   `exec` of user-influenced strings.
 - **SEC-3 MUST** Output-encode by context (HTML, attribute, URL, JS). Framework auto-escaping stays
   on; every `dangerouslySetInnerHTML`/`| safe`/`v-html` is justified inline.
-- **SEC-4 MUST** File uploads: size cap, content-type sniffing (not extension), stored outside web
+- **SEC-4 MUST** File uploads: size cap, type checked by extension allow-list **and** content
+  sniffing (FILE-1), stored outside web
   root / in object storage with random names, scanned if user-shared.
 - **SEC-5 MUST** All outbound calls go through CORE-6, which blocks private/link-local/metadata IPs
   unless allow-listed (SSRF).
@@ -99,14 +109,16 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
 - **SEC-8 MUST** Row-level security (or equivalent) on every user-owned table, one policy per
   operation, default-deny. `SECURITY DEFINER` functions re-check authz and pin `search_path`.
 - **SEC-9 MUST** Sessions: short-lived access tokens, rotating refresh, `HttpOnly; Secure;
-  SameSite=Lax|Strict` cookies, CSRF protection on cookie-auth mutations, MFA available for admins,
-  rate-limited login with lockout/backoff. Passwords (if any) hashed per CRY-3 / AUTH-2.
+  SameSite=Lax|Strict` cookies (prefix and flags per BRW-2), CSRF protection on cookie-auth mutations,
+  MFA per AUTH-4 (every user, not only admins), rate-limited login with lockout/backoff (AUTH-1).
+  Passwords (if any) hashed per CRY-3 / AUTH-2.
 - **SEC-10 MUST** No mass assignment — map request DTOs to models explicitly.
 
 ### Secrets & data
 - **SEC-11 MUST** Zero secrets in git (history included), client bundles, mobile artifacts, source
   maps, logs, URLs, or error messages. Client config is an **allow-list** of public keys; a build
-  step fails if anything else appears.
+  step fails if anything else appears. A secret found in history is rotated immediately and recorded
+  in `docs/STANDARD_EXCEPTIONS.md`; rewriting history is optional (the rotation is what un-leaks it).
 - **SEC-12 MUST** Encryption in transit (TLS 1.2+, HSTS) and at rest for sensitive data; keys in a
   KMS/vault, rotated; a written **rotation runbook** (redeploying does not un-leak a credential).
 - **SEC-13 MUST** Data inventory: every PII/sensitive field is classified, has a retention period
@@ -116,10 +128,13 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   Debug endpoints, stack traces and prod source maps are off.
 
 ### Supply chain & infra
-- **SEC-15 MUST** Lockfiles committed; dependencies updated by Renovate/Dependabot; **no Critical/High
-  known CVE** in shipped deps (`osv-scanner`, `govulncheck`, `npm audit`, `pip-audit`).
-- **SEC-16 SHOULD** SBOM generated per release (`syft`); container images scanned (`trivy image`);
-  base images pinned by digest; run as non-root.
+- **SEC-15 MUST** Lockfiles committed; dependencies updated by Renovate/Dependabot (with the SUP-1
+  cooldown); a change never **adds or upgrades to** a dependency version with a known Critical/High CVE
+  (`osv-scanner`, `govulncheck`, `npm audit`, `pip-audit` in CI). A CVE published against a version
+  **already shipped** is fixed within the VULN-2 deadlines; past its deadline it blocks releases.
+- **SEC-16 MUST** Container base images are pinned by digest and run as non-root; images are scanned
+  (`trivy image`); prefer hardened/distroless bases (SUP-5). An SBOM is generated per release (`syft`) —
+  the same requirement as CFG-3, stated once there.
 - **SEC-17 MUST** CI actions pinned to a commit SHA; workflows lint-clean under `zizmor`; least-privilege
   `permissions:` block; no secrets exposed to PR builds from forks.
 - **SEC-18 MUST** IaC scanned (`trivy config` / `checkov`): no public buckets, no `*` IAM, no open
@@ -129,7 +144,9 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
 - **SEC-19 MUST** Treat model output as untrusted input (SEC-1/3). Tools exposed to a model run with
   least privilege, and destructive tools require human confirmation. Retrieved/user content is
   never concatenated into the system prompt as instructions (prompt-injection). Log prompts/outputs
-  only through the redactor. Map against OWASP Top 10 for LLM Applications.
+  only through the redactor. Map against the OWASP Top 10 for LLM Applications and the OWASP Top 10 for
+  Agentic Applications. The testable specifics are AI-1…AI-9 (§2D); how the coding agent itself is
+  configured is §2C.
 
 ### Threat model
 - **SEC-20 MUST** Each app keeps a one-page `docs/THREAT_MODEL.md`: assets, actors, trust boundaries,
@@ -164,11 +181,13 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   migrations run as a separate role; cloud identities (managed identity / service account) are scoped
   to the resources they touch; no long-lived keys where workload identity exists.
 - **SEC-31 MUST** **AI-assisted code** is reviewed like any other code and must pass the same gates.
-  Every dependency an AI suggests is verified to exist, be the intended package and be maintained
-  before install (slopsquatting / typosquatting); generated code never weakens a control to make a
-  test pass.
+  Every dependency an AI suggests is verified to exist, be the intended package, be maintained and be
+  older than the SUP-1 cooldown before install (slopsquatting / typosquatting — the plugin's
+  `verify_dependency` tool and Bash hook do this); generated code never weakens a control **or a test**
+  to make a test pass (AGT-8).
 - **SEC-32 SHOULD** Releases are reproducible and signed (tags signed; build provenance via GitHub
-  artifact attestations / SLSA); production deploys only from CI, never from a laptop.
+  artifact attestations / SLSA); production deploys only from CI, never from a laptop. **MUST** for
+  container images that are deployed, because SUP-4 verifies these attestations before deploy.
 
 ---
 
@@ -195,7 +214,8 @@ only when the app has that feature — and become MUST the day it does.
 - **INP-4 MUST** Untrusted HTML, Markdown, SVG, CSS and XSL are sanitized server-side with a maintained
   allow-list sanitizer (DOMPurify, bluemonday, nh3) before storage or rendering; SVG uploads are
   sanitized or rasterized and served as attachments. Client code inserts text with `textContent`/framework
-  binding — `innerHTML`/`document.write` with dynamic data are lint-banned. [1.3.1, 1.3.4–5, 3.2.2]
+  binding — `innerHTML`/`document.write` with dynamic data are lint-banned, except to insert the
+  output of this sanitizer with an inline SEC-3 justification. [1.3.1, 1.3.4–5, 3.2.2]
 - **INP-5 MUST** Memory-safe languages only; any `unsafe`/cgo/FFI/native module needs an ADR, stays
   small, is fuzzed (TEST-10) and sanitizer-tested; resources are released deterministically
   (`defer`/`with`/`using`/`finally`). [1.4.1, 1.4.3]
@@ -252,16 +272,19 @@ only when the app has that feature — and become MUST the day it does.
   rate-limit and lockout; lockout is per-account backoff that can't be used to lock out a real user.
   No default or seeded accounts — the first admin is created by an explicit bootstrap step.
   [6.1.1, 6.1.3, 6.3.2, 6.3.4]
-- **AUTH-2 MUST** **Password policy** (where passwords exist): minimum 8 characters (15 recommended),
-  at least 64 accepted, any Unicode and spaces, **no composition rules, no forced rotation**; reject
+- **AUTH-2 MUST** **Password policy** (where passwords exist), per NIST SP 800-63B-4: minimum
+  **15 characters** wherever a password can be the only factor (MFA optional, or an AUTH-4 exception);
+  minimum 8 only where MFA is enforced for that account; at least 64 accepted, any Unicode and spaces, **no composition rules, no forced rotation**; reject
   the top common passwords, breached passwords (HIBP k-anonymity) and the app's documented
   context-specific words; verify exactly as entered — no truncation (bcrypt inputs longer than 72 bytes
   are pre-hashed or the app uses Argon2id). [6.1.2, 6.2.1, 6.2.4–5, 6.2.8–12]
 - **AUTH-3 MUST** Password UX: masked fields with optional show toggle; paste, browser helpers and
   password managers work (correct `autocomplete`); users can change their password with the current
   one; no password hints or security questions. [6.2.2–3, 6.2.6–7, 6.4.2]
-- **AUTH-4 MUST** **MFA for every user** (TOTP, passkeys/WebAuthn preferred; SMS/voice only to a verified
-  number, alongside a stronger option, with its risks explained to the user); exceptions recorded with compensating controls. Password reset
+- **AUTH-4 MUST** **MFA for every user.** Passkeys/WebAuthn (phishing-resistant) MUST be offered
+  (conditional UI per WEB-22); TOTP MAY be offered in addition; SMS/voice MAY be offered only to a
+  verified number, alongside a stronger option, with its risks explained to the user; exceptions recorded with
+  compensating controls, and an account without MFA falls under AUTH-2's 15-character minimum. Password reset
   never bypasses enrolled MFA; recovering a lost factor requires identity proofing equal to enrollment
   and is `record()`ed. [6.3.3, 6.4.3–4, 6.6.1]
 - **AUTH-5 MUST** **One-time codes:** initial passwords/activation codes from a CSPRNG, meeting the
@@ -337,7 +360,8 @@ only when the app has that feature — and become MUST the day it does.
   mandates it, e.g. TOTP RFC 6238), ≥ 256-bit output for integrity
   and signatures; password hashing at current OWASP parameters (Argon2id m ≥ 19 MiB, t ≥ 2; bcrypt cost
   ≥ 10), reviewed yearly; password-derived keys use Argon2id, scrypt or PBKDF2-SHA256 ≥ 600,000
-  iterations with a random salt; secret values have ≥ 128 bits from a CSPRNG and UUIDs are never used as
+  iterations with a random salt; secret values (tokens, reset links, API keys) have ≥ 128 bits from a CSPRNG — user-typed one-time
+  codes follow AUTH-5 instead — and UUIDs are never used as
   secrets. [11.4.1–4, 11.5.1]
 
 ### TLS & service-to-service
@@ -383,10 +407,157 @@ only when the app has that feature — and become MUST the day it does.
   success and failure, with method), every **denied** authorization decision, and defined security
   events (validation rejections, rate-limit and bot-protection hits, business-logic violations).
   [16.3.1–3]
-- **SLOG-3 MUST** Logs go over TLS to a store in a separate trust domain the app can append to but not
-  read, modify or delete (WORM/append-only), with role-restricted read access. [16.4.2–3]
+- **SLOG-3 MUST** Security logs and the audit store go over TLS to a store in a separate trust domain
+  (or an app-DB table whose app role has INSERT only) that the app can append to but not modify or
+  delete (WORM/append-only), with role-restricted read access; the app reads only the activity-feed
+  projection of it (LOG-5). [16.4.2–3]
 - **SLOG-4 MUST** **Fail closed:** an error in authentication, authorization, validation or any security
   dependency denies the request and rolls back — never defaults to allow. [16.5.3]
+
+---
+
+## 2C · AI agents that build the code (Claude Code and any other coding agent)
+
+The rest of this standard governs the *code*; this section governs the *agent writing it*. Limits that
+matter are configuration the harness enforces — a sentence in `CLAUDE.md` is advice the agent can miss.
+The `engineering-standard` plugin checks most of these at session start and blocks the rest in hooks.
+
+- **AGT-1 MUST** Every repo commits `.claude/settings.json` whose `permissions.deny` covers
+  `Read(./.env)`, `Read(./.env.*)`, `Read(./secrets/**)`, `Read(~/.ssh/**)` and the repo's production
+  config files (e.g. `env.prod*.json`), and sets `permissions.disableBypassPermissionsMode: "disable"`.
+  `.env.example` stays readable. Security limits never live only in `CLAUDE.md`. *Enforced by:* plugin
+  `SessionStart` warning + `PreToolUse` block; agent-config lint in CI. The same file enables the
+  `engineering-standard` plugin (`enabledPlugins`) so every session — local, cloud or a teammate's —
+  loads its hooks.
+- **AGT-2 MUST** Where Claude Code's sandbox is supported, Bash runs sandboxed and is configured to
+  **fail rather than fall back** to unsandboxed execution (no unsandboxed-command escape hatch), with an
+  explicit network allow-list and credential paths denied; `excludedCommands` never lists an interpreter
+  (`python`, `node`, `bash`) or `docker`. The sandbox covers Bash only — AGT-1 still governs file tools.
+- **AGT-3 MUST** Permission-bypass modes (`--dangerously-skip-permissions`, bypass/auto-approve modes)
+  run only inside a disposable container or VM that holds **no production credentials**. A machine or
+  session that can reach production keeps AGT-1's `disableBypassPermissionsMode`.
+- **AGT-4 MUST** **No lethal trifecta:** no agent session, and no LLM feature in an app (AI-*), combines
+  private data, untrusted content (web pages, issues, PR text from others, user uploads, tool output) and
+  an outbound channel. When untrusted content is in context, remove one leg — network egress
+  allow-list, deny `Bash(curl *)`/`WebFetch` for that task, or never render model-emitted URLs/images.
+  Each tool-using feature records which leg it removes in `docs/THREAT_MODEL.md`; an injection fixture
+  test asserts no outbound call happens.
+- **AGT-5 MUST** **MCP servers and plugins are dependencies** (SEC-15, CLEAN-10): allow-listed by command
+  or URL, stdio packages pinned to an exact version (never bare `npx -y <pkg>` or `@latest`), and their
+  tool descriptions re-reviewed when they change (tool poisoning / rug pull). *Enforced by:* `.mcp.json`
+  lint; managed `allowedMcpServers` where available.
+- **AGT-6 MUST** **Headless agents on code you didn't write** (`claude -p`, Agent SDK,
+  `claude-code-action` on PRs or issues) don't load that code's project settings or hooks
+  (`--setting-sources user`, `disableAllHooks`), get a minimal `--allowedTools` list, a turn and time cap,
+  and a least-privilege GitHub App / OIDC identity — in headless mode project `.mcp.json` servers and
+  hooks run without a trust prompt, so a malicious PR can run code in CI. Workflows pass `zizmor`
+  (SEC-17).
+- **AGT-7 MUST** Every project subagent (`.claude/agents/*.md`) declares a `tools:` allow-list — an
+  omitted list inherits every tool, including MCP. Review and research agents are read-only.
+- **AGT-8 MUST** **The agent never loosens tests to get green:** in a change that makes tests pass it
+  never deletes or weakens an assertion, adds a skip/`only`, or special-cases test inputs in production
+  code (extends SEC-31 from security controls to tests). Allowed and stated in the PR description:
+  removing tests together with the feature they cover, changing an assertion because the specified
+  behaviour changed, and quarantining a flaky test in its own PR (TEST-5). *Enforced by:* plugin
+  `PreToolUse` hook on test edits; CI requires a label when assertions are removed or skips added.
+- **AGT-9 MUST** **Agent configuration is privileged code:** `CLAUDE.md`, `.claude/**`, `.mcp.json`,
+  skills, hooks and agent definitions are covered by `CODEOWNERS` (REPO-2). The agent never copies
+  fetched or otherwise untrusted text into memory or instruction files (memory poisoning).
+- **AGT-10 SHOULD** Agent sessions export OpenTelemetry (with tool details) through CORE-3 to the LOG-9 store so tool
+  and MCP use is auditable.
+
+**Instruction files** (`CLAUDE.md`, skills): short and specific — point at this standard and the repo's
+§1 map instead of restating rules, no persona prompts ("act as a security expert"), and no secrets or
+URLs to untrusted content (OpenSSF *Security-Focused Guide for AI Code Assistant Instructions*).
+
+## 2D · LLM features in apps — testable controls (extends SEC-19)
+
+- **AI-1 MUST** Model output that drives code uses schema-constrained (structured) output **and** is
+  validated server-side (SEC-1) — constrained decoding doesn't enforce numeric or length bounds; the
+  `refusal` and `max_tokens` stop reasons are handled explicitly. *Test:* refusal, truncation and
+  out-of-range fixtures.
+- **AI-2 MUST** The model ID lives in one config value (CORE-1); a scheduled CI job fails when that model
+  is deprecated or has a retirement date.
+- **AI-3 MUST** Prompts are versioned files; a change to a prompt, model or tool schema runs an eval suite
+  in CI with a pass threshold, including prompt-injection and accuracy cases.
+- **AI-4 MUST** Every LLM path caps `max_tokens`, tool-loop iterations, wall time and a per-user token
+  budget (API-4 limits request rate, not runaway loops). *Test:* a mock that always calls a tool stops at
+  the cap.
+- **AI-5 MUST** No credentials or authorization logic in prompts (the system prompt is not a secret);
+  retrieval (RAG) filters by the caller's permissions **before** ranking. *Test:* cross-tenant retrieval
+  returns nothing; gitleaks runs over prompt files.
+- **AI-6 SHOULD** Confirmation dialogs for destructive tools (SEC-19) show the actual tool arguments,
+  not the model's summary of them.
+- **AI-7 MUST** *If we build an MCP server* reachable over HTTP: OAuth 2.1 with PKCE (S256), protected-
+  resource metadata (RFC 9728), audience-checked tokens (RFC 8707), no token passthrough to upstream
+  APIs, no session-based auth, SSRF-safe metadata fetching (CFG-1). *Test:* wrong-audience token → 401.
+  Local stdio servers take no network listener.
+- **AI-8 MUST** **EU AI Act Art. 50** (applies from 2026-08-02) for apps offered in the EU: a chatbot or
+  assistant discloses that it is AI at the first interaction, and realistic generated images, audio or
+  video are labelled and machine-readably marked. *Test:* e2e asserts the disclosure on every assistant
+  surface.
+- **AI-9 MUST** Personal data is sent to a third-party AI provider only after the user is told which
+  provider and has given explicit consent (Apple App Review 5.1.2(i)); the processor is in
+  DATA_INVENTORY (REG-2). *Test:* the feature stays blocked until the consent flag is set.
+
+## 2E · Supply chain & lifecycle
+
+- **NPM-1 MUST** JS installs enforce a **release-age quarantine** and a **build-script allow-list**,
+  committed in repo config: pnpm ≥ 11 with `minimumReleaseAge: 10080` (7 days) and an explicit
+  `allowBuilds` list, or the equivalent settings of the npm version in use (else switch to pnpm).
+  `ignore-scripts=true` silently overrides an allow-list — don't combine them. *Enforced by:* CI asserts
+  the package-manager version and keys; the plugin's install hook.
+- **SUP-1 MUST** Update bots use the same cooldown (Dependabot `cooldown: { default-days: 7 }`; Renovate
+  `minimumReleaseAge: "7 days"`, checking that a preset doesn't override it). **Security fixes for a known
+  CVE are exempt** from every cooldown (NPM-1, SUP-1, the plugin hook) so the VULN-2 deadlines can be met:
+  install with the documented override and cite the advisory in the PR.
+- **SUP-2 MUST** Publishing to npm or PyPI uses OIDC **trusted publishing** with provenance — no stored
+  registry token; consumers run `npm audit signatures` in CI.
+- **SUP-3 MUST** Repos that publish GitHub releases enable **immutable releases**; consumers verify
+  (`gh release verify`, `gh attestation verify`).
+- **SUP-4 MUST** The deploy verifies the image's signature/attestation (SEC-32) before it runs
+  (`docker compose up`, `az containerapp update` …) and aborts on failure.
+- **SUP-5 SHOULD** Base images are hardened: Docker Hardened Images, distroless or Chainguard.
+- **SUP-6 SHOULD** Python installs are hash-locked (`uv.lock`, or `pip --require-hashes`).
+- **SUP-7 SHOULD** Target SLSA Build L2+, and self-assess against the OpenSSF OSPS Baseline (L1; L2 for
+  repos with users).
+- **LIFE-1 MUST** No runtime, framework, mobile SDK or base OS past end-of-life in anything deployable: a
+  weekly CI job queries endoflife.date and fails 90 days before the EOL date; stay within the latest two
+  supported lines (Node: COMPAT-2's LTS-only rule applies). (Generalises WEB-16's server-software clause.)
+- **LIFE-2 SHOULD** Deprecation warnings are errors on the branch that prepares the next major upgrade
+  (`-W error::DeprecationWarning`, `flutter analyze --fatal-infos`, `tsc` without
+  `ignoreDeprecations`).
+- **LIFE-3 MUST** APIs used by mobile apps stay compatible with the oldest supported app version
+  (API-2), and can answer with a server-driven minimum-version response that the app's CORE-15 check
+  turns into a forced update. *Test:* contract test against the oldest supported client's schema.
+
+## 2F · Privacy & regulation
+
+- **PRIV-1 MUST** Honour **Global Privacy Control** (`Sec-GPC: 1`) as an opt-out of sale/sharing: no
+  third-party advertising/analytics tag fires for that visitor, and the site shows that the opt-out
+  preference signal was honoured (California CCPA regulations). *Test:* Playwright with the GPC header.
+- **PRIV-2 MUST** Crash and telemetry SDKs scrub PII before sending (LOG-4 redactor, DATA-2); store privacy
+  labels (App Store privacy details, Play Data safety) are generated from DATA_INVENTORY and diffed in CI
+  (makes MOB-8 mechanical).
+- **PRIV-3 MUST** Account deletion and erasure requests propagate to every processor through its deletion
+  API; backups age out within the retention period stated in the privacy notice; audit records follow
+  LOG-5's erasure rule.
+- **REG-1 MUST** *Products sold or monetised in the EU:* **EU Cyber Resilience Act Art. 14** reporting
+  (applies from 2026-09-11, including to products already on the market) — an actively exploited
+  vulnerability gets an early warning within 24 h, a notification within 72 h and a final report within
+  14 days after a fix is available, through ENISA's Single Reporting Platform. `docs/RUNBOOK.md` holds
+  the procedure with a named owner, linked from `SECURITY.md`. *Enforced by:* CI fails when the runbook
+  section or owner is missing in an in-scope repo.
+- **REG-2 MUST** GDPR records per app, in `docs/DATA_INVENTORY.md`: the Art. 30 record of processing; a
+  signed DPA per processor (Supabase, Firebase, AI provider, email …) with `processor`, `dpa_url` and
+  `transfer_basis` fields (EU–US Data Privacy Framework, or SCCs); a DPIA before processing children's
+  data or household data at scale.
+- **REG-3 SHOULD** *Consumer services sold in the EU:* meet the European Accessibility Act (EN 301 549,
+  which UX-5's WCAG 2.2 AA largely covers) and publish an accessibility statement; a microenterprise
+  exemption is recorded in an ADR.
+- **SBD-1 SHOULD** Meet the CISA Secure-by-Design pledge goals not already covered elsewhere: CVEs
+  published with accurate CWE (VULN-7) and automatic or easy patching. (MFA by default is AUTH-4;
+  customer-visible audit is LOG-5's activity feed.)
 
 ---
 
@@ -402,10 +573,12 @@ when nobody deploys. Every finding carries a one-line fix; header/exposure fixes
 
 - **WEB-15 MUST** **Analytics coverage:** every public page carries the site's analytics tag with the
   expected property ID (from the fleet config), and the CSP allows it. `check-site.mjs` crawls the site
-  and reports pages without it. Preview/staging hosts must never report to production properties.
+  and reports pages without it. The tag being **present** is not the tag **firing**: it sends data only
+  as WEB-14 and PRIV-1 allow (consent, Global Privacy Control). Preview/staging hosts must never report
+  to production properties.
 - **WEB-16 MUST** **Known-vulnerable front-end libraries** are not shipped: detected library versions
   are checked against OSV on every run; a hit is an ERROR until upgraded or removed. Server software
-  (PHP, CMS core) must be on a supported release (endoflife.date).
+  (PHP, CMS core) is on a supported release — the end-of-life rule for every stack is LIFE-1.
 
 - **WEB-1 MUST** **Ship an allowlist, not a folder.** The deploy copies only listed public files into a
   staging directory and uploads that (pattern: `a staged-allowlist deploy.sh`). Repo roots are never document
@@ -421,23 +594,26 @@ when nobody deploys. Every finding carries a one-line fix; header/exposure fixes
   strict-origin-when-cross-origin`; `Permissions-Policy` denying unused features; no version-disclosing
   `Server`/`X-Powered-By`. New CSPs roll out as `-Report-Only` for one deploy, then enforce. No inline
   `on*=` handlers or inline scripts — move them to files (or hash them).
-- **WEB-4 MUST** Cookies `Secure`, `SameSite`, and `HttpOnly` for anything session-like. Static sites
+- **WEB-4 MUST** Cookies per BRW-2/SEC-9: `__Host-` prefix, `Secure`, `SameSite=Lax|Strict`, and
+  `HttpOnly` unless script must read them. Static sites
   set no cookies except consented analytics.
 - **WEB-5 MUST** No mixed content: every script, stylesheet, iframe, image and form action is https.
 - **WEB-6 MUST** Third-party scripts/styles are minimized, listed in the CSP by exact origin, and pinned
-  with **Subresource Integrity** where the provider serves static files (GA4/Google Fonts are exempt —
-  they can't be pinned). Prefer self-hosting fonts and libraries.
+  with **Subresource Integrity** where the provider serves static files (GA4 is exempt — it can't be
+  pinned). Fonts are self-hosted (PERF-16), so Google Fonts is not loaded from Google; prefer
+  self-hosting libraries too.
 - **WEB-7 MUST** No public source maps in production; build tools set `sourcemap: false` (or upload maps
   privately to the error tracker).
 - **WEB-8 MUST** Nothing private is reachable: directory listing off; VCS/env/backup/config files return
   404/403 (the host config blocks them even if one slips into the upload); admin/editor surfaces never
   live on the public host — list them in `standard.config.json → site.forbid` so the post-deploy check
   proves they 404. Config files for a *different* server (an `.htaccess` on Caddy) are not shipped.
-- **WEB-9 SHOULD** `/.well-known/security.txt` with a monitored `Contact:` and an `Expires:`.
+- **WEB-9 MUST** `/.well-known/security.txt` (required by VULN-1) with a monitored `Contact:` and an `Expires:`.
 - **WEB-10 SHOULD** DNS hygiene on the registrable domain: CAA (limit CAs), SPF (`v=spf1 -all` if it
   sends no mail), DKIM where mail is sent, DMARC moving from `p=none` to `quarantine`/`reject`, DNSSEC
   where the registrar supports it; registrar lock and MFA on the registrar/DNS account.
-- **WEB-11 MUST** No secrets in shipped files — only public keys (analytics IDs, anon/publishable keys,
+- **WEB-11 MUST** No secrets in shipped files — only public keys (analytics IDs, Supabase publishable keys —
+  legacy `anon` only until the SUPA-1 cut-over —
   OAuth client IDs). `check-build.mjs` scans for private keys, cloud/API tokens, DB URLs with passwords
   and elevated-role JWTs (e.g. Supabase `service_role`).
 - **WEB-12 MUST** Forms and endpoints: server-side validation (SEC-1), rate limiting and bot protection
@@ -445,8 +621,25 @@ when nobody deploys. Every finding carries a one-line fix; header/exposure fixes
   mail sent through CORE-14 — never a mail relay exposed to the form.
 - **WEB-13 MUST** Dependencies of a built site (npm/composer) pass SEC-15; CMS sites (WordPress) run
   auto-updates for core/plugins, have XML-RPC and file editing disabled, and admin behind MFA.
-- **WEB-14 SHOULD** Privacy: analytics only after consent where the audience requires it; privacy page
-  linked from the footer; no third-party trackers beyond what the privacy page lists.
+- **WEB-14 MUST** Privacy: analytics fire only after consent where the audience's law requires it (EU/UK
+  visitors; Firebase apps per FB-2) and never against a Global Privacy Control signal (PRIV-1); privacy
+  page linked from the footer; no third-party trackers beyond what the privacy page lists.
+- **WEB-17 MUST** **Preview and staging deployments are access-controlled** and hold no production
+  secrets or production data (Azure SWA pull-request environments are public even for private repos;
+  Vercel needs at least Standard Deployment Protection). SWA routes match first-to-last, so
+  role-restricted routes sit above public ones. *Test:* CI requests a preview URL unauthenticated and
+  expects 401/302.
+- **WEB-18 SHOULD** Trusted Types (`require-trusted-types-for 'script'`), report-only first; **MUST** for
+  admin surfaces once report-only is clean.
+- **WEB-19 SHOULD** Fetch-Metadata resource isolation: reject cross-site non-navigation requests by
+  `Sec-Fetch-Site`.
+- **WEB-20 SHOULD** `Cross-Origin-Opener-Policy: same-origin` (`same-origin-allow-popups` where an OAuth
+  popup needs it) and `Cross-Origin-Resource-Policy: same-origin` on authenticated responses; COEP only
+  when cross-origin isolation is needed.
+- **WEB-21 SHOULD** Framework-rendered pages use a nonce-based CSP with `'strict-dynamic'` (static sites
+  keep WEB-3's hashes from `harden.mjs`).
+- **WEB-22 SHOULD** Passkey sign-in (required by AUTH-4) offers conditional UI
+  (`autocomplete="username webauthn"`).
 
 **Gate:** a deploy is complete only when `check-site.mjs` passes with **zero ERRORs** on every hostname
 the site answers on. WARNs are tracked in `docs/STANDARD_EXCEPTIONS.md` or fixed.
@@ -462,26 +655,32 @@ Budgets are defaults — override per app in §1, but **every app has numbers**.
   CLS ≤ **0.1** · initial JS ≤ **200 KB gz** · mobile cold start ≤ **2 s** on a mid-tier device.
 - **PERF-2 MUST** Every network/DB/queue call has a **timeout**; every retry has backoff + jitter + a
   cap; every external dependency has a fallback or a loud failure (never a hang).
-- **PERF-3 MUST** Every list endpoint is **paginated** (cursor preferred) with a max page size. No
-  unbounded `SELECT *`, no loading a collection to count it.
+- **PERF-3 MUST** Every list endpoint is **paginated** with a max page size — cursor-based per API-7;
+  offset only for small, bounded, rarely-changing collections. No unbounded `SELECT *`, no loading a
+  collection to count it.
 - **PERF-4 MUST** No N+1 queries; every filter/sort column used by a query is indexed; slow-query log
   on in non-prod. Run `EXPLAIN` on any new query touching a large table.
 - **PERF-5 MUST** Concurrency is bounded (worker pools, semaphores); shared state uses locks /
   upserts / idempotency keys / leases — never last-write-wins. Safe under >1 replica.
-- **PERF-6 SHOULD** Cache only with an explicit key, TTL and invalidation rule; never cache across
-  tenants; cache hit/miss is a metric.
+- **PERF-6 SHOULD** Cache only with an explicit key, TTL and invalidation rule; cache hit/miss is a
+  metric. Never caching across tenants or users is a security MUST — PERF-27.
+- **PERF-27 MUST** Never cache across tenants or users: a cache entry holding tenant- or user-specific
+  data has the tenant/user in its key (PERF-6, PERF-13, NEXT-6). *Test:* user A then user B sees none of
+  A's data.
 - **PERF-7 MUST** Clients: virtualized/lazy lists, images sized and cached at display resolution,
   code-split by route, subscriptions/streams disposed on unmount.
 - **PERF-8 MUST** **Profile before optimizing.** A perf change cites a before/after measurement.
 - **PERF-9 MUST** Simplicity is a performance feature: no dead code, no unused deps, no speculative
-  abstraction, no feature flags older than 90 days. (`/simplify`, `knip`, `deadcode`, `vulture`.)
+  abstraction, no **release** flags older than 90 days. Kill switches and forced-update / min-version
+  flags (CORE-15, MOB-6, VULN-5) are permanent by design: they are declared `permanent` in the flag
+  registry and exempt. (`/simplify`, `knip`, `deadcode`, `vulture`.)
 
 
 ### Backend & data
 - **PERF-10 MUST** Connection pooling for every DB/HTTP client (sized to the DB's limits); HTTP
   keep-alive / HTTP/2; prepared statements for hot queries.
-- **PERF-11 MUST** No unbounded work on the request path: anything > ~200 ms or touching third parties
-  in bulk goes to a background job (CORE-10); large exports stream instead of buffering.
+- **PERF-11 MUST** No unbounded work on the request path: work that would push the endpoint past its
+  PERF-1 budget, or that calls third parties in bulk, goes to a background job (CORE-10, API-10); large exports stream instead of buffering.
 - **PERF-12 MUST** Know the complexity: no O(n²) over user-controlled n; batch DB writes and external
   calls; select only the columns you use; covering indexes for the top queries; archive or partition
   tables that grow without bound.
@@ -490,7 +689,9 @@ Budgets are defaults — override per app in §1, but **every app has numbers**.
 
 ### Web front end
 - **PERF-14 MUST** Static assets have content-hashed filenames and `Cache-Control: public,
-  max-age=31536000, immutable`; HTML is `no-cache` (revalidate). Compression (br/gzip) on text.
+  max-age=31536000, immutable`; **public** HTML is `no-cache` (revalidate — never `no-store`, which
+  breaks bfcache, PERF-22); authenticated or sensitive responses are `no-store` (DATA-2). Compression
+  (br/gzip) on text.
 - **PERF-15 MUST** Images: modern formats (AVIF/WebP), `width`/`height` set (no layout shift),
   responsive `srcset`/`sizes`, `loading="lazy"` below the fold, `fetchpriority="high"` on the LCP image.
 - **PERF-16 MUST** Fonts: self-hosted WOFF2, subset, `font-display: swap`, the 1–2 critical files
@@ -500,6 +701,15 @@ Budgets are defaults — override per app in §1, but **every app has numbers**.
   privacy and CSP surface); no render-blocking scripts in `<head>`.
 - **PERF-18 SHOULD** Real-user monitoring of Core Web Vitals (`web-vitals` → analytics) so budgets are
   checked against real devices, not just Lighthouse.
+- **PERF-22 MUST** Public pages are **bfcache-eligible**: no `unload` handlers and no `Cache-Control:
+  no-store` on public HTML (PERF-14). *Enforced by:* the Lighthouse bfcache audit.
+- **PERF-23 SHOULD** Speculation Rules (`eagerness: "moderate"`) prefetch/prerender public same-origin
+  navigations — never authenticated or state-changing URLs.
+- **PERF-24 SHOULD** RUM reports INP with Long Animation Frame (LoAF) attribution so slow interactions
+  point at a script.
+- **PERF-25 SHOULD** `content-visibility: auto` on long off-screen sections and lists.
+- **PERF-26 SHOULD** Next.js apps stream with `loading.tsx`/Suspense boundaries and run the bundle
+  analyzer per PR against the PERF-17 budget.
 
 ### Mobile (Flutter / native)
 - **PERF-19 MUST** Flutter: `const` constructors wherever possible; rebuild only what changed
@@ -513,6 +723,27 @@ Budgets are defaults — override per app in §1, but **every app has numbers**.
 - **PERF-21 MUST** Each stack's profiler is part of the toolkit and used before optimizing:
   Go `pprof`, Node `--cpu-prof`/clinic, Python `py-spy`/`scalene`, Flutter DevTools, Chrome Performance
   panel, `EXPLAIN (ANALYZE, BUFFERS)` for SQL. Regressions in PERF-1 budgets fail CI.
+
+---
+
+## 3B · Framework & platform compatibility
+
+- **COMPAT-1 MUST** One browser target per app, declared once in `browserslist` (default `baseline
+  widely available`) and shared by the build, lint (`eslint-plugin-compat`) and CSS tooling. Vite's
+  `build.target` doesn't read browserslist — set it explicitly to match. When a framework's own floor is
+  stricter (Tailwind v4: Safari 16.4+), the stricter floor wins and is the declared target.
+- **COMPAT-2 MUST** Node is pinned to an Active or Maintenance **LTS** line in `.nvmrc`, `engines`,
+  `packageManager` and CI, with `engine-strict=true`; an odd-numbered or EOL line is never deployed
+  (LIFE-1). Moving to the next LTS happens within six months of it becoming LTS.
+- **COMPAT-3 SHOULD** TypeScript compiles cleanly on the current 6.x without `ignoreDeprecations`, so the
+  move to the native (Go) 7.x compiler is a version bump.
+- **COMPAT-4 MUST** Tailwind v4 apps take tokens from the kit's CSS-first `@theme` output
+  (`design/build/tailwind/theme.css`, platform `tailwind4`), never a hand-written theme; the v3 JS preset
+  is only for apps still on v3 (THEME-1).
+- **COMPAT-5 SHOULD** Next.js apps follow the current major's conventions (Next 16: `proxy.ts`, async
+  request APIs); upgrades run `@next/codemod` on a branch with the e2e suite green; React Compiler is
+  opted into per app.
+- **COMPAT-6 SHOULD** ESLint uses flat config (`eslint.config.*`) only.
 
 ---
 
@@ -545,8 +776,10 @@ Code is read far more than it is written; these rules keep it cheap to read, cha
   are easy to test and log.
 - **CLEAN-8 MUST** **Comments explain why, not what;** public functions/types of shared modules have
   doc comments with an example; an ADR records any decision that constrains future work.
-- **CLEAN-9 MUST** **Small, reviewable changes:** PRs ≤ ~400 changed lines of non-generated code, one
-  concern each; generated files and lockfiles reviewed separately. Every PR states which standard rules
+- **CLEAN-9 MUST** **Small, reviewable changes:** PRs ≤ ~400 changed lines of non-generated
+  **production** code, one concern each; the feature's tests and help/docs (TEST-0, HELP-6) belong in the
+  same PR and don't count toward the limit — split the feature, never its tests; generated files and
+  lockfiles reviewed separately. Every PR states which standard rules
   it touches and links tests (PR template).
 - **CLEAN-10 MUST** **Adding a dependency is a decision:** check it is maintained (release in the last
   year), widely used, licence-compatible (REPO-4), small, and not replaceable by ~20 lines of code or
@@ -611,16 +844,23 @@ Honeycomb) without remapping. App-specific attributes live under the `app.` name
   Go `log/slog` (JSON handler) · Node `pino` · Python `structlog` (or stdlib + JSON formatter) ·
   Swift `os.Logger` + remote sink · Flutter/Dart `package:logging` → backend sink ·
   traces/metrics via **OpenTelemetry** SDK, exported over OTLP.
-- **LOG-3 MUST** Level discipline: `error` = someone should look (alertable); `warn` = degraded but
+- **LOG-3 MUST** Level discipline: `error` = someone should look — it counts toward error-rate /
+  burn-rate alerts (REL-1), never pages on a single occurrence; `warn` = degraded but
   handled; `info` = business events and request summaries; `debug` = off in prod by default,
   switchable at runtime without redeploy.
 - **LOG-4 MUST** **Redaction at the logger**, not the call site: a denylist of keys
   (`password|secret|token|authorization|cookie|api[_-]?key|ssn|card`) plus value-pattern scrubbing
-  (JWTs, bearer tokens, long hex/base64). PII is hashed or omitted. Unit-test the redactor.
+  (JWTs, bearer tokens, long hex/base64). PII is hashed or omitted, except the LOG-1 identity and HTTP fields (`user.id`,
+  `client.address`, `user_agent.original`), which are kept (IP truncated where DATA_INVENTORY says so).
+  Unit-test the redactor.
 - **LOG-5 MUST** **Audit rides on logging.** `record()` (CORE-4) emits one event that lands in
   (a) the app log, (b) the **append-only** audit store for every state change and privileged read,
   and (c) the user-visible activity feed where relevant. Audit records carry who/what/when/from-where
   (IP, user-agent)/outcome and are immutable to the app (DB role without UPDATE/DELETE; optional hash chain).
+  **Erasure vs immutability:** audit records are kept for their LOG-9 retention under the legal basis
+  recorded in DATA_INVENTORY, identify the actor by an internal ID (never email/name), and are not
+  rewritten when an account is deleted (STORE-4, PRIV-3); deleting the account removes the ID → person
+  mapping, and the privacy notice says audit records age out at their retention.
 - **LOG-6 MUST** **Producer coverage**: every subsystem that mutates state calls `record()`. A
   dashboard or audit log fed by 9 of 63 subsystems is worse than none. Keep a producer × sink table
   in `docs/OBSERVABILITY.md`.
@@ -630,7 +870,7 @@ Honeycomb) without remapping. App-specific attributes live under the `app.` name
 - **LOG-8 MUST** Client apps: crash reporter live with release tag and uploaded symbols; client errors
   carry `request_id`; no raw `print`/`console` in release builds.
 - **LOG-9 MUST** Logs are centralized, retained per policy (default 30 d app / 1 y audit), access-
-  controlled, and alerting exists for: error-rate spike, auth-failure spike, job not run on schedule,
+  controlled, and alerting exists for: error-rate spike (as burn-rate alerts, REL-1), auth-failure spike, job not run on schedule,
   audit-write failure.
 - **LOG-10 SHOULD** Golden signals per service as metrics (latency, traffic, errors, saturation) with
   one dashboard; job freshness (`last_success_ts`) exported per job.
@@ -651,7 +891,7 @@ Honeycomb) without remapping. App-specific attributes live under the `app.` name
   externalized for i18n; `mailto:` built with RFC 3986 encoding (`%20`, not `+`).
 - **UX-7 MUST** Every screen and field has in-app help and a living-docs page per §6G.
 - **UX-8 MUST** Network resilience: offline/slow/5xx states are graceful; token expiry triggers silent
-  refresh; reconnect backfills missed realtime state.
+  refresh via the refresh token (never an IdP `prompt=none` session, SESS-5); reconnect backfills missed realtime state.
 
 ---
 
@@ -670,12 +910,13 @@ between apps except the structure, the semantic names and the tooling.
   tokens/presets/<name>.json          ← optional user-selectable colour presets (same keys)
   icons.json                          ← semantic icon name → glyph: "action.delete" → trash, "status.warning" → alert-triangle
   build/ (generated, never hand-edited)
-    css/tokens.css · tailwind/preset.js · dart/app_tokens.dart · swift/Tokens.swift · icons.(ts|dart|swift)
+    css/tokens.css · tailwind/theme.css (v4 @theme) · dart/app_tokens.dart · swift/AppTokens.swift · icons.(tsx|dart|swift)
 ```
 
 - **THEME-1 MUST** Each app has exactly **one** token source, authored in the W3C **Design Tokens**
   (DTCG) JSON format and generated for its platform(s) by the kit's zero-dependency
-  `tools/standard/design-tokens/scripts/build.mjs` (CSS vars, Tailwind preset, TS, Flutter
+  `tools/standard/design-tokens/scripts/build.mjs` (CSS vars, Tailwind v4 `@theme` CSS per COMPAT-4 —
+  the v3 JS preset only for apps still on v3 — TS, Flutter
   `ThemeExtension`, SwiftUI). DTCG keeps the source compatible with Style Dictionary and Tokens Studio
   (Figma) if a designer joins. A web + mobile app generates both from the same source, so they match. Generated files are never hand-edited. Two theme/colour files in one app (e.g.
   `theme_colors.dart` *and* `app_colors.dart`) is a finding.
@@ -726,7 +967,7 @@ lint as **warn**, codemod the hits to semantic tokens, (4) flip the rule to **er
 - **API-3 MUST** Every mutating endpoint that can be retried accepts an **idempotency key**.
 - **API-4 MUST** **Rate limiting and quotas on every public endpoint** (per user, per IP, per tenant),
   stricter on auth, signup, password reset, OTP, file upload and anything that costs money (LLM, SMS).
-- **API-5 MUST** One error format everywhere (CORE-7/CORE-12): **RFC 9457 Problem Details**
+- **API-5 MUST** One error format everywhere (CORE-7; CORE-12 parses it): **RFC 9457 Problem Details**
   (`Content-Type: application/problem+json`) — `type`, `title`, `status`, `detail`, `instance`, plus
   extension members `code` (stable CORE-7 code) and `request_id`; field errors in an `errors` array
   (`{pointer, code, detail}`). Never leak stack traces or SQL.
@@ -742,7 +983,8 @@ lint as **warn**, codemod the hits to semantic tokens, (4) flip the rule to **er
 - **API-10 MUST** **Long-running work** returns `202 Accepted` with an operation resource
   (`/operations/{id}`: status, progress, result or problem) instead of holding the request open.
 - **API-11 MUST** **Deprecation is signalled in-band:** `Deprecation` and `Sunset` headers (plus a `Link`
-  to the migration note) on deprecated endpoints, at least one mobile release cycle before removal.
+  to the migration note) on deprecated endpoints, at least one mobile release cycle before removal, and not removed while the oldest supported app
+  version (LIFE-3) still calls it.
 - **API-12 MUST** The **OWASP API Security Top 10** is reviewed per API: object-level authz (SEC-7),
   function-level authz (SEC-6), property-level exposure (explicit response DTOs, no `SELECT *` to
   JSON), resource consumption limits (API-4, PERF-3), SSRF (SEC-5), and an inventory of every
@@ -759,21 +1001,119 @@ lint as **warn**, codemod the hits to semantic tokens, (4) flip the rule to **er
 - **MOB-4 MUST** **Verified links only:** Android App Links (`assetlinks.json`) and iOS Universal Links
   (`apple-app-site-association`) for anything that opens the app with state; custom URL schemes never
   carry auth codes.
-- **MOB-5 SHOULD** **App attestation** (Play Integrity / App Attest via Firebase App Check or
-  equivalent) on APIs that cost money or expose sensitive data, enforced server-side.
+- **MOB-5 SHOULD** **App attestation** (Play Integrity / App Attest) on APIs that cost money or expose
+  sensitive data, enforced server-side. Firebase apps: FB-1 makes this a MUST via App Check.
 - **MOB-6 MUST** **Certificate pinning is a recorded decision** (ADR): default is *no pinning* plus
   ATS/Network Security Config; if pinned, pin the SPKI with a backup pin and a remote kill switch
   (CORE-15) so a rotated certificate can't brick the app.
 - **MOB-7 MUST** **Nothing sensitive in backups, logs, clipboard or screenshots:** tokens and PII
   excluded from device/cloud backup (Android `dataExtractionRules`; iOS Keychain
-  `ThisDeviceOnly` + `isExcludedFromBackup`), sensitive non-password fields mark `secureTextEntry`/disable autofill
-  suggestions (password fields keep password-manager autofill, AUTH-3), app switcher snapshot blurred on sensitive screens.
+  `ThisDeviceOnly` + `isExcludedFromBackup`), sensitive non-password fields mark `secureTextEntry`/disable autofill,
+  suggestions and autocorrect (password fields keep password-manager autofill, AUTH-3), secrets are never
+  copied to the clipboard by the app, app switcher snapshot blurred on sensitive screens.
 - **MOB-8 MUST** **Store privacy declarations match the code:** Apple privacy manifest
   (`PrivacyInfo.xcprivacy`, required-reason APIs) and Google Play Data safety form are updated in the
   same PR as any new SDK or data collection.
 - **MOB-9 SHOULD** Release builds are obfuscated (`--obfuscate --split-debug-info`, R8) with symbols
   uploaded privately; MASVS-RESILIENCE controls (root/jailbreak detection) only where the threat model
   calls for them.
+- **MOB-10 MUST** **Biometric unlock releases a key, not a boolean:** biometrics gate a Keychain /
+  Android Keystore key that requires user authentication and is invalidated when biometric enrolment
+  changes; a bare `local_auth` / `LAContext` success result never decides access on its own.
+- **MOB-11 MUST** Every Android component sets `android:exported` explicitly; only the launcher, App Links
+  activities and components that must be reachable from other apps are exported, and those validate
+  their input (MOB-3). *Enforced by:* merged-manifest allow-list in CI.
+- **MOB-12 MUST** **WebView / hybrid hardening:** no WebView remote debugging in release builds, no
+  navigation wildcards, JavaScript bridges exposed only to the app's own origin; Capacitor
+  `server.url`, `cleartext` and `allowMixedContent` are off in production builds **unless an ADR records a
+  remote-shell design** (then the ADR lists the compensating controls and the origin allow-list).
+
+## 6J · App stores & Flutter
+
+Store rules carry dates because the stores move their floors every year; the CI assertion is the rule,
+the number is today's value.
+
+- **STORE-1 MUST** Release builds meet the current store floors: Android `targetSdk` **36** (required for
+  updates since 2026-08-31); iOS built with **Xcode 26 / the iOS 26 SDK** (required since 2026-04-28).
+  Set `targetSdk` explicitly rather than inheriting a framework default. *Enforced by:* `aapt2 dump
+  badging` ≥ 36 and the `DTSDKName` of the archive in CI.
+- **STORE-2 MUST** Every native `.so` in an Android release is **16 KB page-aligned** (Play blocks
+  non-compliant updates from 2027-02-01; AGP ≥ 8.5.1, NDK r28+). Plugins with native code (ML Kit /
+  `mobile_scanner`, `sqlite3`) are where it breaks. *Enforced by:* `zipalign -c -P 16` and an ELF
+  alignment check on the release artifact.
+- **STORE-3 MUST** **Android 16 readiness** at API 36: no edge-to-edge opt-out; predictive back
+  (`PopScope`, never `WillPopScope`); orientation and resizability locks are ignored on screens ≥ 600dp,
+  so layouts work there. THEME-9 goldens add a 600dp landscape size with system insets.
+- **STORE-4 MUST** **Account deletion** is available in the app (Apple 5.1.1(v)) **and** from a web URL
+  listed in Play Console, and deletes the user's server data in every user-owned table and storage
+  bucket (audit records per LOG-5, processors per PRIV-3). *Test:* pgTAP/integration test finds zero
+  user rows outside the LOG-5 audit store after deletion; CI requests the web URL.
+- **STORE-5 MUST** An app that offers Google (or other third-party) sign-in also offers an equivalent
+  privacy-preserving login (Apple 4.8; Sign in with Apple satisfies it).
+- **STORE-6 MUST** *Apps available in Texas* (SB 2420, enforceable since 2026): age assurance from the
+  store's age signal (Apple Declared Age Range, Play Age Signals), parental consent refreshed on a
+  significant change, and age data deleted after use. Other jurisdictions' age-assurance laws are
+  tracked per app in an ADR (**SHOULD** until each one's date is confirmed).
+- **STORE-7 MUST** No `READ_MEDIA_IMAGES`/`READ_MEDIA_VIDEO` unless media access is the app's core
+  purpose (use the system photo picker); every foreground service declares its type and permission;
+  exact alarms only for alarm/calendar apps. *Enforced by:* merged-manifest permission allow-list.
+- **STORE-8 MUST** Staged rollouts halt when Android vitals cross Play's bad-behaviour thresholds
+  (user-perceived crash rate 1.09%, ANR rate 0.47% overall; 8% on any single device model). *Enforced
+  by:* a Play Reporting API check before raising the rollout percentage.
+- **FLT-1 MUST** `--dart-define`, `--dart-define-from-file` and `env*.json` hold **public config only** —
+  their values are compiled into the binary and obfuscation doesn't hide them (SEC-11). *Enforced by:*
+  `strings` over `libapp.so` / `App.framework` for `sb_secret_`, `service_role`, `PRIVATE KEY`, `sk-`;
+  gitleaks over `env*.json`.
+- **FLT-2 MUST** iOS/macOS builds use Swift Package Manager (CocoaPods trunk becomes read-only
+  2026-12-02); `enable-swift-package-manager: false` is never set.
+- **FLT-3 MUST** `pubspec.lock` is committed (apps) and scanned on a schedule (`osv-scanner -L
+  pubspec.lock`, `dart pub outdated` weekly — VULN-3).
+- **FLT-4 SHOULD** CI pins the Flutter version (`.fvmrc` or the workflow) and upgrades deliberately.
+
+## 6K · Backend platforms — Next.js, Supabase, Firebase, Azure
+
+- **NEXT-1 MUST** Authorization runs in the data-access layer, in **every Server Action and every
+  `route.ts`** — never only in `middleware.ts`/`proxy.ts`, which has been bypassed (CVE-2025-29927).
+  *Enforced by:* semgrep — a `'use server'` export or route handler that reaches the DB without the
+  CORE-5 check first.
+- **NEXT-2 MUST** Every Server Action is a **public POST endpoint**: schema-validated arguments (CORE-9),
+  an ownership check (SEC-7), and a minimal DTO in return — never a raw ORM record.
+- **NEXT-3 MUST** Modules that touch secrets, the database or server-only `process.env` start with
+  `import 'server-only'`; `NEXT_PUBLIC_*` variables hold no secret. *Test:* grep `.next/static` for
+  secret names.
+- **NEXT-4 MUST** Next.js stays on a supported release line and takes each Next.js security release
+  within the VULN-2 deadline for its severity (React Server Components flaws such as CVE-2025-55182 are
+  Critical); `next` is pinned to an exact version, since it bundles its React server packages.
+  *Enforced by:* a CI version-floor assertion + `osv-scanner`.
+- **NEXT-5 MUST** `images.remotePatterns` lists exact protocol, hostname and path prefix — no wildcards;
+  `dangerouslyAllowSVG` stays off; rewrites and redirects never build a destination host from request
+  input (SSRF, CFG-1).
+- **NEXT-6 MUST** Cached code (`'use cache'`, Cache Components, `unstable_cache`) never reads cookies,
+  headers or the session, and never returns per-user data unless the user is part of the cache key
+  (PERF-6). *Test:* e2e as user A then user B — B sees none of A's data.
+- **SUPA-1 MUST** Clients use **publishable** keys (`sb_publishable_…`); **secret** keys (`sb_secret_…`)
+  live only in servers and Edge Functions; the legacy `anon`/`service_role` JWT keys are disabled before
+  Supabase removes them (end of 2026). `verify_jwt` doesn't authenticate a caller that sends only an API
+  key, so every Edge Function authorizes in code. *Test:* call each function with only the publishable
+  key → 401/403.
+- **SUPA-2 MUST** `supabase db advisors` (security + performance lints) runs in CI and fails on ERROR:
+  RLS disabled, `SECURITY DEFINER` views, definer functions callable by `anon`, listable public buckets,
+  always-true policies.
+- **SUPA-3 MUST** RLS policies (SEC-8) are written for performance too: `(select auth.uid())` rather
+  than `auth.uid()`, a `TO authenticated` role clause, and an index on every column a policy filters
+  on; views use `security_invoker = true`; definer functions set `search_path = ''`.
+- **SUPA-4 SHOULD** Leaked-password protection is on, and Auth settings are diffed against a committed
+  copy via the Management API.
+- **FB-1 MUST** **Firebase App Check** is enforced for each Firebase product once its metrics show valid
+  tokens; iOS uses App Attest, and the debug provider is compiled in only under `kDebugMode`. (Firebase
+  apps' form of MOB-5.)
+- **FB-2 MUST** Firebase Analytics collection is off until the user consents
+  (`FIREBASE_ANALYTICS_COLLECTION_ENABLED=false`, then `setConsent` / enable on consent); push is sent
+  through the FCM HTTP v1 API only.
+- **AZR-1 SHOULD** Key Vaults use Azure RBAC (not access policies) with purge protection on.
+- **AZR-2 MUST** Azure Files shares holding irreplaceable data have share soft-delete **and** snapshots
+  or Azure Backup — snapshots are deleted with the share (OPS-3).
+- **AZR-3 SHOULD** Defender for Cloud Foundational CSPM (free) is on and Secure Score is reviewed monthly.
 
 ---
 
@@ -797,8 +1137,12 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
 - **TEST-3 MUST** Coverage floor on platform-core modules (≥ 80% lines) and on **changed lines** in a PR
   (≥ 70%); no repo-wide vanity target. Coverage counts behaviour, not snapshot-only render tests.
 - **TEST-4 MUST** E2E/walkthrough runs **authenticated** (asserts it is not on `/login`), in **both
-  themes**, and fails on console errors, uncaught exceptions and failed network requests.
-- **TEST-5 MUST** Flaky tests are quarantined with an owner and a date, not retried until green.
+  themes**, and fails on console errors, uncaught exceptions and failed network requests — except
+  requests the test itself fails on purpose (e.g. to render the TEST-6 error state), which it declares.
+- **TEST-5 MUST** Flaky tests are quarantined, not retried until green. Quarantine is the **only**
+  permitted way to skip a test: the skip carries `quarantine`, an owner and an ISO date in its reason, it
+  lands in its own PR (never in the change that makes other tests pass, AGT-8), and it is fixed or
+  deleted by that date. Emergency patches (VULN-5) still run every non-quarantined test.
 - **TEST-6 MUST** **Walkthrough test per screen** — one spec per routable screen that performs, in order:
   open it as a fresh user → assert loading, **empty**, error and data states render → configure / create
   an object through the UI → see it populate → drill into it → edit and delete it → export → open help
@@ -806,8 +1150,9 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   (THEME-9) → repeat as a lower role and assert the denied paths. The same specs regenerate help
   screenshots (HELP-10) and are the live evidence for `APP_REVIEW.md`.
 - **TEST-7 MUST** **Feature → test map is enforced:** every feature key in the nav/router inventory has
-  tests tagged with it (`@feature:<key>` in the test name or tag) covering unit, e2e and walkthrough; a CI
-  step lists features missing any kind and fails. A new route without tagged tests cannot merge.
+  tests tagged with it (`@feature:<key>` in the test name or tag) covering all four TEST-0 kinds — unit,
+  integration, e2e and walkthrough (`bin/check-tests.mjs`; a feature with no server side records
+  `integration` under `allowMissing` with a reason); a CI step lists features missing any kind and fails. A new route without tagged tests cannot merge.
 - **TEST-8 MUST** Bugs get a regression test that fails before the fix and passes after, in the same PR.
 - **TEST-10 MUST** **Fuzz anything that parses untrusted input** (file formats, decoders, URL/filter
   parsers, import code): Go native fuzzing, Atheris (Python), Jazzer.js; fuzz targets run in CI for a
@@ -832,7 +1177,7 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
 - **OPS-1 MUST** `/healthz` (liveness) and `/readyz` (dependencies) endpoints; graceful shutdown that
   drains in-flight requests and jobs.
 - **OPS-2 MUST** CI/CD: gates (§7.1) → preview/staging deploy → migrations → prod, with a one-command
-  **rollback** that has been exercised. Deploys are tagged with the git SHA logged as `version`.
+  **rollback** that has been exercised. Deploys are tagged with the git SHA logged as `service.version` (LOG-1).
 - **OPS-3 MUST** Backups with written **RPO/RTO**; a restore is actually performed and verified at least
   quarterly (a backup never restored is a hope).
 - **OPS-4 MUST** Environments are config-identical except for values; secrets differ per environment;
@@ -862,8 +1207,8 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
 - **REL-4 MUST** **Blameless postmortem** within 5 business days for every SEV1/SEV2 and every security
   incident: timeline, impact, root causes (plural), what went well, action items with owners and dates
   tracked as issues. Repeated causes become standard rules or lint checks.
-- **REL-5 MUST** **Disaster recovery is rehearsed:** RPO/RTO per data store (OPS-3), a restore into a
-  clean environment at least twice a year, and a written, tested procedure for losing the primary
+- **REL-5 MUST** **Disaster recovery is rehearsed:** RPO/RTO per data store (OPS-3), a full DR rehearsal into a
+  clean environment at least twice a year (in addition to OPS-3's quarterly restore test), and a written, tested procedure for losing the primary
   region/host (for single-VM hosts like a single VM: rebuild from IaC + backups, timed).
 - **REL-6 SHOULD** **Resilience is tested, not assumed:** each critical dependency (DB, auth provider,
   payment, LLM, email) has a tested failure mode — timeouts, fallback or a clear degraded UI — exercised
@@ -898,8 +1243,9 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
 - **REPO-1 MUST** `README` (run, test, deploy in < 10 lines each), `CLAUDE.md` referencing this
   standard, `CHANGELOG`, ADRs in `docs/adr/` for decisions that constrain future work.
 - **REPO-2 MUST** Protected `main`: PR required, gates green, no force-push; `CODEOWNERS` for platform
-  core, tokens, migrations, CI.
-- **REPO-3 SHOULD** Conventional commits; PR template with "standard rules touched / exceptions added".
+  core, tokens, migrations, CI and agent configuration (AGT-9).
+- **REPO-3 SHOULD** Conventional commits. (The PR template itself is required by CLEAN-9 and HELP-7:
+  standard rules touched, exceptions added, help/docs updated.)
 - **REPO-4 MUST** Dependency licences checked (no AGPL/unknown in shipped code without a decision).
 
 ---
@@ -954,7 +1300,8 @@ what here) · tips · troubleshooting (common errors and fixes) · link to the f
 | Tests | `go test -race ./...` | `vitest`/`jest` + Playwright | `pytest` | `flutter test` + `integration_test` | XCTest |
 | Dep CVEs | `govulncheck` | `osv-scanner` / `npm audit --audit-level=high` | `pip-audit` | `osv-scanner` | `osv-scanner` |
 | Complexity + architecture (CLEAN-2/3) | `gocyclo`/`gocognit` (golangci), `depguard` | ESLint `complexity`, `max-lines*`, `max-params`, `sonarjs`; `dependency-cruiser`; `knip`; `size-limit` | `ruff` `C901`/`PLR09xx`; `import-linter`; `vulture` | `very_good_analysis` lints; `custom_lint` | `swiftlint` `cyclomatic_complexity`, `function_body_length` |
-| **All stacks** | `gitleaks` (secrets) · `semgrep --config p/default p/owasp-top-ten` + repo custom rules (SAST) · `trivy fs/config` · `zizmor` (CI) · client-bundle secret allow-list check · Lighthouse CI / bundle-size budget (web) |
+| **All stacks** | `gitleaks` (secrets) · `semgrep --config p/default p/owasp-top-ten` + repo custom rules (SAST) · `trivy fs/config` · `zizmor` (CI) · client-bundle secret allow-list check · Lighthouse CI / bundle-size budget (web) · agent-config lint (AGT-1/5/7) · weekly endoflife.date job (LIFE-1) |
+| **Stack-specific** | Supabase: `supabase db advisors` fails on ERROR (SUPA-2) · Android: `zipalign -c -P 16` + merged-manifest permission/export allow-list (STORE-2/7, MOB-11), `aapt2 dump badging` target-API floor (STORE-1) · Flutter: `strings` scan of the release binary for secrets (FLT-1), `osv-scanner -L pubspec.lock` (FLT-3) · npm: `npm audit signatures`, package-manager cooldown keys asserted (NPM-1, SUP-2) · Next.js: version floor + `server-only`/auth semgrep rules (NEXT-1…4) |
 
 ### 7.2 Banned-API rules (one per CORE row) — shipped in the kit
 §1's "banned elsewhere" column is encoded as Semgrep rules in `engineering-standard/semgrep/`
@@ -975,17 +1322,24 @@ direct icon imports, `print`/`console`, env reads outside config, raw HTTP clien
 
 ### 7.3 Local loop
 - `pre-commit` (or `lefthook`) runs format, `gitleaks protect --staged`, and fast lint.
-- Claude Code hook (via `/update-config`; snippet in the kit README): `PostToolUse` on `Edit|Write`
-  runs the standard's Semgrep rules on the touched file and exits 2 on a violation, so Claude fixes it
-  in the same turn.
+- **The `engineering-standard` Claude Code plugin** (this repo; install steps in the kit README) supplies
+  the agent loop: a `SessionStart` hook injects the rules for the detected stack, `PreToolUse` hooks block
+  secret reads (AGT-1), test loosening (AGT-8) and unverified or too-new dependencies (SEC-31, SUP-1), a
+  `PostToolUse` hook on `Edit|Write` runs the standard's Semgrep rules on the touched file and exits 2 on
+  a violation so Claude fixes it in the same turn, and the MCP server answers `rules_for` / `rule` /
+  `verify_dependency`. Repos that hand-added the older per-repo Semgrep hook remove it when they enable
+  the plugin, so the check doesn't run twice. Hooks are a convenience for the agent; CI (§7.1) is still
+  the gate.
 - **Agent rule (put in every repo's `CLAUDE.md`):** when Claude adds or changes a feature it also writes
   or updates that feature's unit, integration, e2e and walkthrough tests (TEST-0), runs them and
-  `tools/standard/check.sh`, and reports the real output — never "should pass".
+  `tools/standard/check.sh`, and reports the real output — never "should pass". It never loosens a
+  test to get green (AGT-8), and asks before installing a dependency the plugin flags (SEC-31, SUP-1).
 
 ### 7.4 Claude Code plugins & skills that apply this standard
 
 | When | Use |
 |---|---|
+| Every session, every repo | **`engineering-standard` plugin** (user scope, plus `enabledPlugins` in each repo's `.claude/settings.json`) — hooks, stack skills, MCP `rules_for`/`rule`/`check`/`verify_dependency`/`exception_add`/`review_plan`, `standard-reviewer` agent |
 | Before writing a feature | `feature-dev:feature-dev` (explorer → architect → reviewer) — point the architect at §1 so it reuses the core |
 | Before opening a PR | `/security-review` (pending diff) · `/code-review high` · `/simplify` (reuse + efficiency) |
 | Large branch / pre-release | `/code-review ultra` (user-triggered cloud multi-agent review) |
@@ -1003,8 +1357,12 @@ A repo meets the standard when:
 - [ ] §1 platform-core table is filled in and every CORE row exists.
 - [ ] Kit adopted (`tools/standard/VERSION` current); `tools/standard/check.sh` runs in CI and is
       **blocking**; any `.semgrep/baseline.json` is shrinking release over release.
-- [ ] §7.1 gates run in CI and are **blocking**.
-- [ ] Every nav feature has tagged unit + e2e + walkthrough tests (TEST-0, TEST-7).
+- [ ] §7.1 gates run in CI and are **blocking**, including the stack-specific row for this repo's stacks.
+- [ ] Agent configuration meets §2C: `.claude/settings.json` deny rules + bypass disabled (AGT-1),
+      subagents declare `tools:` (AGT-7), agent config under `CODEOWNERS` (AGT-9), and the
+      `engineering-standard` plugin enabled in `.claude/settings.json` (AGT-1).
+- [ ] Store and platform floors with dates (STORE-1/2, FLT-2, SUPA-1, LIFE-1) pass their CI checks.
+- [ ] Every nav feature has tagged unit + integration + e2e + walkthrough tests (TEST-0, TEST-7).
 - [ ] `SECURITY.md` present, Scorecard workflow running (VULN-1, VULN-6); `docs/SLO.md` and the incident
       section of `docs/RUNBOOK.md` exist for user-facing services (REL-1, REL-3).
 - [ ] Security posture mapped: `mappings/ASVS-5.0.md` gaps for Level 1–2 are closed or listed as exceptions.
@@ -1017,7 +1375,8 @@ A repo meets the standard when:
 - [ ] `APP_REVIEW.md` has been run and has **zero open P0** findings.
 
 ### Severity (shared with `APP_REVIEW.md`)
-**P0** blocks release: exploitable vuln, auth bypass/IDOR, secret leak, data loss, fabricated success,
+**P0** blocks release: exploitable vuln (a dependency CVE is P0 when actively exploited / CISA KEV or past
+its VULN-2 deadline; otherwise it is tracked against that deadline), auth bypass/IDOR, secret leak, data loss, fabricated success,
 mutation without audit, inert security control. **P1** customer cannot get the feature's value, or a
 MUST rule is broken without mitigation. **P2** consistency/ergonomics, SHOULD rules. **P3** polish.
 (Legacy mapping: Critical→P0 · High→P1 · Medium→P2 · Low→P3.)
