@@ -259,9 +259,11 @@ rmSync(tmp, { recursive: true, force: true })
   const { bashViolation } = await import(join(ROOT, 'lib/guards.mjs'))
   const cwd = ROOT
   for (const c of ['docker system prune -af', 'docker volume rm data', 'docker compose down -v', 'terraform destroy', 'terraform apply -destroy', 'supabase db reset --linked', 'supabase db push',
-    'az group delete -n rg', 'firebase deploy --project prod-app', 'psql -c "DROP TABLE users"', 'psql -c "DELETE FROM users"', 'rm -rf /', 'rm -rf ../other', 'sudo rm -rf /var/x', 'bash -c "terraform destroy"'])
+    'az group delete -n rg', 'firebase deploy --project prod-app', 'psql -c "DROP TABLE users"', 'psql -c "DELETE FROM users"', 'rm -rf /', 'rm -rf ../other', 'sudo rm -rf /var/x', 'bash -c "terraform destroy"',
+    'terraform -chdir=infra destroy', 'docker --context prod system prune -f', 'az --debug group delete -n x', 'supabase --workdir x db push', 'sudo -u root rm -rf /var/x',
+    'timeout -s KILL 30 terraform destroy', 'firebase deploy --project prod-not-dev', 'firebase deploy', 'ls | xargs rm -rf', 'find / -name x -delete', 'rm -rf .', 'rm -rf *'])
     t(`AGT-17 blocks: ${c}`, bashViolation(c, { cwd })?.rule === 'AGT-17')
-  for (const c of ['supabase db reset', 'firebase deploy --project my-dev', 'psql -c "DELETE FROM users WHERE id = 1"', 'rm -rf node_modules', 'docker rm -f test1', 'terraform plan'])
+  for (const c of ['supabase db reset', 'firebase deploy --project my-dev', 'psql -c "DELETE FROM users WHERE id = 1"', 'rm -rf node_modules', 'docker rm -f test1', 'terraform plan', 'firebase deploy --project shop-staging', 'find . -name "*.tmp" -delete', 'rm -rf build/*.js', 'git commit -m "terraform destroy docs"'])
     t(`AGT-17 allows: ${c}`, bashViolation(c, { cwd }) === null)
   t('AGT-17 owner override (environment only)', bashViolation('terraform destroy', { cwd, allowDestructive: true }) === null)
 }
