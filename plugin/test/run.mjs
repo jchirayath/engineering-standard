@@ -248,6 +248,13 @@ if (sem.status === 0) t('lint-edit: console.log violation → exit 2', le.status
 else t('lint-edit: semgrep missing → silent no-op (exit 0)', le.status === 0 && !le.stderr)
 
 rmSync(tmp, { recursive: true, force: true })
+{
+  const { testLoosening } = await import(join(ROOT, 'lib/guards.mjs'))
+  for (const [line, name] of [['    pytest.skip("flaky")', 'tests/test_a.py'], ['test.fail("x", async () => {})', 'e2e/a.spec.ts'], ['test.describe.fixme("x", () => {})', 'e2e/a.spec.ts'],
+    ['it.todo("later")', 'src/a.test.ts'], ['test.todo("later")', 'src/a.test.ts'], ['    self.skipTest("x")', 'tests/test_b.py'], ['@pytest.mark.skipif(True, reason="x")', 'tests/test_c.py'], ['test.describe.only("x", () => {})', 'e2e/b.spec.ts']])
+    t(`AGT-8 guard blocks ${line.trim()}`, !!testLoosening(name, 'x\n', `x\n${line}\n`))
+  t('AGT-8 guard allows a quarantined skip', !testLoosening('src/a.test.ts', 'x\n', "x\nit.skip('quarantine @jacob 2026-11-30 flaky #12', () => {})\n"))
+}
 console.log('▸ consume (sources gateway)')
 {
   const { classifyRule, parseGitHub, inventoryFiles, clean, manifestRefs } = await import(join(ROOT, 'bin/consume.mjs'))
