@@ -263,7 +263,8 @@ rmSync(tmp, { recursive: true, force: true })
     'terraform -chdir=infra destroy', 'docker --context prod system prune -f', 'az --debug group delete -n x', 'supabase --workdir x db push', 'sudo -u root rm -rf /var/x',
     'timeout -s KILL 30 terraform destroy', 'firebase deploy --project prod-not-dev', 'firebase deploy', 'ls | xargs rm -rf', 'find / -name x -delete', 'rm -rf .', 'rm -rf *',
     'rm -rf .*', 'rm -rf ..', 'find . / -delete', 'terraform apply -destroy=true', 'tofu destroy', 'psql $DB <<EOF\nDROP TABLE users;\nEOF', 'psql -f missing.sql',
-    'supabase db reset --db-url postgres://x', 'az sql db delete -n x', 'firebase firestore:delete --all-collections', 'echo "truncate users" | psql'])
+    'supabase db reset --db-url postgres://x', 'az sql db delete -n x', 'firebase firestore:delete --all-collections', 'echo "truncate users" | psql',
+    'supabase db execute "DROP TABLE users"', 'supabase migration up --sql "truncate users"'])
     t(`AGT-17 blocks: ${c}`, bashViolation(c, { cwd })?.rule === 'AGT-17')
   for (const c of ['supabase db reset', 'firebase deploy --project my-dev', 'psql -c "DELETE FROM users WHERE id = 1"', 'rm -rf node_modules', 'docker rm -f test1', 'terraform plan', 'firebase deploy --project shop-staging', 'find . -name "*.tmp" -delete', 'rm -rf build/*.js', 'git commit -m "terraform destroy docs"'])
     t(`AGT-17 allows: ${c}`, bashViolation(c, { cwd }) === null)
