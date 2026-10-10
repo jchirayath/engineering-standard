@@ -50,7 +50,9 @@ jobs:
           printf '{ "name": "demo", "dependencies": { "next": "16.0.0" } }\n' > package.json
           "$GITHUB_WORKSPACE/bin/adopt.sh" . --mode quick
           test -f .claude/settings.json && grep -q '"mode": "quick"' standard.config.json && grep -q engineering-standard CLAUDE.md
-          tools/standard/check.sh
+          CI= tools/standard/check.sh                       # first run generates the theme code, as on a laptop
+          git add -A && git -c user.email=ci@example.com -c user.name=ci commit -qm "adopt engineering standard"
+          tools/standard/check.sh                           # CI run on the committed repo: must pass with no drift
       - name: TEST-7 checker runs
         run: node bin/check-tests.mjs --config /dev/null || true
 
