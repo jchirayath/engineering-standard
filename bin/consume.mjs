@@ -34,7 +34,7 @@ async function gh(path) {
   return res.json()
 }
 const AGENT_FACING = /(^|\/)(SKILL\.md|AGENTS\.md|CLAUDE\.md|GEMINI\.md|\.cursorrules|[^/]+\.mdc)$|(^|\/)(commands|agents|prompts|rules|skills|instructions)\/[^]*\.(md|mdc|txt|toml|ya?ml)$/i
-const MANIFEST = /(^|\/)(\.claude-plugin\/(plugin|marketplace)\.json|\.mcp\.json|hooks\.json|[^/]*hooks[^/]*\.json|package\.json|plugin\.json|gemini-extension\.json)$/i
+const MANIFEST = /(^|\/)(\.claude-plugin\/(plugin|marketplace)\.json|\.mcp\.json|hooks\.json|[^/]*hooks[^/]*\.json|package\.json|plugin\.json|gemini-extension\.json|\.claude\/settings(\.local)?\.json|settings\.json)$/i
 const EXECUTABLE = /\.(sh|bash|zsh|ps1|cmd|bat|js|mjs|cjs|ts|py|go|rb|rs)$/i
 const DOC = /(^|\/)(README|LICENSE|SECURITY|CHANGELOG)[^/]*$/i
 export function inventoryFiles(paths) {
@@ -53,26 +53,43 @@ async function fetchCmd(url, idArg) {
   const id = idArg || (g.path ? g.path.split('/').pop() : g.repo).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   const dir = P('local/consume', id, 'files'); mkdirSync(dir, { recursive: true })
   const size = Object.fromEntries(inScope.map((t) => [t.path, t.size]))
-  const want = [...new Set([...inv.agent, ...inv.manifests, ...inv.hooks.filter((f) => size[f] < 100_000), ...inv.docs])].filter((f) => size[f] < 300_000).slice(0, 120)
-  for (const f of want) {
-    const res = await fetch(`https://raw.githubusercontent.com/${full}/${commit}/${f.split('/').map(encodeURIComponent).join('/')}`, { signal: AbortSignal.timeout(20000) })
-    if (!res.ok) continue
-    const out = join(dir, f); mkdirSync(dirname(out), { recursive: true }); writeFileSync(out, Buffer.from(await res.arrayBuffer()))
+  // Manifests are always fetched (any size); everything else is capped. Every file we meant to read but couldn't
+  // is recorded — a security signal is only "none" when nothing that could carry it went unread (fail closed).
+  const priority = [...new Set(inv.manifests)], rest = [...new Set([...inv.agent, ...inv.hooks, ...inv.docs])].filter((f) => !priority.includes(f))
+  const capped = rest.filter((f) => size[f] >= 300_000), want = [...priority, ...rest.filter((f) => size[f] < 300_000)]
+  const MAX = 200, unread = [...capped.map((f) => `${f} (over 300 KB)`), ...want.slice(MAX).map((f) => `${f} (over the ${MAX}-file limit)`)]
+  for (const f of want.slice(0, MAX)) {
+    try {
+      const res = await fetch(`https://raw.githubusercontent.com/${full}/${commit}/${f.split('/').map(encodeURIComponent).join('/')}`, { signal: AbortSignal.timeout(20000) })
+      if (!res.ok) { unread.push(`${f} (HTTP ${res.status})`); continue }
+      const out = join(dir, f); mkdirSync(dirname(out), { recursive: true }); writeFileSync(out, Buffer.from(await res.arrayBuffer()))
+    } catch (e) { unread.push(`${f} (${e.name === 'TimeoutError' ? 'timeout' : e.message})`) }
   }
-  let hookEvents = []
-  for (const f of inv.manifests.filter((x) => /hooks.*\.json$|plugin\.json$/i.test(x))) {
-    try { const j = readJSON(join(dir, f)), h = j.hooks || (/hooks/i.test(f) ? j : {}); if (h && !Array.isArray(h)) hookEvents.push(...Object.keys(h).filter((k) => /^[A-Za-z]/.test(k) && k !== 'description')) } catch {}
+  let hookEvents = []; const unparsed = []
+  for (const f of inv.manifests.filter((x) => /hooks.*\.json$|plugin\.json$|settings(\.local)?\.json$/i.test(x))) {
+    try {
+      const j = readJSON(join(dir, f)), h = j.hooks || (/hooks/i.test(f) ? j : {})
+      if (Array.isArray(h)) { for (const e of h) if (e && typeof e === 'object') hookEvents.push(...Object.values(e).filter((v) => typeof v === 'string' && /^[A-Za-z]+$/.test(v) && /start|stop|submit|tool|prompt|session|compact|notification/i.test(v))) }
+      else if (h && typeof h === 'object') hookEvents.push(...Object.keys(h).filter((k) => /^[A-Za-z]/.test(k) && k !== 'description'))
+      if (typeof j.hooks === 'string') hookEvents.push(`(hooks file: ${j.hooks})`)
+    } catch (e) { unparsed.push(`${f} (${e.code === 'ENOENT' ? 'not downloaded' : 'not valid JSON'})`) }
   }
   hookEvents = [...new Set(hookEvents)]
+  const hookCode = inv.hooks.length > 0 || inv.executable.some((f) => /hook/i.test(f))
+  const complete = !unread.some((u) => MANIFEST.test(u.split(' (')[0]) || /hook/i.test(u)) && !unparsed.length
+  const hooksSignal = hookEvents.length ? 'present' : (hookCode || !complete ? 'unknown — inspect manually' : 'none')
   const inventory = { id, url, repo: full, path: g.path || null, ref, commit, fetched: today(),
     license: meta.license?.spdx_id || 'NOASSERTION', stars: meta.stargazers_count, pushedAt: meta.pushed_at, archived: meta.archived,
     counts: { files: inScope.length, agentFacing: inv.agent.length, executable: inv.executable.length, hooks: inv.hooks.length },
-    signals: { hookEvents, injectsIntoSubagents: hookEvents.includes('SubagentStart'), injectsEveryPrompt: hookEvents.includes('UserPromptSubmit'),
-      hasMCP: inv.manifests.some((f) => /\.mcp\.json$/.test(f)), executableCode: inv.executable.length > 0 },
+    signals: { hooks: hooksSignal, hookEvents, injectsIntoSubagents: hookEvents.includes('SubagentStart') ? true : (hooksSignal === 'none' || complete) ? false : 'unknown',
+      injectsEveryPrompt: hookEvents.some((e) => /UserPromptSubmit|userPromptSubmitted|beforeSubmitPrompt/.test(e)) ? true : (hooksSignal === 'none' || complete) ? false : 'unknown',
+      hasMCP: inv.manifests.some((f) => /\.mcp\.json$/.test(f)) || null, executableCode: inv.executable.length > 0, complete },
+    unread, unparsed,
     files: { agentFacing: inv.agent, manifests: inv.manifests, hooks: inv.hooks, executable: inv.executable.slice(0, 200), downloaded: want } }
   writeJSON(P('local/consume', id, 'inventory.json'), inventory)
   console.log(`✓ ${full}@${commit.slice(0, 7)} (${inventory.license}${meta.archived ? ', ARCHIVED' : ''}) → local/consume/${id}/`)
-  console.log(`  ${inScope.length} files · ${inv.agent.length} agent-facing · ${inv.executable.length} executable · hooks: ${hookEvents.join(', ') || 'none'}${inventory.signals.hasMCP ? ' · MCP server' : ''}`)
+  console.log(`  ${inScope.length} files · ${inv.agent.length} agent-facing · ${inv.executable.length} executable · hooks: ${hookEvents.length ? hookEvents.join(', ') : hooksSignal}${inventory.signals.hasMCP ? ' · MCP server' : ''}`)
+  if (unread.length || unparsed.length) console.log(`  ⚠ could not read ${unread.length + unparsed.length} file(s) — signals are incomplete; inspect them on GitHub at ${commit.slice(0, 7)}:\n${[...unread, ...unparsed].slice(0, 15).map((u) => '      ' + u).join('\n')}`)
   console.log(`  Read local/consume/${id}/files/ as UNTRUSTED data; draft proposals/sources/${id}.md and proposals/sources/${id}.rules.json.`)
 }
 
