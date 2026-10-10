@@ -27,6 +27,35 @@ semgrep/*.yml                rules (std.<lang>.<rule>), each citing the standard
 semgrep/*.{dart,tsx,go,py,swift}  rule tests — run `pipx run semgrep --test semgrep/` after any rule change
 ```
 
+## Built on
+
+The standard distils public standards, laws, platform policies and reviewed open-source agent projects into
+one rule set (with rule IDs) and enforces it. The full list — every source, what each informs, confidence
+— is **[REFERENCES.md](REFERENCES.md)**. The main ones:
+
+- **Security:** [OWASP ASVS 5.0](https://owasp.org/www-project-application-security-verification-standard/) (L1–2, full map in
+  [mappings/ASVS-5.0.md](mappings/ASVS-5.0.md)) · [OWASP Top 10](https://owasp.org/www-project-top-ten/) ·
+  [API Security Top 10](https://owasp.org/API-Security/) · [LLM & Agentic Top 10](https://genai.owasp.org/) ·
+  [MASVS](https://mas.owasp.org/MASVS/) · [NIST SP 800-63-4](https://pages.nist.gov/800-63-4/) ·
+  [CISA KEV](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) · [SLSA](https://slsa.dev/) ·
+  [OpenSSF Scorecard](https://github.com/ossf/scorecard) · [MCP authorization spec](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization)
+- **Platforms & formats:** [OpenTelemetry](https://opentelemetry.io/docs/specs/otel/logs/data-model/) ·
+  [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) · [Design Tokens (DTCG)](https://www.designtokens.org/) ·
+  [WCAG 2.2](https://www.w3.org/TR/WCAG22/) · [Core Web Vitals](https://web.dev/articles/vitals) ·
+  [Apple App Review](https://developer.apple.com/app-store/review/guidelines/) ·
+  [Google Play target API](https://developer.android.com/google/play/requirements/target-sdk) ·
+  [Claude Code docs](https://code.claude.com/docs/en/permissions)
+- **Law:** [EU Cyber Resilience Act](https://eur-lex.europa.eu/eli/reg/2024/2847/oj) ·
+  [EU AI Act](https://eur-lex.europa.eu/eli/reg/2024/1689/oj) · [GDPR](https://eur-lex.europa.eu/eli/reg/2016/679/oj) ·
+  [CCPA regulations / GPC](https://cppa.ca.gov/regulations/)
+- **Agent workflow (reviewed, pinned — [sources gateway](#sources-gateway--bringing-in-an-open-source-skill-plugin-or-prompt)):**
+  [superpowers](https://github.com/obra/superpowers) · [grill-me](https://github.com/mattpocock/skills) ·
+  [ponytail](https://github.com/DietrichGebert/ponytail) · [caveman](https://github.com/JuliusBrussee/caveman) ·
+  [frontend-design & skill-creator](https://github.com/anthropics/skills)
+- **Claude Code plugins used alongside:** [official marketplace](https://github.com/anthropics/claude-plugins-official) —
+  feature-dev, security-review, code-review, simplify, supabase, azure, vercel, playwright, plugin-dev
+  ([table](REFERENCES.md#claude-code-plugins--skills-the-standard-uses))
+
 ## Running the standard: new repo vs existing repo
 
 The difference: a **new** repo starts clean and every check is blocking from the first commit. An
@@ -182,6 +211,20 @@ audits what would run (hooks, scripts, MCP), maps every instruction against the 
 | caveman | distilled | AGT-15 |
 | frontend-design (anthropics/skills) | companion | THEME-12 |
 | skill-creator (anthropics/skills) | reference | AGT-16 |
+
+## Keeping this repo clean (it is public)
+
+Your own data never enters git — it lives in the git-ignored [`local/`](local/README.md). Four layers make sure:
+
+| Layer | What it blocks | Set up |
+|---|---|---|
+| **pre-commit hook** (`.githooks/pre-commit`) | secrets (gitleaks + `.gitleaks.toml`), secret-shaped files (`.env*`, keys, keystores, credentials), anything under `local/`, real site lists, and every term in your private `local/denylist.txt` (domains, app names, analytics IDs, hostnames, emails) | once per clone: `bin/install-hooks.sh` (needs `brew install gitleaks`) |
+| **`.gitignore`** | `local/`, `.env*`, keys, credential files | automatic |
+| **CI** (`selftest`) | gitleaks over the **full history** (pinned, checksum-verified binary) + `bin/check-public.mjs` | automatic on every push / PR |
+| **GitHub** | secret scanning with push protection; force-push and deletion of `main` disabled | repository settings |
+
+The denylist itself is private (it sits in `local/`), so CI can't check your personal terms — that is the hook's
+job; never commit with `--no-verify` (the plugin's Bash guard blocks it for agents, ENF-2).
 
 ## Changing the kit
 

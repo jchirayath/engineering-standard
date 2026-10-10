@@ -8,6 +8,7 @@ their own sites, findings and notes here without them ever reaching the reposito
 |---|---|---|
 | `sites.json` | Your website fleet: hostnames, host type, expected analytics IDs, private paths that must 404 (`forbid`). Start from [`../fleet/sites.example.json`](../fleet/sites.example.json). | `node site/check-site.mjs --config local/sites.json` · `fleet/report.mjs` · the `sites-weekly` workflow (via the `SITES_JSON` secret) |
 | `findings/` | Repo-specific findings — named apps, versions, local files, unfixed weaknesses. | you; `/engineering-standard:intake` and research write app-specific notes here, not into `proposals/` |
+| `denylist.txt` | Terms that must never be committed — your domains, app names, analytics IDs, hostnames, emails (one per line; `re:` prefix = regex). Created by `bin/install-hooks.sh`. | the pre-commit hook and `node bin/check-public.mjs` |
 | anything else | Your notes, drafts, exports. | — |
 
 **Weekly site check without publishing anything:** the `sites-weekly` workflow reads the fleet from the

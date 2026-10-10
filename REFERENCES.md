@@ -28,116 +28,138 @@ listed under [Held back](#held-back--not-yet-a-source-of-any-rule), not used.
 
 | Source | Informs |
 |---|---|
-| **OWASP ASVS 5.0**, Levels 1–2 — [owasp.org/www-project-application-security-verification-standard](https://owasp.org/www-project-application-security-verification-standard/) | §2B (INP, BL, BRW, FILE, AUTH, SESS, AZ, TOK, CRY, TLS, CFG, DATA, SLOG); requirement-by-requirement map in `mappings/ASVS-5.0.md` |
-| **OWASP Top 10** (web) | §2 SEC-1…32, §2A, APP_REVIEW §9.1 |
-| **OWASP API Security Top 10** | API-12, API-4, PERF-3, SEC-5/6/7 |
-| **OWASP Top 10 for LLM Applications** (LLM01, LLM07–LLM10) | SEC-19, AI-1…9 |
-| **OWASP Top 10 for Agentic Applications** (2026) ◐ item names | SEC-19, AGT-4, AGT-9 (memory poisoning) |
-| **OWASP Password Storage** parameters (Argon2id m ≥ 19 MiB, t ≥ 2; bcrypt cost ≥ 10) | SEC-22, CRY-3 |
-| **OWASP MASVS / MASTG** (incl. MASVS-RESILIENCE, MASTG BEST-0036/37) | §6C MOB-1…12 (MOB-9, MOB-10) |
-| **NIST SP 800-63-4 / 800-63B-4** (digital identity, final 2025) ✅ | AUTH-2 (15-char minimum without enforced MFA), AUTH-4, SESS-1 |
-| **NIST SP 800-57** (key management) | CRY-1 |
-| **Mozilla Server Side TLS** — "intermediate" profile | TLS-1 |
-| **CISA Known Exploited Vulnerabilities (KEV)** | VULN-2, §8 severity |
-| **CISA Secure by Design pledge** | SBD-1 |
-| **"The lethal trifecta"** — Simon Willison, 2025-06 ✅ | AGT-4 |
-| **Model Context Protocol specification 2025-11-25** — authorization ✅ | AI-7 |
-| **OpenSSF Security-Focused Guide for AI Code Assistant Instructions** (2025) ✅ | §2C "Instruction files", AGT-16 |
-| **OpenSSF Scorecard** | VULN-6, `templates/github/scorecard.yml` |
-| **OpenSSF OSPS Baseline** | SUP-7 |
-| **SLSA** (Build L2+) | SEC-32, SUP-7 |
+| [**OWASP ASVS 5.0**](https://owasp.org/www-project-application-security-verification-standard/), Levels 1–2 | §2B (INP, BL, BRW, FILE, AUTH, SESS, AZ, TOK, CRY, TLS, CFG, DATA, SLOG); requirement-by-requirement map in `mappings/ASVS-5.0.md` |
+| [**OWASP Top 10**](https://owasp.org/www-project-top-ten/) (web) | §2 SEC-1…32, §2A, APP_REVIEW §9.1 |
+| [**OWASP API Security Top 10**](https://owasp.org/API-Security/) | API-12, API-4, PERF-3, SEC-5/6/7 |
+| [**OWASP Top 10 for LLM Applications**](https://genai.owasp.org/llm-top-10/) (LLM01, LLM07–LLM10) | SEC-19, AI-1…9 |
+| [**OWASP Top 10 for Agentic Applications**](https://genai.owasp.org/) (2026) ◐ item names | SEC-19, AGT-4, AGT-9 (memory poisoning) |
+| [**OWASP Password Storage**](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) parameters (Argon2id m ≥ 19 MiB, t ≥ 2; bcrypt cost ≥ 10) | SEC-22, CRY-3 |
+| [**OWASP MASVS**](https://mas.owasp.org/MASVS/) / [**MASTG**](https://mas.owasp.org/MASTG/) (incl. MASVS-RESILIENCE, MASTG BEST-0036/37) | §6C MOB-1…12 (MOB-9, MOB-10) |
+| [**NIST SP 800-63-4 / 800-63B-4**](https://pages.nist.gov/800-63-4/) (digital identity, final 2025) ✅ | AUTH-2 (15-char minimum without enforced MFA), AUTH-4, SESS-1 |
+| [**NIST SP 800-57**](https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final) (key management) | CRY-1 |
+| [**Mozilla Server Side TLS**](https://wiki.mozilla.org/Security/Server_Side_TLS) — "intermediate" profile | TLS-1 |
+| [**CISA Known Exploited Vulnerabilities (KEV)**](https://www.cisa.gov/known-exploited-vulnerabilities-catalog) | VULN-2, §8 severity |
+| [**CISA Secure by Design pledge**](https://www.cisa.gov/securebydesign/pledge) | SBD-1 |
+| [**"The lethal trifecta"**](https://simonwillison.net/2025/Jun/16/the-lethal-trifecta/) — Simon Willison, 2025-06 ✅ | AGT-4 |
+| [**Model Context Protocol specification 2025-11-25**](https://modelcontextprotocol.io/specification/2025-11-25) — [authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) ✅ | AI-7 |
+| [**OpenSSF Security-Focused Guide for AI Code Assistant Instructions**](https://best.openssf.org/Security-Focused-Guide-for-AI-Code-Assistant-Instructions) (2025) ✅ | §2C "Instruction files", AGT-16 |
+| [**OpenSSF Scorecard**](https://github.com/ossf/scorecard) | VULN-6, `templates/github/scorecard.yml` |
+| [**OpenSSF OSPS Baseline**](https://baseline.openssf.org/) | SUP-7 |
+| [**SLSA**](https://slsa.dev/) (Build L2+) | SEC-32, SUP-7 |
 | STRIDE (threat modelling) | SEC-20 |
 
 ## Protocols, formats & web platform
 
 | Source | Informs |
 |---|---|
-| RFC 9457 Problem Details for HTTP APIs | API-5, CORE-7, CORE-12 |
-| RFC 3339 timestamps | LOG-1, API-6 |
-| RFC 3986 URI syntax | UX-6 (`mailto:` encoding) |
-| RFC 6266 / RFC 5987 (Content-Disposition, filename encoding) | FILE-2 |
-| RFC 6238 TOTP | AUTH-5, CRY-3 |
-| RFC 9728 OAuth Protected Resource Metadata · RFC 8707 Resource Indicators · OAuth 2.1 + PKCE (S256) | AI-7, SEC-25, TOK-1…3 |
-| OpenID Connect (`iss`/`sub`, `acr`/`amr`, back-channel logout) | AUTH-6, TOK-2/3, SESS-5 |
-| `security.txt` (RFC 9116) | WEB-9, VULN-1 |
-| JSON Merge Patch · `ETag`/`If-Match` | API-9 |
+| [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457) Problem Details for HTTP APIs | API-5, CORE-7, CORE-12 |
+| [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339) timestamps | LOG-1, API-6 |
+| [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986) URI syntax | UX-6 (`mailto:` encoding) |
+| [RFC 6266](https://www.rfc-editor.org/rfc/rfc6266) / [RFC 5987](https://www.rfc-editor.org/rfc/rfc5987) (Content-Disposition, filename encoding) | FILE-2 |
+| [RFC 6238](https://www.rfc-editor.org/rfc/rfc6238) TOTP | AUTH-5, CRY-3 |
+| [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) OAuth Protected Resource Metadata · [RFC 8707](https://www.rfc-editor.org/rfc/rfc8707) Resource Indicators · [OAuth 2.1](https://oauth.net/2.1/) + PKCE (S256) | AI-7, SEC-25, TOK-1…3 |
+| [OpenID Connect](https://openid.net/developers/specs/) (`iss`/`sub`, `acr`/`amr`, back-channel logout) | AUTH-6, TOK-2/3, SESS-5 |
+| `security.txt` ([RFC 9116](https://www.rfc-editor.org/rfc/rfc9116)) | WEB-9, VULN-1 |
+| JSON Merge Patch ([RFC 7396](https://www.rfc-editor.org/rfc/rfc7396)) · `ETag`/`If-Match` | API-9 |
 | `Deprecation` / `Sunset` headers | API-11 |
-| **OpenTelemetry** log data model + semantic conventions; **W3C Trace Context** | LOG-1…10, AGT-10 |
-| **W3C Design Tokens (DTCG)** format | THEME-1…12, kit `design-tokens/` |
-| WebAuthn / passkeys (conditional UI) | AUTH-4, WEB-22 |
-| CSP (nonces/hashes, `strict-dynamic`), HSTS, Trusted Types, Fetch Metadata (`Sec-Fetch-Site`), COOP/CORP/COEP, Subresource Integrity, `Clear-Site-Data` | SEC-14, BRW-1…5, WEB-3, WEB-6, WEB-18…21, SESS-3 |
-| Global Privacy Control (`Sec-GPC`) | PRIV-1 |
-| Core Web Vitals (LCP, INP, CLS) · Long Animation Frames · bfcache · Speculation Rules · `content-visibility` | PERF-1, PERF-18, PERF-22…25 |
-| Baseline ("widely available") · browserslist | COMPAT-1 |
+| [**OpenTelemetry** log data model](https://opentelemetry.io/docs/specs/otel/logs/data-model/) + [semantic conventions](https://opentelemetry.io/docs/specs/semconv/); [**W3C Trace Context**](https://www.w3.org/TR/trace-context/) | LOG-1…10, AGT-10 |
+| [**Design Tokens Community Group (DTCG)**](https://www.designtokens.org/) format | THEME-1…12, kit `design-tokens/` |
+| [WebAuthn](https://www.w3.org/TR/webauthn-3/) / [passkeys](https://passkeys.dev/) (conditional UI) | AUTH-4, WEB-22 |
+| CSP (nonces/hashes, `strict-dynamic`), HSTS, [Trusted Types](https://www.w3.org/TR/trusted-types/), [Fetch Metadata](https://www.w3.org/TR/fetch-metadata/) (`Sec-Fetch-Site`), COOP/CORP/COEP, Subresource Integrity, `Clear-Site-Data` | SEC-14, BRW-1…5, WEB-3, WEB-6, WEB-18…21, SESS-3 |
+| [Global Privacy Control](https://globalprivacycontrol.org/) (`Sec-GPC`) | PRIV-1 |
+| [Core Web Vitals](https://web.dev/articles/vitals) (LCP, INP, CLS) · Long Animation Frames · [bfcache](https://web.dev/articles/bfcache) · [Speculation Rules](https://developer.chrome.com/docs/web-platform/prerender-pages) · `content-visibility` | PERF-1, PERF-18, PERF-22…25 |
+| [Baseline](https://web.dev/baseline) ("widely available") · browserslist | COMPAT-1 |
 | `PopScope` / predictive back, Android edge-to-edge (Android 16) | STORE-3 |
 
 ## Accessibility
 
 | Source | Informs |
 |---|---|
-| **WCAG 2.2 AA** | UX-5, THEME-7 (contrast at build), TEST-13 |
-| **EN 301 549** · **European Accessibility Act** ◐ (app as product vs service) | REG-3 |
+| [**WCAG 2.2 AA**](https://www.w3.org/TR/WCAG22/) | UX-5, THEME-7 (contrast at build), TEST-13 |
+| **EN 301 549** · [**European Accessibility Act**](https://eur-lex.europa.eu/eli/dir/2019/882/oj) ◐ (app as product vs service) | REG-3 |
 | axe-core / Flutter `meetsGuideline` | TEST-13 |
 
 ## Law & regulation
 
 | Source | Informs |
 |---|---|
-| **EU Cyber Resilience Act** — Regulation (EU) 2024/2847, Art. 14 reporting from 2026-09-11 ✅ (◐ scope for unmonetised solo OSS) | REG-1 |
-| **EU AI Act** — Regulation (EU) 2024/1689, Art. 50 transparency from 2026-08-02 ✅ | AI-8 |
-| **GDPR** — Regulation (EU) 2016/679: Art. 30 records, DPAs, transfers (EU–US Data Privacy Framework / SCCs; appeal C-703/25 P pending), DPIA | REG-2, SEC-13, DATA-1, PRIV-3 |
-| **California CCPA regulations** — opt-out preference signals (2026-01-01) ✅ (◐ list of other states) | PRIV-1 |
+| [**EU Cyber Resilience Act**](https://eur-lex.europa.eu/eli/reg/2024/2847/oj) — Regulation (EU) 2024/2847, Art. 14 reporting from 2026-09-11 ✅ (◐ scope for unmonetised solo OSS) | REG-1 |
+| [**EU AI Act**](https://eur-lex.europa.eu/eli/reg/2024/1689/oj) — Regulation (EU) 2024/1689, Art. 50 transparency from 2026-08-02 ✅ | AI-8 |
+| [**GDPR**](https://eur-lex.europa.eu/eli/reg/2016/679/oj) — Regulation (EU) 2016/679: Art. 30 records, DPAs, transfers (EU–US Data Privacy Framework / SCCs; appeal C-703/25 P pending), DPIA | REG-2, SEC-13, DATA-1, PRIV-3 |
+| [**California CCPA regulations**](https://cppa.ca.gov/regulations/) — opt-out preference signals (2026-01-01) ✅ (◐ list of other states) | PRIV-1 |
 | **Texas SB 2420** (app-store age assurance) ✅ | STORE-6 |
 
 ## App store & platform vendor policies
 
 | Source | Informs |
 |---|---|
-| **Apple App Review Guidelines** 5.1.1(v) account deletion · 4.8 login services · 5.1.2(i) data to third-party AI ✅ | STORE-4, STORE-5, AI-9 |
+| [**Apple App Review Guidelines**](https://developer.apple.com/app-store/review/guidelines/) 5.1.1(v) account deletion · 4.8 login services · 5.1.2(i) data to third-party AI ✅ | STORE-4, STORE-5, AI-9 |
 | Apple: builds with **Xcode 26 / iOS 26 SDK** (from 2026-04-28) ✅; privacy manifest & required-reason APIs; Declared Age Range | STORE-1, MOB-8, STORE-6 |
-| **Google Play**: target API **36** for updates (from 2026-08-31) ✅; **16 KB page size** (from 2027-02-01) ✅; account-deletion URL; Data safety form; Android vitals bad-behaviour thresholds (crash 1.09 %, ANR 0.47 %) ✅; photo-picker / foreground-service / exact-alarm policies; Play Age Signals; Play Integrity | STORE-1…8, MOB-5, MOB-8, PRIV-2 |
-| **Claude Code documentation** — permissions, sandboxing, hooks, plugins & marketplaces, headless mode, settings (code.claude.com/docs) ✅ | AGT-1…7, the plugin itself |
-| **Next.js** — data-security guide; CVE-2025-29927 (middleware auth bypass) ✅; CVE-2025-55182 (React Server Components) ✅; Next 16 conventions (`proxy.ts`, async request APIs) | NEXT-1…6, COMPAT-5 |
-| **Supabase** — publishable/secret API keys and legacy-key retirement ✅; `supabase db advisors` ✅; RLS performance guidance ✅; leaked-password protection | SUPA-1…4, SEC-8 |
-| **Firebase** — App Check (App Attest / Play Integrity), Analytics consent mode, FCM HTTP v1 | FB-1, FB-2 |
-| **Flutter / Dart** — `--dart-define` values are compiled in; Swift Package Manager (CocoaPods trunk read-only 2026-12-02) ✅ | FLT-1…4 |
-| **Microsoft Azure** — Key Vault RBAC + purge protection ◐; Azure Files soft delete & backup ✅; Static Web Apps PR environments are public ✅; Defender for Cloud Foundational CSPM ✅ | AZR-1…3, WEB-17 |
-| **Vercel** — Deployment Protection | WEB-17 |
-| **Tailwind CSS v4** (CSS-first `@theme`, Safari 16.4 floor) ✅ | COMPAT-1, COMPAT-4, THEME-1; kit `tailwind4` output (compiled with the v4.3.3 CLI) |
-| **Node.js release schedule** (Node 24 maintenance 2026-10-20, Node 26 LTS 2026-10-28) ✅ · **TypeScript 6** ✅ (◐ 7.0 date) · **ESLint flat config** | COMPAT-2, COMPAT-3, COMPAT-6 |
+| **Google Play**: [target API](https://developer.android.com/google/play/requirements/target-sdk) **36** for updates (from 2026-08-31) ✅; [**16 KB page size**](https://developer.android.com/guide/practices/page-sizes) (from 2027-02-01) ✅; account-deletion URL; Data safety form; [Android vitals](https://developer.android.com/topic/performance/vitals) bad-behaviour thresholds (crash 1.09 %, ANR 0.47 %) ✅; photo-picker / foreground-service / exact-alarm policies; Play Age Signals; Play Integrity | STORE-1…8, MOB-5, MOB-8, PRIV-2 |
+| **Claude Code documentation** — [permissions](https://code.claude.com/docs/en/permissions), [sandboxing](https://code.claude.com/docs/en/sandboxing), [hooks](https://code.claude.com/docs/en/hooks), [plugins & marketplaces](https://code.claude.com/docs/en/plugins), [settings](https://code.claude.com/docs/en/settings), headless mode ✅ | AGT-1…7, the plugin itself |
+| **Next.js** — [data-security guide](https://nextjs.org/docs/app/guides/data-security); [CVE-2025-29927](https://nvd.nist.gov/vuln/detail/CVE-2025-29927) (middleware auth bypass) ✅; [CVE-2025-55182](https://nvd.nist.gov/vuln/detail/CVE-2025-55182) (React Server Components) ✅; Next 16 conventions (`proxy.ts`, async request APIs) | NEXT-1…6, COMPAT-5 |
+| **Supabase** — [publishable/secret API keys](https://supabase.com/docs/guides/api/api-keys) and legacy-key retirement ✅; [database advisors](https://supabase.com/docs/guides/database/database-advisors) ✅; [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security) performance guidance ✅; leaked-password protection | SUPA-1…4, SEC-8 |
+| **Firebase** — [App Check](https://firebase.google.com/docs/app-check) (App Attest / Play Integrity), Analytics consent mode, FCM HTTP v1 | FB-1, FB-2 |
+| **Flutter / Dart** — `--dart-define` values are compiled in; [Swift Package Manager](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers) (CocoaPods trunk read-only 2026-12-02) ✅ | FLT-1…4 |
+| **Microsoft Azure** — [Key Vault RBAC](https://learn.microsoft.com/azure/key-vault/general/rbac-guide) + purge protection ◐; Azure Files soft delete & backup ✅; [Static Web Apps PR environments](https://learn.microsoft.com/azure/static-web-apps/review-publish-pull-requests) are public ✅; Defender for Cloud Foundational CSPM ✅ | AZR-1…3, WEB-17 |
+| **Vercel** — [Deployment Protection](https://vercel.com/docs/deployment-protection) | WEB-17 |
+| [**Tailwind CSS v4**](https://tailwindcss.com/docs/theme) (CSS-first `@theme`, Safari 16.4 floor) ✅ | COMPAT-1, COMPAT-4, THEME-1; kit `tailwind4` output (compiled with the v4.3.3 CLI) |
+| [**Node.js release schedule**](https://nodejs.org/en/about/previous-releases) (Node 24 maintenance 2026-10-20, Node 26 LTS 2026-10-28) ✅ · **TypeScript 6** ✅ (◐ 7.0 date) · **ESLint flat config** | COMPAT-2, COMPAT-3, COMPAT-6 |
 
 ## Supply chain & lifecycle
 
 | Source | Informs |
 |---|---|
-| **pnpm 11** `minimumReleaseAge`, build allow-list ✅ · Dependabot `cooldown` ✅ · Renovate `minimumReleaseAge` ✅ | NPM-1, SUP-1, the plugin's install hook |
-| **npm trusted publishing** (OIDC) + provenance, `npm audit signatures` ✅ | SUP-2 |
-| **GitHub immutable releases**, artifact attestations (`gh attestation verify`) ✅ | SUP-3, SUP-4, SEC-32 |
-| **Docker Hardened Images** (Apache-2.0), distroless, Chainguard ✅ | SUP-5, SEC-16 |
-| `uv.lock` / `--require-hashes` (✅) · PEP 751 `pylock.toml` (◐ pip support) | SUP-6 |
-| **endoflife.date** | LIFE-1, WEB-16 |
-| **OSV** (osv.dev) | SEC-15, WEB-16, VULN-3, the plugin's `verify_dependency` |
-| HIBP Pwned Passwords (k-anonymity) | AUTH-2 |
+| [**pnpm 11**](https://pnpm.io/settings) `minimumReleaseAge`, build allow-list ✅ · [Dependabot `cooldown`](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference) ✅ · Renovate `minimumReleaseAge` ✅ | NPM-1, SUP-1, the plugin's install hook |
+| [**npm trusted publishing**](https://docs.npmjs.com/trusted-publishers) (OIDC) + provenance, `npm audit signatures` ✅ | SUP-2 |
+| [**GitHub immutable releases**](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases), [artifact attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) (`gh attestation verify`) ✅ | SUP-3, SUP-4, SEC-32 |
+| [**Docker Hardened Images**](https://docs.docker.com/dhi/) (Apache-2.0), distroless, Chainguard ✅ | SUP-5, SEC-16 |
+| `uv.lock` / `--require-hashes` (✅) · [PEP 751](https://peps.python.org/pep-0751/) `pylock.toml` (◐ pip support) | SUP-6 |
+| [**endoflife.date**](https://endoflife.date/) | LIFE-1, WEB-16 |
+| [**OSV**](https://osv.dev/) | SEC-15, WEB-16, VULN-3, the plugin's `verify_dependency` |
+| [HIBP Pwned Passwords](https://haveibeenpwned.com/API/v3) (k-anonymity) | AUTH-2 |
 | Slopsquatting / typosquatting research | SEC-31, the plugin's typosquat hint |
 
 ## Engineering practice
 
 | Source | Informs |
 |---|---|
-| **The Twelve-Factor App** | OPS-8, CORE-1 |
-| **Google SRE** — SLOs, error budgets, burn-rate alerting, blameless postmortems | REL-1…5, LOG-3, LOG-9 |
-| **DORA** metrics | OPS-9 |
+| [**The Twelve-Factor App**](https://12factor.net/) | OPS-8, CORE-1 |
+| [**Google SRE**](https://sre.google/books/) — SLOs, error budgets, burn-rate alerting, blameless postmortems | REL-1…5, LOG-3, LOG-9 |
+| [**DORA**](https://dora.dev/) metrics | OPS-9 |
 | Test pyramid · property-based testing · mutation testing · fuzzing | TEST-1, TEST-10…12 |
-| Architecture Decision Records | REPO-1, CLEAN-8, AGT-11/12 |
-| Conventional Commits | REPO-3 |
+| [Architecture Decision Records](https://adr.github.io/) | REPO-1, CLEAN-8, AGT-11/12 |
+| [Conventional Commits](https://www.conventionalcommits.org/) | REPO-3 |
 
 ## Tools the kit and rules rely on
 
-Semgrep (kit rules + `p/default`, `p/owasp-top-ten`) · gitleaks · osv-scanner · govulncheck · npm audit · pip-audit · trivy
-(fs/config/image) · checkov · zizmor · syft · OpenSSF Scorecard action · Lighthouse CI · `@axe-core/playwright` · size-limit ·
+[Semgrep](https://semgrep.dev/) (kit rules + `p/default`, `p/owasp-top-ten`) · [gitleaks](https://github.com/gitleaks/gitleaks) · [osv-scanner](https://github.com/google/osv-scanner) · govulncheck · npm audit · pip-audit · [trivy](https://github.com/aquasecurity/trivy)
+(fs/config/image) · checkov · [zizmor](https://github.com/zizmorcore/zizmor) · [syft](https://github.com/anchore/syft) · OpenSSF Scorecard action · Lighthouse CI · `@axe-core/playwright` · size-limit ·
 knip / deadcode / vulture · dependency-cruiser / import-linter / depguard · ESLint (+ security, compat) · ruff · mypy/pyright ·
 golangci-lint · swiftlint · `very_good_analysis` · Playwright · Flutter `integration_test` · k6 · Stryker / mutmut ·
 fast-check / hypothesis · `aapt2`, `zipalign`, `supabase db advisors`, `gh`. Each is named in the rule it enforces (§7.1).
+
+## Claude Code plugins & skills the standard uses
+
+The standard's own plugin (this repository) is the always-on layer. §7.4 names the other Claude Code plugins and
+built-in commands agents use at specific moments; the plugins come from Anthropic's
+[official plugin marketplace](https://github.com/anthropics/claude-plugins-official) and the skills from
+[anthropics/skills](https://github.com/anthropics/skills). Docs: [Claude Code plugins](https://code.claude.com/docs/en/plugins).
+
+| When | Plugin / skill / command | Informs |
+|---|---|---|
+| Every session, every repo | **engineering-standard** (this repo): hooks, stack skills, MCP tools, `standard-reviewer` | the whole standard (§7.3) |
+| Before writing a feature | `feature-dev` (explorer → architect → reviewer) | §1 CORE, AGT-11/12 |
+| Before opening a PR | `/security-review` · `/code-review` · `/simplify` | §2, CLEAN-*, AGT-13 |
+| Large branch / pre-release | `/code-review ultra` (cloud multi-agent review) | APP_REVIEW |
+| Supabase / Postgres | `supabase` — Postgres best practices (RLS, indexes, SECURITY DEFINER) | SEC-8, SUPA-* |
+| Azure apps | `azure` — App Insights instrumentation, compliance | LOG-*, AZR-* |
+| Vercel apps | `vercel` — verification, firewall | WEB-17 |
+| Keeping repos aligned | `claude-md-management` — `claude-md-improver` | §2C instruction files |
+| Live verification | `playwright` (browser automation) | TEST-4/6, APP_REVIEW §8.4 |
+| Web UI design | `frontend-design` — pinned companion | THEME-12 |
+| Authoring skills | `skill-creator` — reference only | AGT-16 |
+| Building plugins | `plugin-dev` (structure, hooks, MCP, validation) — used to build this plugin | AGT-7, AGT-16 |
 
 ## Agent-workflow sources (reviewed, pinned)
 
