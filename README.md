@@ -222,6 +222,15 @@ pinned source is re-reviewed before its pin moves. `node bin/sources.mjs --check
 | [caveman](https://github.com/JuliusBrussee/caveman) | distilled | AGT-15, AGT-13 |
 | [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) | companion | THEME-12, UX-1 |
 | [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) | reference | AGT-16 |
+| [docker-destructive-guardrails](https://github.com/docker/skills/tree/main/skills/docker-destructive-guardrails) | distilled | AGT-17 |
+| [Playwright test agents](https://github.com/microsoft/playwright/tree/main/packages/playwright/src/agents) | distilled | AGT-8 |
+| [code-modernization](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization) | distilled | TEST-15 |
+| [Trail of Bits skills (agentic-actions-auditor)](https://github.com/trailofbits/skills) | distilled | AGT-6 |
+| [Sentry skills (gha-security-review, skill-scanner, iterate-pr)](https://github.com/getsentry/skills) | distilled | AGT-6, AGT-5, AGT-4, AGT-9 |
+| [ECC database-migrations](https://github.com/affaan-m/ECC/tree/main/skills/database-migrations) | distilled | COR-7 |
+| [Supabase agent skill](https://github.com/supabase/agent-skills/tree/main/skills/supabase) | distilled | SUPA-5 |
+| [firebase-security-rules-auditor](https://github.com/firebase/agent-skills/tree/main/skills/firebase-security-rules-auditor) | distilled | FB-3 |
+| [Vercel React best practices](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) | distilled | NEXT-7 |
 <!-- sources-readme:end -->
 
 ## Keeping this repo clean (it is public)

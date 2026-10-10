@@ -255,6 +255,16 @@ rmSync(tmp, { recursive: true, force: true })
     t(`AGT-8 guard blocks ${line.trim()}`, !!testLoosening(name, 'x\n', `x\n${line}\n`))
   t('AGT-8 guard allows a quarantined skip', !testLoosening('src/a.test.ts', 'x\n', "x\nit.skip('quarantine @jacob 2026-11-30 flaky #12', () => {})\n"))
 }
+{
+  const { bashViolation } = await import(join(ROOT, 'lib/guards.mjs'))
+  const cwd = ROOT
+  for (const c of ['docker system prune -af', 'docker volume rm data', 'docker compose down -v', 'terraform destroy', 'terraform apply -destroy', 'supabase db reset --linked', 'supabase db push',
+    'az group delete -n rg', 'firebase deploy --project prod-app', 'psql -c "DROP TABLE users"', 'psql -c "DELETE FROM users"', 'rm -rf /', 'rm -rf ../other', 'sudo rm -rf /var/x', 'bash -c "terraform destroy"'])
+    t(`AGT-17 blocks: ${c}`, bashViolation(c, { cwd })?.rule === 'AGT-17')
+  for (const c of ['supabase db reset', 'firebase deploy --project my-dev', 'psql -c "DELETE FROM users WHERE id = 1"', 'rm -rf node_modules', 'docker rm -f test1', 'terraform plan'])
+    t(`AGT-17 allows: ${c}`, bashViolation(c, { cwd }) === null)
+  t('AGT-17 owner override (environment only)', bashViolation('terraform destroy', { cwd, allowDestructive: true }) === null)
+}
 console.log('▸ consume (sources gateway)')
 {
   const { classifyRule, parseGitHub, inventoryFiles, clean, manifestRefs } = await import(join(ROOT, 'bin/consume.mjs'))

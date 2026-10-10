@@ -1,0 +1,22 @@
+{
+  "name": "Playwright test agents",
+  "author": "Microsoft",
+  "kind": "prompt",
+  "disposition": "distilled",
+  "paths": [
+    "packages/playwright/src/agents/playwright-test-healer.agent.md",
+    "packages/playwright/src/agents/playwright-test-generator.agent.md"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-8",
+      "append": "This binds every agent that writes or repairs tests, including test-generation and 'healer' agents: none adds `skip` / `fixme` / `fail` / `todo`, switches to `networkidle` waits or fixed sleeps, or rewrites expectations to match current output; when it can't make a test pass honestly it stops and reports — quarantine (TEST-5) is a human decision."
+    }
+  ],
+  "notes": "The healer agent is told 'Do not ask user questions' and to mark an unfixable test test.fixme() — the opposite of AGT-8; its generator guidance (role-based locators, no networkidle) agrees with the standard.",
+  "repo": "microsoft/playwright",
+  "url": "https://github.com/microsoft/playwright/tree/main/packages/playwright/src/agents",
+  "commit": "d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c",
+  "license": "Apache-2.0",
+  "applied": "2026-10-10"
+}

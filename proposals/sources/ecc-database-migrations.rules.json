@@ -1,0 +1,21 @@
+{
+  "name": "ECC database-migrations",
+  "author": "affaan-m",
+  "kind": "skill",
+  "disposition": "distilled",
+  "paths": [
+    "skills/database-migrations/SKILL.md"
+  ],
+  "amendments": [
+    {
+      "id": "COR-7",
+      "append": "Migrations are safe on a live database: renames and drops go expand → migrate → contract across releases; indexes on existing tables are built `CONCURRENTLY`; a `lock_timeout` is set; a new `NOT NULL` column has a default; schema (DDL) and data backfills are separate migrations; a migration that has run anywhere shared is never edited — a new one corrects it. *Enforced by:* `squawk` (Postgres) or `atlas migrate lint` in CI."
+    }
+  ],
+  "notes": "The repo ships a large hook set (session, shell, file, MCP and subagent events) — only this one skill file was read; nothing installed.",
+  "repo": "affaan-m/ECC",
+  "url": "https://github.com/affaan-m/ECC/tree/main/skills/database-migrations",
+  "commit": "8384d609a0e6dc071503f669cb6a581420e23469",
+  "license": "MIT",
+  "applied": "2026-10-10"
+}

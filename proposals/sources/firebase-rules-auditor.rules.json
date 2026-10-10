@@ -1,0 +1,28 @@
+{
+  "name": "firebase-security-rules-auditor",
+  "author": "Google (Firebase)",
+  "kind": "skill",
+  "disposition": "distilled",
+  "paths": [
+    "skills/firebase-security-rules-auditor/SKILL.md"
+  ],
+  "newRules": [
+    {
+      "prefix": "FB",
+      "level": "MUST",
+      "title": "Firestore and Storage rules are tested as code",
+      "after": "FB-2",
+      "mode": "quick",
+      "text": "Rules take authority (`role`, `isAdmin`, `ownerId`) only from `request.auth` or server-written documents, never from `request.resource.data`; `update` is at least as strict as `create`, so a document can't be created valid and then updated into an escalated state; every written field is type-checked and size-limited; `hasOnly()` / `diff()` are always paired with an ownership check. Emulator tests (`@firebase/rules-unit-testing`) cover, per collection, the denied path and a create-then-escalate attempt (TEST-2).",
+      "modeReason": "security floor (\"ownership\") — never relaxed in quick mode",
+      "modeConfidence": "set",
+      "id": "FB-3"
+    }
+  ],
+  "notes": "Vendor skill (Apache-2.0), prompt-only; written as a red-team persona prompt, which this standard's instruction-file rule avoids — distilled instead of pinned.",
+  "repo": "firebase/agent-skills",
+  "url": "https://github.com/firebase/agent-skills/tree/main/skills/firebase-security-rules-auditor",
+  "commit": "b5735e5baa0d874cb97a23e26ebe93e4501797b9",
+  "license": "Apache-2.0",
+  "applied": "2026-10-10"
+}

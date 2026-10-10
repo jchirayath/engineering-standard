@@ -256,3 +256,46 @@ rules:
           - pattern: $C.createHash($ALG)
           - pattern: $C.createCipheriv($ALG, ...)
       - metavariable-regex: { metavariable: $ALG, regex: "(?i)^['\"](md4|md5|sha1|sha-1|rc4|des|des-ede3?(-cbc)?|bf-.*|aes-\\d+-ecb|.*-ecb)['\"]$" }
+
+  # ── Tests (AGT-8, TEST-4) ─────────────────────────────────────────────────
+  - id: std.web.test-networkidle
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: "Waiting for 'networkidle' is flaky and discouraged by Playwright — wait for a role/text locator or a web-first assertion instead (AGT-8)."
+    metadata: { standard: [AGT-8, TEST-4] }
+    paths: { include: ["*.spec.*", "*.test.*", "**/e2e/**", "**/tests/**", "web.tsx"] }
+    pattern-either:
+      - pattern: $PAGE.waitForLoadState("networkidle", ...)
+      - pattern: '$PAGE.goto($URL, {..., waitUntil: "networkidle", ...})'
+      - pattern: '$PAGE.waitForNavigation({..., waitUntil: "networkidle", ...})'
+
+  - id: std.web.test-fixed-sleep
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: "Fixed sleep in a test — wait for the condition itself (locator / expect.poll / web-first assertion) (AGT-8)."
+    metadata: { standard: [AGT-8, TEST-5] }
+    paths: { include: ["*.spec.*", "*.test.*", "**/e2e/**", "**/tests/**", "web.tsx"] }
+    pattern-either:
+      - pattern: $PAGE.waitForTimeout($MS)
+      - pattern: await new Promise(($R) => setTimeout($R, $MS))
+
+  # ── Server request state (NEXT-7) ─────────────────────────────────────────
+  - id: std.web.server-module-state
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: "Module-level variable assigned inside a server function — concurrent requests share module scope, so one user's data can reach another. Keep it in function scope or React.cache (NEXT-7)."
+    metadata: { standard: [NEXT-7, PERF-27] }
+    paths:
+      include: ["**/app/**", "**/pages/api/**", "**/actions/**", "*.server.*", "web.tsx"]
+      exclude: ["*.test.*", "*.spec.*", "**/node_modules/**"]
+    patterns:
+      - pattern-not-inside: |
+          'use client'
+          ...
+      - pattern-inside: |
+          let $X = $INIT;
+          ...
+      - pattern-either:
+          - pattern-inside: export default async function $F(...) { ... }
+          - pattern-inside: export async function $F(...) { ... }
+      - pattern: $X = $V

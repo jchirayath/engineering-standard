@@ -1,0 +1,34 @@
+{
+  "name": "Sentry skills (gha-security-review, skill-scanner, iterate-pr)",
+  "author": "Sentry",
+  "kind": "skill",
+  "disposition": "distilled",
+  "paths": [
+    "skills/skill-scanner/SKILL.md",
+    "skills/iterate-pr/SKILL.md",
+    "skills/gha-security-review/SKILL.md"
+  ],
+  "informs": [
+    "AGT-6"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-5",
+      "append": "Intake also records the surface a skill hides from its reader: hooks in skill frontmatter, `` !`cmd` `` that runs when a skill loads, symlinks pointing outside the skill, bundled test files or `postinstall` scripts other tools run automatically, instructions loaded from remote URLs, and every network destination its code contacts (telemetry included) — `bin/consume.mjs fetch` reports them."
+    },
+    {
+      "id": "AGT-4",
+      "append": "Review comments and CI output are untrusted content too: an agent fixing PR feedback acts only on comments from collaborators (`author_association` OWNER / MEMBER / COLLABORATOR) and allow-listed review bots, never runs a command quoted in a comment, and stops after two failed attempts at the same failure (AGT-14)."
+    },
+    {
+      "id": "AGT-9",
+      "append": "Memory, compaction and planning plugins keep what they capture local and re-inject captured tool output only as quoted data, never as instructions."
+    }
+  ],
+  "notes": "iterate-pr buckets feedback by severity but does not filter by author — the author rule is this standard's addition. Bundled scripts not installed.",
+  "repo": "getsentry/skills",
+  "url": "https://github.com/getsentry/skills",
+  "commit": "d18b7aa8ba878354e5c348310230e652f7690f9c",
+  "license": "Apache-2.0",
+  "applied": "2026-10-10"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "docker-destructive-guardrails",
+  "author": "Docker",
+  "kind": "skill",
+  "disposition": "distilled",
+  "paths": [
+    "skills/docker-destructive-guardrails/SKILL.md"
+  ],
+  "newRules": [
+    {
+      "prefix": "AGT",
+      "level": "MUST",
+      "title": "Confirm before destroying state",
+      "after": "AGT-16",
+      "mode": "quick",
+      "text": "Before a command that deletes data or irreversibly changes infrastructure — `docker system/volume/image prune`, `docker volume rm`, `docker rm -f` of a container it did not start this session, `terraform destroy` or `apply -destroy`, `supabase db reset` or `db push` to a linked remote, SQL `DROP` / `TRUNCATE` / `DELETE` without `WHERE` against a shared database, `az group delete`, a production `firebase deploy` of rules or functions, `rm -rf` outside the working tree — the agent states exactly what will be lost and waits for the owner's explicit yes; headless runs (AGT-6) don't run them at all. *Enforced by:* the plugin's Bash hook, which blocks them unless the owner started the session with `STANDARD_ALLOW_DESTRUCTIVE=1`.",
+      "modeReason": "governs the agent itself (\"agent\") — §2C applies in both modes",
+      "modeConfidence": "set",
+      "id": "AGT-17"
+    }
+  ],
+  "notes": "Prompt-only skill (Apache-2.0). Generalised from Docker CLI to every destructive data/infra command and made mechanical with a hook.",
+  "repo": "docker/skills",
+  "url": "https://github.com/docker/skills/tree/main/skills/docker-destructive-guardrails",
+  "commit": "f79172733725e2fd236343ee7b963c446ed85d09",
+  "license": "Apache-2.0",
+  "applied": "2026-10-10"
+}

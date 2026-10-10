@@ -176,6 +176,15 @@ Third-party agent projects reach this standard only through the sources gateway 
 | [caveman](https://github.com/JuliusBrussee/caveman) — Julius Brussee | `e20f07e` (v3.2.0) | Apache-2.0 (from 3.0.0; 'Caveman' is a trademark) | distilled | AGT-15, AGT-13 |
 | [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) — Anthropic | `dbd4588` | Apache-2.0 | companion | THEME-12, UX-1 |
 | [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) — Anthropic | `dbd4588` | Apache-2.0 | reference | AGT-16 |
+| [docker-destructive-guardrails](https://github.com/docker/skills/tree/main/skills/docker-destructive-guardrails) — Docker | `f791727` | Apache-2.0 | distilled | AGT-17 |
+| [Playwright test agents](https://github.com/microsoft/playwright/tree/main/packages/playwright/src/agents) — Microsoft | `d9f2fd3` | Apache-2.0 | distilled | AGT-8 |
+| [code-modernization](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization) — Anthropic | `b8e53f1` | Apache-2.0 | distilled | TEST-15 |
+| [Trail of Bits skills (agentic-actions-auditor)](https://github.com/trailofbits/skills) — Trail of Bits | `442fc9d` | CC-BY-SA-4.0 | distilled | AGT-6 |
+| [Sentry skills (gha-security-review, skill-scanner, iterate-pr)](https://github.com/getsentry/skills) — Sentry | `d18b7aa` | Apache-2.0 | distilled | AGT-6, AGT-5, AGT-4, AGT-9 |
+| [ECC database-migrations](https://github.com/affaan-m/ECC/tree/main/skills/database-migrations) — affaan-m | `8384d60` | MIT | distilled | COR-7 |
+| [Supabase agent skill](https://github.com/supabase/agent-skills/tree/main/skills/supabase) — Supabase | `c9be0e9` | MIT | distilled | SUPA-5 |
+| [firebase-security-rules-auditor](https://github.com/firebase/agent-skills/tree/main/skills/firebase-security-rules-auditor) — Google (Firebase) | `b5735e5` | Apache-2.0 | distilled | FB-3 |
+| [Vercel React best practices](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) — Vercel | `063bee9` | MIT (per skill frontmatter; repo licence not declared) | distilled | NEXT-7 |
 <!-- sources-references:end -->
 
 "Distilled" means the idea was rewritten as a rule here, citing the source; none of that project's text or code is loaded by

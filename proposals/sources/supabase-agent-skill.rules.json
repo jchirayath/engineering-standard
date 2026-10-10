@@ -1,0 +1,29 @@
+{
+  "name": "Supabase agent skill",
+  "author": "Supabase",
+  "kind": "skill",
+  "disposition": "distilled",
+  "paths": [
+    "skills/supabase/SKILL.md",
+    "skills/supabase/references/"
+  ],
+  "newRules": [
+    {
+      "prefix": "SUPA",
+      "level": "MUST",
+      "title": "Supabase authorization traps",
+      "after": "SUPA-2",
+      "mode": "quick",
+      "text": "No policy or function authorizes from `user_metadata` / `raw_user_meta_data` (users can edit it, and it appears in `auth.jwt()`); every UPDATE policy has both `USING` and `WITH CHECK`; `TO authenticated` is always paired with an ownership predicate (alone it is authentication, not authorization); `SECURITY DEFINER` functions live outside exposed schemas or have `EXECUTE` revoked from `PUBLIC` and `anon`; the CLI, CI, MCP servers and agents use scoped personal access tokens, never a full-account token; deleting a user revokes their sessions first (access tokens outlive the user). *Test:* a migration lint for `user_metadata` and for UPDATE policies without `WITH CHECK`; pgTAP for cross-user update and post-deletion access.",
+      "modeReason": "security floor (\"authoriz\") — never relaxed in quick mode",
+      "modeConfidence": "set",
+      "id": "SUPA-5"
+    }
+  ],
+  "notes": "Vendor skill (MIT), prompt-only. Could also be pinned as a companion later; distilled so the facts have one owner.",
+  "repo": "supabase/agent-skills",
+  "url": "https://github.com/supabase/agent-skills/tree/main/skills/supabase",
+  "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+  "license": "MIT",
+  "applied": "2026-10-10"
+}

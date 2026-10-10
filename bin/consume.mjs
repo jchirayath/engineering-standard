@@ -27,6 +27,7 @@ const today = () => new Date().toISOString().slice(0, 10)
 export const clean = (v, max = 160) => String(v ?? '').replace(new RegExp('[\\u0000-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u2028-\\u202e\\u2060-\\u206f\\ufeff]', 'g'), '?').slice(0, max)
 const EVENT = /^[A-Za-z][A-Za-z0-9_-]{1,40}$/
 export function parseGitHub(url) {
+  if (/\s/.test(String(url).trim())) throw new Error(`URL contains whitespace: "${clean(url)}" — pass the id with --id`)
   const m = String(url).trim().replace(/\.git$/, '').match(/^(?:https?:\/\/github\.com\/)?([\w.-]+)\/([\w.-]+)(?:\/(?:tree|blob)\/(.+?))?\/?$/)
   if (!m) throw new Error(`not a GitHub repo URL: ${clean(url)}`)
   const rest = m[3] || '', segs = rest ? rest.split('/') : []
@@ -77,6 +78,7 @@ async function fetchCmd(url, idArg) {
   const tree = (await gh(`repos/${full}/git/trees/${commit}?recursive=1`))
   const blobs = tree.tree.filter((t) => t.type === 'blob')
   const inScope = blobs.filter((t) => !scope || t.path === scope || t.path.startsWith(scope + '/'))
+  if (!inScope.length) throw new Error(`no files under "${clean(scope)}" at ${commit.slice(0, 7)} — check the path in the URL`)
   const inv = inventoryFiles(inScope.map((t) => t.path))
   const id = idArg || (scope ? scope.split('/').pop() : g.repo).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
   if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) throw new Error(`bad id "${clean(id)}"`)
@@ -108,7 +110,7 @@ async function fetchCmd(url, idArg) {
     if (!hits.length) unparsed.push(`${r.path} (declared as ${r.kind} in a plugin manifest, not found in the repo)`)
     for (const h of hits) { extra.push(h); if (r.kind === 'hooks' || r.kind === 'mcpServers') inv.manifests.includes(h) || inv.manifests.push(h); else if (!inv.agent.includes(h)) inv.agent.push(h) }
   }
-  const rest = [...new Set([...inv.agent, ...extra, ...inv.hooks, ...inv.docs])].filter((f) => !got.has(f))
+  const rest = [...new Set([...inv.agent, ...extra, ...inv.hooks, ...inv.docs, ...inv.executable.filter((f) => (size[f] ?? 0) < 100_000)])].filter((f) => !got.has(f))
   const MAX = 200, small = rest.filter((f) => (size[f] ?? 0) < 300_000)
   unread.push(...rest.filter((f) => (size[f] ?? 0) >= 300_000).map((f) => `${f} (over 300 KB)`), ...small.slice(MAX).map((f) => `${f} (over the ${MAX}-file limit)`))
   for (const f of small.slice(0, MAX)) await download(f)
@@ -120,7 +122,7 @@ async function fetchCmd(url, idArg) {
     for (const f of rootManifests) {
       await download(f)
       try { const j = readJSON(join(dir, f)), h = j.hooks && typeof j.hooks === 'object' ? j.hooks : (/hooks/i.test(f) ? j : null)
-        if (h && !Array.isArray(h)) repoHookEvents.push(...Object.keys(h).filter((k) => EVENT.test(k))) } catch { unparsed.push(`${f} (repo-level manifest unreadable)`) }
+        if (h && !Array.isArray(h)) repoHookEvents.push(...Object.keys(h).filter((k) => EVENT.test(k) && Array.isArray(h[k]))) } catch { unparsed.push(`${f} (repo-level manifest unreadable)`) }
     }
   }
   let hookEvents = []
@@ -128,10 +130,28 @@ async function fetchCmd(url, idArg) {
     try {
       const j = readJSON(join(dir, f)), h = j.hooks && typeof j.hooks === 'object' ? j.hooks : (/hooks/i.test(f) ? j : null)
       if (Array.isArray(h)) { for (const e of h) if (e && typeof e === 'object') hookEvents.push(...Object.values(e).filter((v) => typeof v === 'string' && EVENT.test(v) && /start|stop|submit|tool|prompt|session|compact|notification/i.test(v))) }
-      else if (h) { const keys = Object.keys(h).filter((k) => k !== 'description'); hookEvents.push(...keys.filter((k) => EVENT.test(k))); if (keys.some((k) => !EVENT.test(k))) unparsed.push(`${f} (hook keys that are not event names)`) }
+      else if (h) { const keys = Object.keys(h).filter((k) => Array.isArray(h[k])); hookEvents.push(...keys.filter((k) => EVENT.test(k))); if (keys.some((k) => !EVENT.test(k))) unparsed.push(`${f} (hook keys that are not event names)`) }
     } catch (e) { unparsed.push(`${f} (${e.code === 'ENOENT' ? 'not downloaded' : 'not valid JSON'})`) }
   }
   hookEvents = [...new Set(hookEvents)]
+  // Surface a skill hides from its reader (AGT-5): things that run without the model choosing to run them,
+  // and every place the bundle reaches out to. Read from downloaded copies; never executed.
+  const read = (f) => { try { return readFileSync(join(dir, f), 'utf8') } catch { return null } }
+  const hostsIn = (t) => [...new Set([...(t || '').matchAll(/https?:\/\/([a-z0-9.-]+\.[a-z]{2,})/gi)].map((m) => m[1].toLowerCase()))]
+  const SELF = new Set(['github.com', 'raw.githubusercontent.com', 'www.apache.org', 'opensource.org', 'creativecommons.org', 'spdx.org'])
+  const hidden = { frontmatterHooks: [], loadTimeCommands: [], symlinks: [], autoRunTests: [], installScripts: [], remoteInstructionHosts: [], codeNetworkHosts: [] }
+  for (const f of inv.agent) {
+    const t = read(f); if (t == null) continue
+    const fm = (t.match(/^---\n([\s\S]*?)\n---/) || [])[1] || ''
+    if (/^hooks\s*:/m.test(fm)) hidden.frontmatterHooks.push(f)
+    if (/!`[^`\n]+`/.test(t)) hidden.loadTimeCommands.push(f)
+    hidden.remoteInstructionHosts.push(...hostsIn(t).filter((h) => !SELF.has(h)))
+  }
+  hidden.symlinks = tree.tree.filter((t) => t.mode === '120000' && (!scope || t.path.startsWith(scope + '/') || t.path === scope)).map((t) => t.path)
+  hidden.autoRunTests = inScope.map((t) => t.path).filter((p) => /(^|\/)(conftest\.py|test_[^/]*\.py|[^/]*_test\.py|[^/]*\.(test|spec)\.[cm]?[jt]sx?)$/.test(p))
+  for (const f of inv.manifests.filter((x) => /package\.json$/.test(x))) { try { const sc = readJSON(join(dir, f)).scripts || {}; for (const k of ['preinstall', 'install', 'postinstall', 'prepare', 'prepublish']) if (sc[k]) hidden.installScripts.push(`${f}: ${k}`) } catch {} }
+  for (const f of inv.executable) hidden.codeNetworkHosts.push(...hostsIn(read(f)).filter((h) => !SELF.has(h)))
+  hidden.remoteInstructionHosts = [...new Set(hidden.remoteInstructionHosts)].slice(0, 30); hidden.codeNetworkHosts = [...new Set(hidden.codeNetworkHosts)].slice(0, 30)
   const hookCode = inv.hooks.length > 0 || inv.executable.some((f) => /hook/i.test(f)) || refs.some((r) => r.kind === 'hooks')
   const complete = !tree.truncated && !unread.some((u) => MANIFEST.test(u.split(' (')[0]) || /hook/i.test(u)) && !unparsed.length
   const hooksSignal = hookEvents.length ? 'present' : (hookCode || !complete ? 'unknown — inspect manually' : 'none')
@@ -143,12 +163,15 @@ async function fetchCmd(url, idArg) {
     signals: { hooks: hooksSignal, hookEvents, repoLevelHookEvents: [...new Set(repoHookEvents)], injectsIntoSubagents: yesNo(hookEvents.includes('SubagentStart')),
       injectsEveryPrompt: yesNo(hookEvents.some((e) => /UserPromptSubmit|userPromptSubmitted|beforeSubmitPrompt/.test(e))),
       hasMCP: inv.manifests.some((f) => /\.mcp\.json$/.test(f)) || refs.some((r) => r.kind === 'mcpServers') || null, executableCode: inv.executable.length > 0, complete },
+    hidden: Object.fromEntries(Object.entries(hidden).map(([k, v]) => [k, C(v)])),
     unread: C(unread), unparsed: C(unparsed),
     files: { agentFacing: C(inv.agent), manifests: C(inv.manifests), hooks: C(inv.hooks), executable: C(inv.executable.slice(0, 200)), downloaded: C([...got]) },
     suspiciousNames: C(inScope.map((t) => t.path).filter((p) => clean(p, 1e4) !== p)) }
   writeJSON(P('local/consume', id, 'inventory.json'), inventory)
   console.log(`✓ ${full}@${commit.slice(0, 7)} (ref ${clean(ref, 60)}, ${inventory.license}${meta.archived ? ', ARCHIVED' : ''}) → local/consume/${id}/`)
   console.log(`  ${inScope.length} files · ${inv.agent.length} agent-facing · ${inv.executable.length} executable · hooks: ${hookEvents.length ? hookEvents.join(', ') : hooksSignal}${inventory.signals.hasMCP ? ' · MCP server' : ''}`)
+  const H = inventory.hidden, flagged = Object.entries(H).filter(([, v]) => v.length)
+  if (flagged.length) console.log(`  ⚠ hidden surface (AGT-5): ${flagged.map(([k, v]) => `${k} ${v.length}`).join(' · ')}\n${flagged.map(([k, v]) => `      ${k}: ${v.slice(0, 6).join(', ')}${v.length > 6 ? ' …' : ''}`).join('\n')}`)
   if (repoHookEvents.length) console.log(`  ⚠ repo-level hooks (run if the whole plugin is installed, not if only this path is distilled): ${[...new Set(repoHookEvents)].join(', ')}`)
   if (unread.length || unparsed.length) console.log(`  ⚠ ${unread.length + unparsed.length} file(s) not fully read — signals are incomplete; inspect on GitHub at ${commit.slice(0, 7)}:\n${C([...unread, ...unparsed]).slice(0, 15).map((u) => '      ' + u).join('\n')}`)
   if (inventory.suspiciousNames.length) console.log(`  ⚠ ${inventory.suspiciousNames.length} file name(s) contain control or bidi characters — treat this repo with extra suspicion`)

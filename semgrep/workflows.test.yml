@@ -1,0 +1,24 @@
+name: ai-review
+on: [issues, pull_request]
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: anthropics/claude-code-action@0000000000000000000000000000000000000000
+        with:
+          # ruleid: std.workflows.ai-allow-all-users
+          allowed_non_write_users: "*"
+          # ruleid: std.workflows.ai-unrestricted-tools
+          claude_args: --allowedTools "Bash(*)"
+          prompt: |
+            Triage this issue:
+            # ruleid: std.workflows.ai-prompt-event-data
+            ${{ github.event.issue.title }}
+            # ok: std.workflows.ai-prompt-event-data
+            Issue number ${{ github.event.issue.number }} in ${{ github.repository }}
+      - id: plan
+        run: echo "done"
+      # ruleid: std.workflows.ai-eval-output
+      - run: eval "${{ steps.plan.outputs.command }}"
+      # ok: std.workflows.ai-eval-output
+      - run: echo "${{ steps.plan.outputs.summary }}"

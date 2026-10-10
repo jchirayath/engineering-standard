@@ -24,8 +24,8 @@ echo "Adopting engineering-standard v$VERSION into $REPO${SITE:+ (website, host:
 # 1. Lint rules (kit-owned). Fixtures stay in the kit; only rules are vendored.
 mkdir -p "$REPO/.semgrep/standard"
 rm -f "$REPO/.semgrep/standard/"*.yml
-cp "$KIT"/semgrep/*.yml "$REPO/.semgrep/standard/"
-echo "  updated  .semgrep/standard/ ($(ls "$KIT"/semgrep/*.yml | wc -l | tr -d ' ') rule files)"
+for f in "$KIT"/semgrep/*.yml; do case "$f" in *.test.yml) ;; *) cp "$f" "$REPO/.semgrep/standard/" ;; esac; done   # *.test.yml are rule fixtures
+echo "  updated  .semgrep/standard/ ($(ls "$KIT"/semgrep/*.yml | grep -vc '\.test\.yml$') rule files)"
 copy_if_absent "$KIT/semgrep/semgrepignore.template" "$REPO/.semgrepignore"
 
 # 2. Tooling (kit-owned).

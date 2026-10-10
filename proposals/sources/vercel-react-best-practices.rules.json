@@ -1,0 +1,29 @@
+{
+  "name": "Vercel React best practices",
+  "author": "Vercel",
+  "kind": "skill",
+  "disposition": "distilled",
+  "paths": [
+    "skills/react-best-practices/rules/server-no-shared-module-state.md",
+    "skills/react-best-practices/SKILL.md"
+  ],
+  "newRules": [
+    {
+      "prefix": "NEXT",
+      "level": "MUST",
+      "title": "No request data in server module scope",
+      "after": "NEXT-6",
+      "mode": "quick",
+      "text": "Server components, route handlers and Server Actions keep request- and user-scoped data in function scope (or `React.cache` / request context), never in mutable module-level variables — concurrent renders share the module and can serve one user's data to another (PERF-27). *Enforced by:* semgrep + review lens.",
+      "modeReason": "placed with quick rule NEXT-6 and no client-only signal",
+      "modeConfidence": "set",
+      "id": "NEXT-7"
+    }
+  ],
+  "notes": "Repo licence reported as NOASSERTION; the skill's frontmatter says MIT. Already installed via the Vercel plugin; its 70 performance rules overlap PERF-14…26.",
+  "repo": "vercel-labs/agent-skills",
+  "url": "https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices",
+  "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+  "license": "MIT (per skill frontmatter; repo licence not declared)",
+  "applied": "2026-10-10"
+}

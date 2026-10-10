@@ -1,0 +1,22 @@
+{
+  "name": "code-modernization",
+  "author": "Anthropic",
+  "kind": "plugin",
+  "disposition": "distilled",
+  "paths": [
+    "plugins/code-modernization/README.md",
+    "plugins/code-modernization/commands/"
+  ],
+  "amendments": [
+    {
+      "id": "TEST-15",
+      "append": "The red run counts only if it fails at an assertion — a compile, import, setup or timeout failure proves nothing, and the run's output shows the failing assertion."
+    }
+  ],
+  "notes": "Plugin ships Python hooks and telemetry — not installed; only its proof discipline is distilled. Its proof discipline (canary break must turn tests red; verdict computed by a script) informs TEST-15 now and the upgrade-proof rule proposed for client mode (v1.4 scan, tier 2).",
+  "repo": "anthropics/claude-plugins-official",
+  "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization",
+  "commit": "b8e53f1c05dff3b6d751297f6527990ffc81c2f4",
+  "license": "Apache-2.0",
+  "applied": "2026-10-10"
+}

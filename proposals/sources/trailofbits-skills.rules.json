@@ -1,0 +1,21 @@
+{
+  "name": "Trail of Bits skills (agentic-actions-auditor)",
+  "author": "Trail of Bits",
+  "kind": "skill",
+  "disposition": "distilled",
+  "paths": [
+    "plugins/agentic-actions-auditor/skills/agentic-actions-auditor/SKILL.md"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-6",
+      "append": "Workflows that run an AI agent never place event data in its prompt — no `${{ github.event.* }}` (or an env var carrying it) and no `gh issue view` / `gh pr view` output or CI logs, unless an AGT-4 leg is removed — never `eval` or execute the agent's output, never allow every user to trigger it (`allowed_non_write_users: '*'`), and never grant a tool that accepts shell substitution (`Bash(*)`). *Enforced by:* the kit's workflow semgrep rules + `zizmor`."
+    }
+  ],
+  "notes": "CC-BY-SA-4.0: ideas only, no text copied. Repo ships hooks and an MCP server — not installed.",
+  "repo": "trailofbits/skills",
+  "url": "https://github.com/trailofbits/skills",
+  "commit": "442fc9d6c89b1e937e6f7a477e7071ea75fcbea4",
+  "license": "CC-BY-SA-4.0",
+  "applied": "2026-10-10"
+}

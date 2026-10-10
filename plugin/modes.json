@@ -120,7 +120,10 @@
       "THEME-7",
       "THEME-8",
       "THEME-4",
-      "THEME-12"
+      "THEME-12",
+      "SUPA-5",
+      "FB-3",
+      "NEXT-7"
     ],
     "quickExclude": [
       "INP-5",
@@ -157,7 +160,9 @@
       "CLEAN-13>TEST-0": "'the mode's tests (TEST-14 or TEST-0)' — picks by mode",
       "TEST-15>TEST-0": "'TEST-14 / TEST-0' — picks by mode",
       "THEME-12>PERF-16": "scoped 'In client mode also'",
-      "THEME-12>UX-1": "scoped 'In client mode also'"
+      "THEME-12>UX-1": "scoped 'In client mode also'",
+      "AGT-17>OPS-2": "scoped 'in client mode the production forms run only from CI'",
+      "AGT-17>SEC-32": "scoped 'in client mode the production forms run only from CI'"
     }
   }
 }

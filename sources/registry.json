@@ -144,6 +144,186 @@
         "AGT-16"
       ],
       "notes": "Its eval loop runs a nested `claude -p` with the user's full permissions and writes into .claude/commands/; it encourages long, 'pushy' skills that restate domain rules. Use only per AGT-16 (throwaway worktree, explicit --allowedTools, reviewed diff)."
+    },
+    {
+      "id": "docker-guardrails",
+      "name": "docker-destructive-guardrails",
+      "author": "Docker",
+      "repo": "docker/skills",
+      "url": "https://github.com/docker/skills/tree/main/skills/docker-destructive-guardrails",
+      "commit": "f79172733725e2fd236343ee7b963c446ed85d09",
+      "reviewed": "2026-10-10",
+      "license": "Apache-2.0",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": [
+        "skills/docker-destructive-guardrails/SKILL.md"
+      ],
+      "informs": [
+        "AGT-17"
+      ],
+      "notes": "Prompt-only skill (Apache-2.0). Generalised from Docker CLI to every destructive data/infra command and made mechanical with a hook."
+    },
+    {
+      "id": "playwright-test-agents",
+      "name": "Playwright test agents",
+      "author": "Microsoft",
+      "repo": "microsoft/playwright",
+      "url": "https://github.com/microsoft/playwright/tree/main/packages/playwright/src/agents",
+      "commit": "d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c",
+      "reviewed": "2026-10-10",
+      "license": "Apache-2.0",
+      "kind": "prompt",
+      "disposition": "distilled",
+      "paths": [
+        "packages/playwright/src/agents/playwright-test-healer.agent.md",
+        "packages/playwright/src/agents/playwright-test-generator.agent.md"
+      ],
+      "informs": [
+        "AGT-8"
+      ],
+      "notes": "The healer agent is told 'Do not ask user questions' and to mark an unfixable test test.fixme() — the opposite of AGT-8; its generator guidance (role-based locators, no networkidle) agrees with the standard."
+    },
+    {
+      "id": "anthropic-code-modernization",
+      "name": "code-modernization",
+      "author": "Anthropic",
+      "repo": "anthropics/claude-plugins-official",
+      "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization",
+      "commit": "b8e53f1c05dff3b6d751297f6527990ffc81c2f4",
+      "reviewed": "2026-10-10",
+      "license": "Apache-2.0",
+      "kind": "plugin",
+      "disposition": "distilled",
+      "paths": [
+        "plugins/code-modernization/README.md",
+        "plugins/code-modernization/commands/"
+      ],
+      "informs": [
+        "TEST-15"
+      ],
+      "notes": "Plugin ships Python hooks and telemetry — not installed; only its proof discipline is distilled. Its proof discipline (canary break must turn tests red; verdict computed by a script) informs TEST-15 now and the upgrade-proof rule proposed for client mode (v1.4 scan, tier 2)."
+    },
+    {
+      "id": "trailofbits-skills",
+      "name": "Trail of Bits skills (agentic-actions-auditor)",
+      "author": "Trail of Bits",
+      "repo": "trailofbits/skills",
+      "url": "https://github.com/trailofbits/skills",
+      "commit": "442fc9d6c89b1e937e6f7a477e7071ea75fcbea4",
+      "reviewed": "2026-10-10",
+      "license": "CC-BY-SA-4.0",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": [
+        "plugins/agentic-actions-auditor/skills/agentic-actions-auditor/SKILL.md"
+      ],
+      "informs": [
+        "AGT-6"
+      ],
+      "notes": "CC-BY-SA-4.0: ideas only, no text copied. Repo ships hooks and an MCP server — not installed."
+    },
+    {
+      "id": "sentry-skills",
+      "name": "Sentry skills (gha-security-review, skill-scanner, iterate-pr)",
+      "author": "Sentry",
+      "repo": "getsentry/skills",
+      "url": "https://github.com/getsentry/skills",
+      "commit": "d18b7aa8ba878354e5c348310230e652f7690f9c",
+      "reviewed": "2026-10-10",
+      "license": "Apache-2.0",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": [
+        "skills/skill-scanner/SKILL.md",
+        "skills/iterate-pr/SKILL.md",
+        "skills/gha-security-review/SKILL.md"
+      ],
+      "informs": [
+        "AGT-6",
+        "AGT-5",
+        "AGT-4",
+        "AGT-9"
+      ],
+      "notes": "iterate-pr buckets feedback by severity but does not filter by author — the author rule is this standard's addition. Bundled scripts not installed."
+    },
+    {
+      "id": "ecc-database-migrations",
+      "name": "ECC database-migrations",
+      "author": "affaan-m",
+      "repo": "affaan-m/ECC",
+      "url": "https://github.com/affaan-m/ECC/tree/main/skills/database-migrations",
+      "commit": "8384d609a0e6dc071503f669cb6a581420e23469",
+      "reviewed": "2026-10-10",
+      "license": "MIT",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": [
+        "skills/database-migrations/SKILL.md"
+      ],
+      "informs": [
+        "COR-7"
+      ],
+      "notes": "The repo ships a large hook set (session, shell, file, MCP and subagent events) — only this one skill file was read; nothing installed."
+    },
+    {
+      "id": "supabase-agent-skill",
+      "name": "Supabase agent skill",
+      "author": "Supabase",
+      "repo": "supabase/agent-skills",
+      "url": "https://github.com/supabase/agent-skills/tree/main/skills/supabase",
+      "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
+      "reviewed": "2026-10-10",
+      "license": "MIT",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": [
+        "skills/supabase/SKILL.md",
+        "skills/supabase/references/"
+      ],
+      "informs": [
+        "SUPA-5"
+      ],
+      "notes": "Vendor skill (MIT), prompt-only. Could also be pinned as a companion later; distilled so the facts have one owner."
+    },
+    {
+      "id": "firebase-rules-auditor",
+      "name": "firebase-security-rules-auditor",
+      "author": "Google (Firebase)",
+      "repo": "firebase/agent-skills",
+      "url": "https://github.com/firebase/agent-skills/tree/main/skills/firebase-security-rules-auditor",
+      "commit": "b5735e5baa0d874cb97a23e26ebe93e4501797b9",
+      "reviewed": "2026-10-10",
+      "license": "Apache-2.0",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": [
+        "skills/firebase-security-rules-auditor/SKILL.md"
+      ],
+      "informs": [
+        "FB-3"
+      ],
+      "notes": "Vendor skill (Apache-2.0), prompt-only; written as a red-team persona prompt, which this standard's instruction-file rule avoids — distilled instead of pinned."
+    },
+    {
+      "id": "vercel-react-best-practices",
+      "name": "Vercel React best practices",
+      "author": "Vercel",
+      "repo": "vercel-labs/agent-skills",
+      "url": "https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices",
+      "commit": "063bee94c3f4df8453406c830b0a7df0f2860278",
+      "reviewed": "2026-10-10",
+      "license": "MIT (per skill frontmatter; repo licence not declared)",
+      "kind": "skill",
+      "disposition": "distilled",
+      "paths": [
+        "skills/react-best-practices/rules/server-no-shared-module-state.md",
+        "skills/react-best-practices/SKILL.md"
+      ],
+      "informs": [
+        "NEXT-7"
+      ],
+      "notes": "Repo licence reported as NOASSERTION; the skill's frontmatter says MIT. Already installed via the Vercel plugin; its 70 performance rules overlap PERF-14…26."
     }
   ]
 }

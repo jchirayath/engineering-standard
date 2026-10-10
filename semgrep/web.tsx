@@ -113,3 +113,37 @@ export function controls(el: any, req: any, crypto: any, user: any) {
   const g = crypto.createCipheriv('aes-256-gcm', key, iv)
 }
 
+
+// ── tests (AGT-8) ──
+async function waits(page: any) {
+  // ruleid: std.web.test-networkidle
+  await page.waitForLoadState("networkidle")
+  // ruleid: std.web.test-networkidle
+  await page.goto("/x", { waitUntil: "networkidle" })
+  // ok: std.web.test-networkidle
+  await page.getByRole("button", { name: "Save" }).click()
+  // ruleid: std.web.test-fixed-sleep
+  await page.waitForTimeout(500)
+  // ruleid: std.web.test-fixed-sleep
+  await new Promise((r) => setTimeout(r, 1000))
+  // ok: std.web.test-fixed-sleep
+  await expect(page.getByText("Saved")).toBeVisible()
+}
+
+// ── server module state (NEXT-7) ──
+let currentUser: any = null
+let requestCount = 0
+
+export default async function Page() {
+  // ruleid: std.web.server-module-state
+  currentUser = await auth()
+  const user = await auth()
+  // ok: std.web.server-module-state
+  const local = user
+  return render(currentUser, local)
+}
+
+export async function action() {
+  // ruleid: std.web.server-module-state
+  requestCount = requestCount + 1
+}

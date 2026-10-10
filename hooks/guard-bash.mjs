@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// PreToolUse Bash — AGT-1 secret reads, AGT-3 bypass flag, ENF-2 --no-verify, REPO-2 force-push to main,
+// PreToolUse Bash — AGT-17 destructive commands, AGT-1 secret reads, AGT-3 bypass flag, ENF-2 --no-verify, REPO-2 force-push to main,
 // SEC-31 curl|sh, and SEC-31/NPM-1/SUP-1 dependency verification for installs of NAMED packages:
 // block when the package doesn't exist or the version is < 7 days old. Network failure → allow + warn.
 // Cooldown override (security fixes only, VULN-5): STANDARD_ALLOW_YOUNG_DEP=<name>[,<name>…] in the
@@ -18,7 +18,8 @@ hook(async (input) => {
     const r = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: projectDir(input), encoding: 'utf8', timeout: 1000 })
     branch = (r.stdout || '').trim()
   }
-  const v = bashViolation(cmd, { branch, cwd: projectDir(input) })
+  // AGT-17 override comes only from the environment the owner started Claude Code with — never from the command.
+  const v = bashViolation(cmd, { branch, cwd: projectDir(input), allowDestructive: process.env.STANDARD_ALLOW_DESTRUCTIVE === '1' })
   if (v) block(v.reason)
 
   const all = installedPackages(cmd)

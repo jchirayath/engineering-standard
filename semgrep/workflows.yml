@@ -1,0 +1,36 @@
+# ENGINEERING_STANDARD rules for GitHub workflows that run an AI agent (AGT-6, AGT-4).  Test: semgrep --test semgrep/
+# Suppress one justified line:  # nosemgrep: <rule-id> -- <reason>
+rules:
+  - id: std.workflows.ai-prompt-event-data
+    languages: [generic]
+    severity: ERROR
+    message: "Attacker-controlled event text (issue/PR/comment/review/commit) reaches an AI agent step — prompt injection. Pass only IDs and let the agent fetch with least privilege, or remove an AGT-4 leg (AGT-6)."
+    metadata: { standard: [AGT-6, AGT-4] }
+    paths: { include: [".github/workflows/*.yml", ".github/workflows/*.yaml", "workflows.test.yml"] }
+    patterns:
+      - pattern-regex: '(?s)uses:\s*(anthropics/claude-code-action|openai/codex-action|google-github-actions/run-gemini-cli|actions/ai-inference)\b.*'
+      - pattern-regex: '\$\{\{\s*github\.event\.(issue|comment|pull_request|review|review_comment|discussion|head_commit|commits)\b[\w.\[\]*]*\.(title|body|message|head\.ref|label|name)\s*\}\}'
+
+  - id: std.workflows.ai-allow-all-users
+    languages: [generic]
+    severity: ERROR
+    message: "Anyone can trigger this AI agent (allowed_non_write_users: '*') — restrict to users with write access (AGT-6)."
+    metadata: { standard: [AGT-6] }
+    paths: { include: [".github/workflows/*.yml", ".github/workflows/*.yaml", "workflows.test.yml"] }
+    pattern-regex: 'allowed_non_write_users:\s*["'']?\*'
+
+  - id: std.workflows.ai-unrestricted-tools
+    languages: [generic]
+    severity: ERROR
+    message: "AI agent in CI with unrestricted shell or permission bypass — give it a minimal --allowedTools list (AGT-6, AGT-3)."
+    metadata: { standard: [AGT-6, AGT-3] }
+    paths: { include: [".github/workflows/*.yml", ".github/workflows/*.yaml", "workflows.test.yml"] }
+    pattern-regex: 'Bash\(\s*\*\s*\)|--dangerously-skip-permissions|--yolo\b|allowed_tools:\s*["'']?\*'
+
+  - id: std.workflows.ai-eval-output
+    languages: [generic]
+    severity: ERROR
+    message: "A step output (possibly written by an AI agent) is executed with eval / sh -c — never execute agent output (AGT-6)."
+    metadata: { standard: [AGT-6] }
+    paths: { include: [".github/workflows/*.yml", ".github/workflows/*.yaml", "workflows.test.yml"] }
+    pattern-regex: '(eval|sh\s+-c|bash\s+-c)\s+["'']?\$\{\{\s*steps\.[\w-]+\.outputs'
