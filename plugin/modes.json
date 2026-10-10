@@ -1,5 +1,5 @@
 {
-  "$comment": "Hand-maintained. Which rules apply in each mode (bin/build-rules.mjs adds `modes` to every rule in build/rules.json). Modes are nested: quick ⊂ client — every rule applies in client mode; a rule applies in quick mode when its id or prefix is listed under quick (ids win over prefixes; quickExclude removes ids from a listed prefix). The quick set is the SECURITY FLOOR plus a lean build bar: nothing that protects secrets, identity, ownership, input, honesty or the agent itself is ever client-only. External obligations (stores, privacy law, public websites) are client-only because quick mode is only allowed while none of them applies (ENF-4). See ENGINEERING_STANDARD.md §0A. reviewedPointers: quick→client references checked by hand to be pointers (see-also, contrast, exemptions), not requirements; --check lists any new cross-mode reference and flags stale entries.",
+  "$comment": "Hand-maintained. Which rules apply in each mode (bin/build-rules.mjs adds `modes` to every rule in build/rules.json). Modes are nested: quick ⊂ client — every rule applies in client mode; a rule applies in quick mode when its id or prefix is listed under quick (ids win over prefixes; quickExclude removes ids from a listed prefix). The quick set is the SECURITY FLOOR, the THEME CORE (the 'Consistent' pillar: one token source, light + dark, contrast) and a lean build bar: nothing that protects secrets, identity, ownership, input, honesty or the agent itself is ever client-only. External obligations (stores, privacy law, public websites) are client-only because quick mode is only allowed while none of them applies (ENF-4). See ENGINEERING_STANDARD.md §0A. reviewedPointers: quick→client references checked by hand to be pointers (see-also, contrast, exemptions), not requirements; --check lists any new cross-mode reference and flags stale entries.",
   "modes": [
     "quick",
     "client"
@@ -109,7 +109,18 @@
       "VULN-2",
       "REPO-4",
       "CLEAN-13",
-      "TEST-15"
+      "TEST-15",
+      "CORE-13",
+      "UX-2",
+      "THEME-1",
+      "THEME-2",
+      "THEME-3",
+      "THEME-5",
+      "THEME-6",
+      "THEME-7",
+      "THEME-8",
+      "THEME-4",
+      "THEME-12"
     ],
     "quickExclude": [
       "INP-5",
@@ -128,7 +139,6 @@
       "PERF-9>MOB-6": "names the exempt flag kinds",
       "PERF-9>VULN-5": "names the exempt flag kinds",
       "COMPAT-2>LIFE-1": "see-also for EOL",
-      "COMPAT-4>THEME-1": "see-also",
       "LOG-3>REL-1": "explains where error counts go once alerts exist (client)",
       "LOG-4>LOG-1": "names the field keys to keep; the schema itself is client-only",
       "TEST-5>VULN-5": "see-also",
@@ -145,7 +155,9 @@
       "AGT-11>HELP-1": "scoped 'In client mode'",
       "AGT-12>CLEAN-9": "scoped 'In client mode'",
       "CLEAN-13>TEST-0": "'the mode's tests (TEST-14 or TEST-0)' — picks by mode",
-      "TEST-15>TEST-0": "'TEST-14 / TEST-0' — picks by mode"
+      "TEST-15>TEST-0": "'TEST-14 / TEST-0' — picks by mode",
+      "THEME-12>PERF-16": "scoped 'In client mode also'",
+      "THEME-12>UX-1": "scoped 'In client mode also'"
     }
   }
 }

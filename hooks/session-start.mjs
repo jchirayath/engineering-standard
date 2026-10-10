@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// SessionStart — detect the repo's stack and mode and inject the four pillars + that mode's MUST rule IDs/titles
+// SessionStart — detect the repo's stack and mode and inject the five pillars + that mode's MUST rule IDs/titles
 // (~1–1.5 KB, never the 78 KB document), plus warnings: kit VERSION behind, AGT-1 settings, AGT-7 subagents,
 // and a quick-mode repo that looks shipped (ENF-4).
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'

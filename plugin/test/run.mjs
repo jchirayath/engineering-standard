@@ -20,7 +20,7 @@ const chk = node(['bin/build-rules.mjs', '--check'])
 process.stdout.write((chk.stdout + chk.stderr).split('\n').filter(Boolean).map((l) => `    ${l}`).join('\n') + '\n')
 t('build-rules --check exits 0', chk.status === 0, `(exit ${chk.status}) — see messages above`)
 const rules = JSON.parse(readFileSync(join(ROOT, 'build/rules.json'), 'utf8'))
-t('rules.json has pillars + ≥ 200 rules', rules.pillars.length === 4 && rules.rules.length >= 200)
+t('rules.json has the five pillars + ≥ 200 rules', rules.pillars.length === 5 && rules.pillars[4].name === 'Consistent' && rules.rules.length >= 200)
 t('every rule has id/level/text/stacks', rules.rules.every((r) => /^[A-Z]+-\d+$/.test(r.id) && /^(MUST|SHOULD|MAY)$/.test(r.level) && r.text && r.stacks.length))
 const { parse } = await import('../../bin/build-rules.mjs')
 const fx = parse(['## 9 · Fixture', '- **STORE-6 MUST in TX, else SHOULD** Age signals.', '| **REG-1 MUST (commercial EU)** | CRA reporting. | — |',

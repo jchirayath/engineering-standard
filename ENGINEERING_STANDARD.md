@@ -1,4 +1,4 @@
-# Engineering Standard — Secure · Optimized · Shared · Observable (v1.3)
+# Engineering Standard — Secure · Optimized · Shared · Observable · Consistent (v1.3)
 
 > The **minimum bar** every application under `~/code` is built to. Stack-agnostic. It answers
 > *"what does good look like?"* — its companion [`APP_REVIEW.md`](APP_REVIEW.md) answers *"does this
@@ -41,7 +41,7 @@ new/existing **apps** and **websites** are in the
 
 ---
 
-## 0 · The four non-negotiables
+## 0 · The five non-negotiables
 
 | # | Pillar | One-line bar |
 |---|---|---|
@@ -49,6 +49,10 @@ new/existing **apps** and **websites** are in the
 | 2 | **Optimized** | Every request, query, list and bundle has a budget, a timeout and a bound — measured, not guessed. |
 | 3 | **Shared** | Each cross-cutting concern has **exactly one** blessed module, and a lint rule forbids going around it. |
 | 4 | **Observable** | One logging call emits a structured, correlated, redacted event — and the audit trail rides on it. |
+| 5 | **Consistent** | One theme per app: every screen, in light **and** dark mode, takes colour, type, spacing and icons from the app's single token source — the same meaning always looks the same, and both modes pass contrast. |
+
+The five pillars apply in **both modes** (§0A): quick mode carries the theme core (THEME-1…8 and THEME-12,
+UX-2, CORE-13); client mode adds presets, per-user persistence and visual regression in both modes.
 
 Websites additionally meet the **secure build & deploy profile** in §2A, checked at creation, on every
 deploy and weekly against the live URL.
@@ -63,7 +67,7 @@ The MCP tools, hooks, test checker and review profile all read it.
 | | **quick** | **client** (default) |
 |---|---|---|
 | For | prototypes, experiments, personal and internal tools with no outside users | anything a customer, the public, a store or a regulator can see |
-| Rule set | the **security floor** + a lean build bar (≈ 100 rules, list in [`MODES.md`](MODES.md)) | every rule in this document |
+| Rule set | the **security floor**, the **theme core** (one token source, light + dark) and a lean build bar (≈ 140 rules, list in [`MODES.md`](MODES.md)) | every rule in this document |
 | Tests | TEST-14: unit tests for logic + one e2e of the main journey; denied-path and regression tests | TEST-0: unit + integration + e2e + walkthrough per feature |
 | Review | `APP_REVIEW.md` profile `quick` | profile `standard` (pre-release) / `full` (client acceptance) |
 
@@ -1038,8 +1042,10 @@ between apps except the structure, the semantic names and the tooling.
   "delete" is the same glyph, size and colour token everywhere. Icon sizes are tokens
   (`icon.sm|md|lg`). App icon, splash and favicon are generated from one source per app.
 - **THEME-6 MUST** Theme mode = `system | light | dark` (+ the app's presets if offered), held by one
-  theme controller (CORE-13), persisted **per user** in the backend profile (local cache for first
-  paint), applied before first render (no flash), switchable at runtime without restart.
+  theme controller (CORE-13), applied before first render (no flash), switchable at runtime without
+  restart. Every screen works in both light and dark from the first commit. In client mode the choice is
+  persisted **per user** in the backend profile (local cache for first paint); in quick mode following
+  the OS setting is enough.
 - **THEME-7 MUST** Contrast is validated **at token build time**: every text/background semantic pair
   meets WCAG AA (4.5:1 body, 3:1 large text/UI) in every mode and preset; the build fails otherwise.
 - **THEME-8 MUST** No raw colours, font sizes, spacing values or direct icon-package imports in screen
@@ -1054,9 +1060,9 @@ between apps except the structure, the semantic names and the tooling.
   keys in `design/tokens/*.json` (THEME-2; new keys only under `color.domain.*`), AA-validated in every
   mode and preset (THEME-7); generated
   screens use only semantic tokens and the icon registry — no hex/rgb, palette classes, size or spacing
-  literals (THEME-8); fonts are at most two families, self-hosted WOFF2 (PERF-16); every screen has its
-  four states (UX-1). Its taste guidance (avoiding generic AI looks, hierarchy, copy) applies within that.
-  In quick mode the skill may be used freely; THEME-12 applies from client mode.
+  literals (THEME-8); every new screen works in light and dark (THEME-6). In client mode also: fonts at
+  most two families, self-hosted WOFF2 (PERF-16), and every screen has its four states (UX-1). Its taste
+  guidance (avoiding generic AI looks, hierarchy, copy) applies within that — in both modes.
 - **THEME-11 SHOULD** A living reference page per app (Storybook / Widgetbook / a `/design` route in
   dev builds) renders every token, icon and shared component in every mode.
 

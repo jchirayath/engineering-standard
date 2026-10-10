@@ -507,7 +507,7 @@ behaviour is backed by having watched it work.
    for deploy and the **ship-verdict distribution** (e.g. "3 SHIP · 5 CAVEAT · 12 NOT-SHIPPABLE"). If it's
    bad, that is the headline — don't bury it under a findings count.
 2. **Scorecard** — the 17 questions, each `PASS / AT-RISK / FAIL / N-A / INCOMPLETE` + one-line why.
-3. **Standard compliance** — pillar by pillar (Secure · Optimized · Shared · Observable): rules met /
+3. **Standard compliance** — pillar by pillar (Secure · Optimized · Shared · Observable · Consistent): rules met /
    broken, with IDs.
 4. **Security gate result** (§9.1) with scan output.
 5. **Feature matrix** — feature × {blocked_at, viability, ship, source, entry, authz, audit, tests, darkmode}.

@@ -181,7 +181,7 @@ CI stays the backstop.
 MCP tools (server `standard`): `mode`, `rules_for`, `rule`, `check`, `verify_dependency`, `exception_add`, `review_plan`.
 
 **Modes** (standard §0A, ENF-4): set `"mode": "quick"` or `"client"` (default) in the repo's `standard.config.json`
-(or `STANDARD_MODE` for one session). Quick = the security floor + a lean build bar (unit + one e2e test per feature,
+(or `STANDARD_MODE` for one session). Quick = the security floor, the theme core (one token source, light + dark) and a lean build bar (unit + one e2e test per feature,
 TEST-14); client = every rule (four test kinds, TEST-0). `rules_for`, SessionStart, `check-tests.mjs` and
 `review_plan` follow the mode; the guard hooks are identical in both. Which rule is in which mode: [MODES.md](MODES.md)
 (generated from `plugin/modes.json`).
