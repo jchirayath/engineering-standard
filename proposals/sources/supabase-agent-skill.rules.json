@@ -25,5 +25,6 @@
   "url": "https://github.com/supabase/agent-skills/tree/main/skills/supabase",
   "commit": "c9be0e931b7930f7d02126d04774d904c381e7d7",
   "license": "MIT",
-  "applied": "2026-10-10"
+  "applied": "2026-10-10",
+  "rationale": "Vendor source, so its Supabase facts are authoritative (user_metadata is user-editable, UPDATE needs WITH CHECK, scoped tokens, sessions outlive deleted users). Distilled into SUPA-5 rather than pinned, so the facts have one owner beside SUPA-1…4."
 }

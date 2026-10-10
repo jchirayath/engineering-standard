@@ -17,5 +17,6 @@
   "url": "https://github.com/trailofbits/skills",
   "commit": "442fc9d6c89b1e937e6f7a477e7071ea75fcbea4",
   "license": "CC-BY-SA-4.0",
-  "applied": "2026-10-10"
+  "applied": "2026-10-10",
+  "rationale": "Source for AGT-6's AI-in-CI vectors: the most systematic list of prompt-injection paths through workflows; Sentry's gha-security-review covers the same ground less completely and is recorded as supporting. CC-BY-SA, so ideas only. Not installed (hooks and an MCP server)."
 }

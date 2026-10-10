@@ -147,7 +147,6 @@
       "TEST-5>VULN-5": "see-also",
       "TEST-14>TEST-0": "says TEST-0 replaces it in client mode",
       "ENF-4>WEB-17": "names what an allowed access-controlled preview is",
-      "SEC-16>SUP-5": "'prefer' — not a requirement",
       "SEC-9>AUTH-4": "explicitly scoped 'in client mode'",
       "SEC-9>AUTH-1": "explicitly scoped 'in client mode'",
       "SEC-16>CFG-3": "explicitly scoped 'in client mode'",

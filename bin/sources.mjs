@@ -33,6 +33,7 @@ export function check() {
     if (['distilled', 'companion'].includes(s.disposition) && !(s.informs || []).length) errors.push(`${at}: a ${s.disposition} source must list the rules it informs`)
     if (s.disposition === 'companion' && !(s.companion?.install && s.companion?.precedence)) errors.push(`${at}: companion needs companion.install and companion.precedence`)
     if (!existsSync(join(ROOT, 'proposals/sources', `${s.id}.md`))) errors.push(`${at}: missing proposals/sources/${s.id}.md (the intake review)`)
+    if (s.disposition !== 'proposed' && !(s.rationale && s.rationale.length >= 40)) errors.push(`${at}: rationale is required — why this disposition, and what it was chosen over`)
   }
   return { errors, count: (reg.sources || []).length }
 }
@@ -65,14 +66,16 @@ const informs = (s) => [(s.informs || []).join(', '), s.also].filter(Boolean).jo
 const live = (s) => s.disposition !== 'proposed'
 export function renderTables(reg = JSON.parse(readFileSync(REG, 'utf8'))) {
   const src = (reg.sources || []).filter(live)
+  const why = src.map((s) => `- **${s.name || s.id}** (${s.disposition}) — ${s.rationale || '_no rationale recorded_'}`).join('\n')
   return {
+    'sources-rationale': why,
     'sources-readme': ['| Source | Disposition | Rules it informs |', '|---|---|---|',
       ...src.map((s) => `| ${link(s)} | ${s.disposition} | ${informs(s)} |`)].join('\n'),
     'sources-references': ['| Source | Pinned commit | License | Disposition | Informs |', '|---|---|---|---|---|',
       ...src.map((s) => `| ${link(s)} — ${s.author || s.repo.split('/')[0]} | \`${s.commit.slice(0, 7)}\`${s.version ? ` (${s.version})` : ''} | ${s.license} | ${s.disposition} | ${informs(s)} |`)].join('\n'),
   }
 }
-const TARGETS = { 'sources-readme': 'README.md', 'sources-references': 'REFERENCES.md' }
+const TARGETS = { 'sources-readme': 'README.md', 'sources-references': 'REFERENCES.md', 'sources-rationale': 'REFERENCES.md' }
 export function render({ write = true } = {}) {
   const tables = renderTables(), stale = []
   for (const [m, file] of Object.entries(TARGETS)) {

@@ -18,5 +18,6 @@
   "url": "https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization",
   "commit": "b8e53f1c05dff3b6d751297f6527990ffc81c2f4",
   "license": "Apache-2.0",
-  "applied": "2026-10-10"
+  "applied": "2026-10-10",
+  "rationale": "Its proof discipline (a deliberate break must turn tests red; verdicts computed by a script, not judged) became TEST-15's 'fails at an assertion'. Preferred as the cited source over Trail of Bits' post-patch-validation markers, which express the same principle less directly. Not installed: Python hooks and telemetry."
 }

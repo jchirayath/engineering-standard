@@ -21,6 +21,8 @@ jobs:
           tar -xzf gl.tgz gitleaks && ./gitleaks git . --no-banner --redact --config .gitleaks.toml
       - name: No owner data committed (local/ stays local)
         run: node bin/check-public.mjs
+      - name: No near-duplicate rules (one fact, one owner)
+        run: node bin/similar.mjs --check
       - name: Sources gateway — registry pinned, reviewed, rule IDs defined
         run: node bin/sources.mjs --check
       - name: Plugin — MCP server, hooks, parser self-test

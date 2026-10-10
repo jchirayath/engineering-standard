@@ -143,11 +143,9 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   from the token on the server — never from a request field.
 - **SEC-8 MUST** Row-level security (or equivalent) on every user-owned table, one policy per
   operation, default-deny. `SECURITY DEFINER` functions re-check authz and pin `search_path`.
-- **SEC-9 MUST** Sessions: short-lived access tokens, rotating refresh, `HttpOnly; Secure;
-  SameSite=Lax|Strict` cookies (prefix and flags per BRW-2), CSRF protection on cookie-auth mutations,
-  rate-limited login with lockout/backoff; in client mode MFA for every user (AUTH-4) and the
-  documented lockout design (AUTH-1).
-  Passwords (if any) hashed per CRY-3 / AUTH-2.
+- **SEC-9 MUST** Sessions: short-lived access tokens, rotating refresh, cookies per BRW-2, CSRF protection
+  on cookie-auth mutations, rate-limited login with lockout/backoff; in client mode MFA for every user
+  (AUTH-4) and the documented lockout design (AUTH-1). Passwords (if any) hashed per CRY-3 / AUTH-2.
 - **SEC-10 MUST** No mass assignment — map request DTOs to models explicitly.
 
 ### Secrets & data
@@ -159,18 +157,16 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
   KMS/vault, rotated; a written **rotation runbook** (redeploying does not un-leak a credential).
 - **SEC-13 MUST** Data inventory: every PII/sensitive field is classified, has a retention period
   and a deletion path; data-subject export/delete exists where law applies.
-- **SEC-14 MUST** Security headers with the exact values in WEB-3/BRW-1: CSP (no `unsafe-inline` for scripts), HSTS, `X-Content-Type-Options`,
-  `frame-ancestors`, `Referrer-Policy`, `Permissions-Policy`; CORS is an explicit allow-list.
-  Debug endpoints, stack traces and prod source maps are off.
+- **SEC-14 MUST** Security headers on every response — values owned by BRW-1 (apps and APIs) and WEB-3
+  (websites); CORS is an explicit allow-list. Debug endpoints, stack traces and prod source maps are off.
 
 ### Supply chain & infra
 - **SEC-15 MUST** Lockfiles committed; dependencies updated by Renovate/Dependabot (with the SUP-1
   cooldown); a change never **adds or upgrades to** a dependency version with a known Critical/High CVE
   (`osv-scanner`, `govulncheck`, `npm audit`, `pip-audit` in CI). A CVE published against a version
   **already shipped** is fixed within the VULN-2 deadlines; past its deadline it blocks releases.
-- **SEC-16 MUST** Container base images are pinned by digest and run as non-root; images are scanned
-  (`trivy image`); prefer hardened/distroless bases (SUP-5). In client mode an SBOM is also generated per
-  release (`syft`, CFG-3).
+- **SEC-16 MUST** Container base images are pinned by digest and run as non-root; images are scanned (`trivy
+  image`). In client mode an SBOM is also generated per release (`syft`, CFG-3).
 - **SEC-17 MUST** CI actions pinned to a commit SHA; workflows lint-clean under `zizmor`; least-privilege
   `permissions:` block; no secrets exposed to PR builds from forks.
 - **SEC-18 MUST** IaC scanned (`trivy config` / `checkov`): no public buckets, no `*` IAM, no open
@@ -268,12 +264,12 @@ only when the app has that feature — and become MUST the day it does.
   a denied-path test. [2.1.3, 2.3.2, 15.1.3]
 
 ### Browser & HTTP
-- **BRW-1 MUST** App and API responses carry the same header values as websites (WEB-3): HSTS
-  `max-age ≥ 31536000; includeSubDomains`, CSP with `object-src 'none'`, `base-uri 'none'`, and
-  script sources from an allow-list, nonces or hashes. [3.4.1, 3.4.3]
+- **BRW-1 MUST** App and API responses carry the website header set with WEB-3's exact values (HSTS, CSP
+  with `object-src` / `base-uri` locked down and allow-listed, nonce or hash script sources). [3.4.1, 3.4.3]
 - **BRW-2 MUST** Cookies use the `__Host-` prefix (`Secure`, `Path=/`, no `Domain`) unless an ADR needs
-  `__Secure-`; every cookie not read by client script is `HttpOnly`; session tokens are set only via `Set-Cookie` and never echoed in bodies, URLs or JS
-  storage. [3.3.1, 3.3.3–4]
+  `__Secure-`, and `SameSite=Lax` or `Strict`; every cookie not read by client script is `HttpOnly`;
+  session tokens are set only via `Set-Cookie` and never echoed in bodies, URLs or JS storage. [3.3.1,
+  3.3.3–4]
 - **BRW-3 MUST** GET/HEAD/OPTIONS never change state; cookie-authenticated endpoints check `Origin`
   against the allow-list and require a non-simple content type or custom header (no reliance on CORS
   preflight alone); `postMessage` handlers check `event.origin` and the message schema; separate apps
@@ -578,15 +574,16 @@ rule cites its source; this standard wins over any of them):
   permission-bypass mode outside AGT-3's container, and a person reviews the resulting skill diff — in both
   modes. *(source: anthropic-skill-creator)*
 - **AGT-17 MUST** **Confirm before destroying state.** Before a command that deletes data or irreversibly
-  changes infrastructure — `docker system/volume/image prune`, `docker volume rm`, `terraform destroy` or
-  `apply -destroy`, `supabase db reset --linked` or `supabase db push` (a linked remote), SQL `DROP` /
-  `TRUNCATE` / `DELETE` without `WHERE` against a shared database, `az group delete`, a production `firebase
-  deploy` of rules or functions, `rm -rf` outside the working tree — the agent states exactly what will be
-  lost and asks the owner for an explicit yes before each one; headless runs (AGT-6) don't run them at all,
-  and in client mode the production forms run only from CI (OPS-2, SEC-32), never from an agent session even
-  with a yes. Resources the agent created itself in this session (a test container, a local scratch
-  database) need no question, but if the hook blocks one the agent asks anyway. *Enforced by:* the plugin's
-  Bash hook blocks the forms listed here until the owner restarts the session with
+  changes infrastructure — `docker system/volume/image prune`, `docker volume rm`, `terraform` / `tofu` /
+  `terragrunt destroy` or `apply -destroy`, `supabase db push` or a remote `supabase db reset`, SQL `DROP` /
+  `TRUNCATE` / `DELETE` without `WHERE` against a shared database (inline, piped or from a file), `az …
+  delete` / `purge`, a production `firebase deploy` or a Firebase data deletion (`firestore:delete`,
+  `database:remove` …), `rm -rf` or `find … -delete` outside the working tree — the agent states exactly
+  what will be lost and asks the owner for an explicit yes before each one; headless runs (AGT-6) don't run
+  them at all, and in client mode the production forms run only from CI (OPS-2, SEC-32), never from an agent
+  session even with a yes. Resources the agent created itself in this session (a test container, a local
+  scratch database) need no question, but if the hook blocks one the agent asks anyway. *Enforced by:* the
+  plugin's Bash hook blocks the forms listed here until the owner restarts the session with
   `STANDARD_ALLOW_DESTRUCTIVE=1` — a yes in chat or the variable inside the command doesn't unblock it, and
   the agent still asks before each command in such a session. *(source: docker-guardrails)*
 
@@ -718,9 +715,7 @@ when nobody deploys. Every finding carries a one-line fix; header/exposure fixes
   strict-origin-when-cross-origin`; `Permissions-Policy` denying unused features; no version-disclosing
   `Server`/`X-Powered-By`. New CSPs roll out as `-Report-Only` for one deploy, then enforce. No inline
   `on*=` handlers or inline scripts — move them to files (or hash them).
-- **WEB-4 MUST** Cookies per BRW-2/SEC-9: `__Host-` prefix, `Secure`, `SameSite=Lax|Strict`, and
-  `HttpOnly` unless script must read them. Static sites
-  set no cookies except consented analytics.
+- **WEB-4 MUST** Cookies follow BRW-2. Static sites set no cookies except consented analytics.
 - **WEB-5 MUST** No mixed content: every script, stylesheet, iframe, image and form action is https.
 - **WEB-6 MUST** Third-party scripts/styles are minimized, listed in the CSP by exact origin, and pinned
   with **Subresource Integrity** where the provider serves static files (GA4 is exempt — it can't be
@@ -832,8 +827,7 @@ Budgets are defaults — override per app in §1, but **every app has numbers**.
 - **PERF-24 SHOULD** RUM reports INP with Long Animation Frame (LoAF) attribution so slow interactions
   point at a script.
 - **PERF-25 SHOULD** `content-visibility: auto` on long off-screen sections and lists.
-- **PERF-26 SHOULD** Next.js apps stream with `loading.tsx`/Suspense boundaries and run the bundle
-  analyzer per PR against the PERF-17 budget.
+- **PERF-26 SHOULD** Next.js apps stream with `loading.tsx`/Suspense boundaries (bundle budget: PERF-17).
 
 ### Mobile (Flutter / native)
 - **PERF-19 MUST** Flutter: `const` constructors wherever possible; rebuild only what changed
@@ -898,19 +892,19 @@ Code is read far more than it is written; these rules keep it cheap to read, cha
   (ENF-2).
 - **CLEAN-13 MUST** **Least code that fully does the task**: in order, ask whether it is needed at all →
   reuse what the codebase has (the CORE modules first) → the platform / standard library → a dependency
-  already installed → a one-liner → the minimum new code — which, for the second caller of a cross-cutting
-  concern, is the core module (SHR-1). Never add a dependency for what ~20 lines would do (CLEAN-10).
-  **Least never means incomplete:** the change still reaches every caller, and everything the repo's mode
-  requires ships with it — validation, error handling, security, accessibility, the mode's tests (TEST-14 or
-  TEST-0), and in client mode help, `record()` and docs. Deletion beats addition. *(source: ponytail)*
+  already installed → a one-liner → the minimum new code (a cross-cutting concern's second caller gets a
+  core module, SHR-1). Never add a dependency for what ~20 lines would do (CLEAN-10). **Least never means
+  incomplete:** the change still reaches every caller, and everything the repo's mode requires ships with it
+  — validation, error handling, security, accessibility, the mode's tests (TEST-14 or TEST-0), and in client
+  mode help, `record()` and docs. Deletion beats addition. *(source: ponytail)*
 - **CLEAN-6 MUST** **Errors are explicit:** expected failures are typed results or typed errors
   (CORE-7), not exceptions for control flow; every error carries context on the way up
   (`fmt.Errorf("load invoice %s: %w", id, err)`); no catch-and-ignore (COR-3).
 - **CLEAN-7 SHOULD** **Immutability and pure functions by default:** domain logic is pure and
   data is immutable (`final`, `readonly`, frozen dataclasses); side effects live at the edges where they
   are easy to test and log.
-- **CLEAN-8 MUST** **Comments explain why, not what;** public functions/types of shared modules have
-  doc comments with an example; an ADR records any decision that constrains future work.
+- **CLEAN-8 MUST** **Comments explain why, not what;** public functions/types of shared modules have doc
+  comments with an example. (Decisions that constrain future work: ADRs, REPO-1.)
 - **CLEAN-9 MUST** **Small, reviewable changes:** PRs ≤ ~400 changed lines of non-generated
   **production** code, one concern each; the feature's tests and help/docs (TEST-0, HELP-6) belong in the
   same PR and don't count toward the limit — split the feature, never its tests; generated files and
@@ -1055,13 +1049,13 @@ between apps except the structure, the semantic names and the tooling.
     css/tokens.css · tailwind/theme.css (v4 @theme) · dart/app_tokens.dart · swift/AppTokens.swift · icons.(tsx|dart|swift)
 ```
 
-- **THEME-1 MUST** Each app has exactly **one** token source, authored in the W3C **Design Tokens**
-  (DTCG) JSON format and generated for its platform(s) by the kit's zero-dependency
-  `tools/standard/design-tokens/scripts/build.mjs` (CSS vars, Tailwind v4 `@theme` CSS per COMPAT-4 —
-  the v3 JS preset only for apps still on v3 — TS, Flutter
+- **THEME-1 MUST** Each app has exactly **one** token source, authored in the W3C **Design Tokens** (DTCG)
+  JSON format and generated for its platform(s) by the kit's zero-dependency
+  `tools/standard/design-tokens/scripts/build.mjs` (CSS vars, Tailwind per COMPAT-4, TS, Flutter
   `ThemeExtension`, SwiftUI). DTCG keeps the source compatible with Style Dictionary and Tokens Studio
-  (Figma) if a designer joins. A web + mobile app generates both from the same source, so they match. Generated files are never hand-edited. Two theme/colour files in one app (e.g.
-  `theme_colors.dart` *and* `app_colors.dart`) is a finding.
+  (Figma) if a designer joins. A web + mobile app generates both from the same source, so they match.
+  Generated files are never hand-edited. Two theme/colour files in one app (e.g. `theme_colors.dart` *and*
+  `app_colors.dart`) is a finding.
 - **THEME-2 MUST** Two tiers: **primitive** tokens (this app's palette, scale) and **semantic** tokens
   (`color.bg.surface`, `color.text.muted`, `color.status.danger`, `color.border.focus`,
   `color.action.primary`). App code references **semantic tokens only**. Light, dark and each preset are
@@ -1092,7 +1086,8 @@ between apps except the structure, the semantic names and the tooling.
   including a dark bridge.
 - **THEME-9 MUST** Visual regression in **both modes**: golden tests (Flutter) / Playwright screenshots
   (web) for a smoke set of screens per mode and preset, in CI.
-- **THEME-10 SHOULD** Typography, spacing, radius, elevation, motion and breakpoints are tokens too.
+- **THEME-10 SHOULD** Motion (durations, easing) and breakpoints are tokens too — typography, spacing,
+  radius and elevation already are (UX-2, THEME-8).
 - **THEME-12 MUST** **Design skills work inside the token system.** A design-generation skill (e.g.
   Anthropic's `frontend-design`, a pinned companion — `sources/registry.json`) treats this section as the
   brief: its palette/typography step proposes primitive values and semantic mappings for the THEME-4 keys in
@@ -1353,9 +1348,8 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   `@feature:<key>`; TEST-2 (denied path), TEST-5 (quarantine) and TEST-8 (regression test per bug) still
   apply. `bin/check-tests.mjs` requires `unit` + `e2e` in quick mode. TEST-0 replaces this rule when the
   repo moves to client mode.
-- **TEST-9 SHOULD** Contract tests between client and API are generated from the API-1 schema; load
-  smoke (`k6`) at expected peak for APIs with a PERF-1 budget; visual-regression goldens for the shared
-  components.
+- **TEST-9 SHOULD** Contract tests between client and API are generated from the API-1 schema; load smoke
+  (`k6`) at expected peak for APIs with a PERF-1 budget (visual regression: THEME-9).
 
 ---
 
@@ -1372,7 +1366,8 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
 - **OPS-5 MUST** A `docs/RUNBOOK.md`: how to deploy, roll back, rotate each secret, restore, and
   respond to each alert in LOG-9.
 - **OPS-6 SHOULD** Cost guardrails: budget alerts on cloud/LLM/SMS spend; per-tenant usage metered.
-- **OPS-7 SHOULD** Uptime monitoring (e.g. Uptime Kuma) on every public endpoint and TLS expiry.
+- **OPS-7 SHOULD** Uptime monitoring (e.g. Uptime Kuma) on every public endpoint (certificate expiry alerts:
+  WEB-2).
 - **OPS-8 MUST** **Stateless, disposable processes** (Twelve-Factor): no state on local disk or in
   process memory that another replica needs; start in seconds, shut down gracefully (OPS-1), so any
   instance can be killed or scaled at any time. Dev, staging and prod use the same backing-service

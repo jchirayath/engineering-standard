@@ -30,5 +30,6 @@
   "url": "https://github.com/getsentry/skills",
   "commit": "d18b7aa8ba878354e5c348310230e652f7690f9c",
   "license": "Apache-2.0",
-  "applied": "2026-10-10"
+  "applied": "2026-10-10",
+  "rationale": "Three narrow, well-specified skills: skill-scanner is the only source that lists the hidden surface (load-time commands, symlinks, auto-run tests) → AGT-5; iterate-pr's feedback loop → AGT-4 (the author filter is this standard's addition); gha-security-review supports AGT-6. Not installed."
 }

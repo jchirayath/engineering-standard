@@ -24,5 +24,6 @@
   "url": "https://github.com/docker/skills/tree/main/skills/docker-destructive-guardrails",
   "commit": "f79172733725e2fd236343ee7b963c446ed85d09",
   "license": "Apache-2.0",
-  "applied": "2026-10-10"
+  "applied": "2026-10-10",
+  "rationale": "Basis for AGT-17 because it states the behaviour precisely — say exactly what is lost, ask, exempt the agent's own fresh resources — and is prompt-only. Generalised from Docker to every destructive data and infrastructure command, and made mechanical with a hook, which no source provided."
 }

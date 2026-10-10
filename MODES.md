@@ -45,7 +45,7 @@
 | SEC-11 | MUST | Zero secrets in git | ✓ | ✓ |
 | SEC-12 | MUST | Encryption in transit | — | ✓ |
 | SEC-13 | MUST | Data inventory | — | ✓ |
-| SEC-14 | MUST | Security headers with the exact values in WEB-3/BRW-1: CSP | — | ✓ |
+| SEC-14 | MUST | Security headers on every response | — | ✓ |
 | SEC-15 | MUST | Lockfiles committed | ✓ | ✓ |
 | SEC-16 | MUST | Container base images are pinned by digest and run as non-root | ✓ | ✓ |
 | SEC-17 | MUST | CI actions pinned to a commit SHA; workflows lint-clean under zizmor | ✓ | ✓ |
@@ -77,7 +77,7 @@
 | INP-6 | MUST | Defensive coding | ✓ | ✓ |
 | BL-1 | MUST | Multi-step flows | ✓ | ✓ |
 | BL-2 | MUST | Business limits | — | ✓ |
-| BRW-1 | MUST | App and API responses carry the same header values as websites | — | ✓ |
+| BRW-1 | MUST | App and API responses carry the website header set with WEB-3's exact… | — | ✓ |
 | BRW-2 | MUST | Cookies use the __Host- prefix | ✓ | ✓ |
 | BRW-3 | MUST | GET/HEAD/OPTIONS never change state | ✓ | ✓ |
 | BRW-4 | MUST | Every body has an accurate Content-Type with charset=utf-8 for text… | — | ✓ |
@@ -187,7 +187,7 @@
 | WEB-1 | MUST | Ship an allowlist, not a folder | — | ✓ |
 | WEB-2 | MUST | HTTPS only | — | ✓ |
 | WEB-3 | MUST | Security headers on every response, from the kit template for the host | — | ✓ |
-| WEB-4 | MUST | Cookies per BRW-2/SEC-9: __Host- prefix, Secure, SameSite=Lax\|Strict,… | — | ✓ |
+| WEB-4 | MUST | Cookies follow BRW-2. Static sites set no cookies except consented… | — | ✓ |
 | WEB-5 | MUST | No mixed content | — | ✓ |
 | WEB-6 | MUST | Third-party scripts/styles are minimized, listed in the CSP by exact… | — | ✓ |
 | WEB-7 | MUST | No public source maps in production | — | ✓ |
@@ -232,7 +232,7 @@
 | PERF-23 | SHOULD | Speculation Rules | — | ✓ |
 | PERF-24 | SHOULD | RUM reports INP with Long Animation Frame | — | ✓ |
 | PERF-25 | SHOULD | content-visibility | — | ✓ |
-| PERF-26 | SHOULD | Next.js apps stream with loading.tsx/Suspense boundaries and run the… | — | ✓ |
+| PERF-26 | SHOULD | Next.js apps stream with loading.tsx/Suspense boundaries | — | ✓ |
 | PERF-19 | MUST | Flutter | — | ✓ |
 | PERF-20 | MUST | Profile in profile/release mode on a real mid-tier device | — | ✓ |
 | PERF-21 | MUST | Each stack's profiler is part of the toolkit and used before optimizing | — | ✓ |
@@ -319,7 +319,7 @@
 | THEME-7 | MUST | Contrast is validated at token build time: every text/background… | ✓ | ✓ |
 | THEME-8 | MUST | No raw colours, font sizes, spacing values or direct icon-package… | ✓ | ✓ |
 | THEME-9 | MUST | Visual regression in both modes: golden tests | — | ✓ |
-| THEME-10 | SHOULD | Typography, spacing, radius, elevation, motion and breakpoints are… | — | ✓ |
+| THEME-10 | SHOULD | Motion | — | ✓ |
 | THEME-12 | MUST | Design skills work inside the token system | ✓ | ✓ |
 | THEME-11 | SHOULD | A living reference page per app | — | ✓ |
 

@@ -1,0 +1,18 @@
+{
+  "$comment": "Reviewed rule overlaps (bin/similar.mjs --check). A pair scoring at or above the threshold must be listed here with why both rules stay — otherwise merge them (one fact, one owner). Stale entries fail the check too.",
+  "threshold": 0.5,
+  "accepted": {
+    "SHR-1~CLEAN-13": "pointer: CLEAN-13's solution order names SHR-1 for the second caller; SHR-1 owns the rule",
+    "WEB-2~OPS-7": "pointer: OPS-7 (all endpoints, SHOULD) defers certificate-expiry alerting to WEB-2 (websites, MUST)",
+    "TEST-0~TEST-14": "mode variants: TEST-14 is the quick-mode minimum, TEST-0 the client-mode set — each says the other replaces it",
+    "AUTH-4~WEB-22": "refinement: AUTH-4 requires passkeys be offered; WEB-22 adds the conditional-UI SHOULD",
+    "AGT-11~CLEAN-8": "pointer to REPO-1 (ADRs) in both; REPO-1 owns the ADR rule",
+    "AGT-12~CLEAN-8": "pointer to REPO-1 (ADRs) in both; REPO-1 owns the ADR rule",
+    "CLEAN-8~REPO-1": "pointer: CLEAN-8 defers ADRs to REPO-1",
+    "PRIV-1~WEB-14": "pointer: WEB-14 (consent) defers Global Privacy Control to PRIV-1",
+    "PERF-6~PERF-27": "split by level: PERF-6 SHOULD (cache hygiene) points to PERF-27 MUST (no cross-tenant cache)",
+    "PERF-16~THEME-12": "pointer: THEME-12 applies PERF-16's font limits to design skills in client mode",
+    "COMPAT-4~THEME-1": "pointer: THEME-1 defers the Tailwind output format to COMPAT-4",
+    "OPS-3~REL-5": "split by cadence: OPS-3 quarterly restore test, REL-5 twice-yearly full DR rehearsal"
+  }
+}

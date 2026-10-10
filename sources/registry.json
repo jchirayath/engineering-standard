@@ -26,7 +26,8 @@
         "AGT-14"
       ],
       "notes": "Plugin not installed: hooks inject a persona into every session and every subagent (breaks standard-reviewer's JSON output), write under ~/.claude and nudge settings.json edits; weaker test/help/logging floor; 'lite' still injects all rules. Review-discipline ideas went to APP_REVIEW §7.",
-      "also": "CLEAN-5 `shortcut:` comments, APP_REVIEW finding discipline"
+      "also": "CLEAN-5 `shortcut:` comments, APP_REVIEW finding discipline",
+      "rationale": "Distilled, not installed. Its 'least code' order is the clearest statement of the idea, so it is CLEAN-13's source (superpowers and caveman reach the same goal only indirectly). Not installed because its hooks inject a persona into every session and subagent (breaking the JSON-only reviewer), write under ~/.claude, and its test/help floor is weaker than TEST-14/TEST-0."
     },
     {
       "id": "superpowers",
@@ -56,7 +57,8 @@
         "AGT-14",
         "TEST-15"
       ],
-      "notes": "Plugin not installed: SessionStart injects an <EXTREMELY_IMPORTANT> skill-first directive; subagent templates have no tools: allow-list (AGT-7); auto-commits specs/plans; specs under docs/superpowers/; 'rulings, not stalls' lets the agent decide ambiguities alone (AGT-12 narrows that); no integration/e2e/walkthrough tiers."
+      "notes": "Plugin not installed: SessionStart injects an <EXTREMELY_IMPORTANT> skill-first directive; subagent templates have no tools: allow-list (AGT-7); auto-commits specs/plans; specs under docs/superpowers/; 'rulings, not stalls' lets the agent decide ambiguities alone (AGT-12 narrows that); no integration/e2e/walkthrough tiers.",
+      "rationale": "Distilled, not installed. The most complete plan → failing test → verify → root-cause-debug workflow, so it is the source for AGT-12…14 and TEST-15 — no other source covered those as fully. Its brainstorming step lost to grill-me (see there). Not installed: its SessionStart hook forces skill-first behaviour, its subagents have no tool allow-lists (AGT-7), and it auto-commits specs and plans."
     },
     {
       "id": "grill-me",
@@ -76,7 +78,8 @@
       "informs": [
         "AGT-11"
       ],
-      "notes": "No executable code. Unbounded rounds and no written output by design; AGT-11 bounds it per mode, adds the standard's client-mode branches (SEC-20, AZ-1, BL-2, HELP-1) and records decisions as ADRs. 'Yes accepts my recommendation' kept, with recommendations never weaker than the mode."
+      "notes": "No executable code. Unbounded rounds and no written output by design; AGT-11 bounds it per mode, adds the standard's client-mode branches (SEC-20, AZ-1, BL-2, HELP-1) and records decisions as ADRs. 'Yes accepts my recommendation' kept, with recommendations never weaker than the mode.",
+      "rationale": "Chosen as the single clarify-first step (AGT-11) over superpowers' brainstorming and ponytail's 'ultra' pushback: it looks facts up itself, asks only decisions, orders questions by dependency and offers a recommended answer, which keeps quick mode cheap. Bounded per mode and given the client-mode branches (SEC-20, AZ-1, BL-2, HELP-1) because on its own it never stops and writes nothing down."
     },
     {
       "id": "caveman",
@@ -99,7 +102,8 @@
         "AGT-15",
         "AGT-13"
       ],
-      "notes": "Plugin/CLI/proxy not installed: hooks inject into every session and subagent and read the full transcript; CLI telemetry on by default; install.sh pulls main without checksums; 'no hedging' can turn 'should work' into 'yes' (COR-1). The 65% claim is withdrawn upstream (docs/HONEST-NUMBERS.md)."
+      "notes": "Plugin/CLI/proxy not installed: hooks inject into every session and subagent and read the full transcript; CLI telemetry on by default; install.sh pulls main without checksums; 'no hedging' can turn 'should work' into 'yes' (COR-1). The 65% claim is withdrawn upstream (docs/HONEST-NUMBERS.md).",
+      "rationale": "Only the 'brief chat' idea is distilled (AGT-15), with the guard caveman lacks: verification state is never compressed away (COR-1, AGT-13). Not installed: hooks read every prompt and transcript, the CLI sends telemetry by default, and 'no hedging' can turn 'should work' into 'yes'."
     },
     {
       "id": "anthropic-frontend-design",
@@ -124,7 +128,8 @@
         "scope": "web UI design in client-mode repos; prompt-only skill, no executable code",
         "precedence": "THEME-12: §6A is the brief — values for existing semantic tokens only, no hex/palette classes/literals in screens, ≤ 2 self-hosted WOFF2 fonts, AA contrast in light and dark, four states per screen."
       },
-      "notes": "Marketplace plugins auto-update; sources-weekly flags any change to skills/frontend-design/ for re-review."
+      "notes": "Marketplace plugins auto-update; sources-weekly flags any change to skills/frontend-design/ for re-review.",
+      "rationale": "The one pinned companion: prompt-only, vendor-maintained, and its design taste has no equivalent in the standard. Its mechanics (inline hex palettes, unstated font sources) conflict with §6A, so THEME-12 makes the token system its brief. Chosen over theme-factory, ui-ux-pro-max and baseline-ui, which impose fixed palettes or framework defaults (THEME-1/8)."
     },
     {
       "id": "anthropic-skill-creator",
@@ -143,7 +148,8 @@
       "informs": [
         "AGT-16"
       ],
-      "notes": "Its eval loop runs a nested `claude -p` with the user's full permissions and writes into .claude/commands/; it encourages long, 'pushy' skills that restate domain rules. Use only per AGT-16 (throwaway worktree, explicit --allowedTools, reviewed diff)."
+      "notes": "Its eval loop runs a nested `claude -p` with the user's full permissions and writes into .claude/commands/; it encourages long, 'pushy' skills that restate domain rules. Use only per AGT-16 (throwaway worktree, explicit --allowedTools, reviewed diff).",
+      "rationale": "Reference only. Its with/without-skill eval method is worth using, but the loop runs nested `claude -p` sessions with full permissions and writes into .claude/commands/, and it encourages long skills that restate rules; AGT-16 records the safe way to use it."
     },
     {
       "id": "docker-guardrails",
@@ -162,7 +168,8 @@
       "informs": [
         "AGT-17"
       ],
-      "notes": "Prompt-only skill (Apache-2.0). Generalised from Docker CLI to every destructive data/infra command and made mechanical with a hook."
+      "notes": "Prompt-only skill (Apache-2.0). Generalised from Docker CLI to every destructive data/infra command and made mechanical with a hook.",
+      "rationale": "Basis for AGT-17 because it states the behaviour precisely — say exactly what is lost, ask, exempt the agent's own fresh resources — and is prompt-only. Generalised from Docker to every destructive data and infrastructure command, and made mechanical with a hook, which no source provided."
     },
     {
       "id": "playwright-test-agents",
@@ -182,7 +189,8 @@
       "informs": [
         "AGT-8"
       ],
-      "notes": "The healer agent is told 'Do not ask user questions' and to mark an unfixable test test.fixme() — the opposite of AGT-8; its generator guidance (role-based locators, no networkidle) agrees with the standard."
+      "notes": "The healer agent is told 'Do not ask user questions' and to mark an unfixable test test.fixme() — the opposite of AGT-8; its generator guidance (role-based locators, no networkidle) agrees with the standard.",
+      "rationale": "Cited for the AGT-8 extension because it is the clearest real instance of the failure: its healer agent is told not to ask and to mark unfixable tests test.fixme(). Its generator guidance (role locators, no networkidle) is preferred over Anthropic's webapp-testing, which recommends networkidle waits."
     },
     {
       "id": "anthropic-code-modernization",
@@ -202,7 +210,8 @@
       "informs": [
         "TEST-15"
       ],
-      "notes": "Plugin ships Python hooks and telemetry — not installed; only its proof discipline is distilled. Its proof discipline (canary break must turn tests red; verdict computed by a script) informs TEST-15 now and the upgrade-proof rule proposed for client mode (v1.4 scan, tier 2)."
+      "notes": "Plugin ships Python hooks and telemetry — not installed; only its proof discipline is distilled. Its proof discipline (canary break must turn tests red; verdict computed by a script) informs TEST-15 now and the upgrade-proof rule proposed for client mode (v1.4 scan, tier 2).",
+      "rationale": "Its proof discipline (a deliberate break must turn tests red; verdicts computed by a script, not judged) became TEST-15's 'fails at an assertion'. Preferred as the cited source over Trail of Bits' post-patch-validation markers, which express the same principle less directly. Not installed: Python hooks and telemetry."
     },
     {
       "id": "trailofbits-skills",
@@ -221,7 +230,8 @@
       "informs": [
         "AGT-6"
       ],
-      "notes": "CC-BY-SA-4.0: ideas only, no text copied. Repo ships hooks and an MCP server — not installed."
+      "notes": "CC-BY-SA-4.0: ideas only, no text copied. Repo ships hooks and an MCP server — not installed.",
+      "rationale": "Source for AGT-6's AI-in-CI vectors: the most systematic list of prompt-injection paths through workflows; Sentry's gha-security-review covers the same ground less completely and is recorded as supporting. CC-BY-SA, so ideas only. Not installed (hooks and an MCP server)."
     },
     {
       "id": "sentry-skills",
@@ -245,7 +255,8 @@
         "AGT-4",
         "AGT-9"
       ],
-      "notes": "iterate-pr buckets feedback by severity but does not filter by author — the author rule is this standard's addition. Bundled scripts not installed."
+      "notes": "iterate-pr buckets feedback by severity but does not filter by author — the author rule is this standard's addition. Bundled scripts not installed.",
+      "rationale": "Three narrow, well-specified skills: skill-scanner is the only source that lists the hidden surface (load-time commands, symlinks, auto-run tests) → AGT-5; iterate-pr's feedback loop → AGT-4 (the author filter is this standard's addition); gha-security-review supports AGT-6. Not installed."
     },
     {
       "id": "ecc-database-migrations",
@@ -264,7 +275,8 @@
       "informs": [
         "COR-7"
       ],
-      "notes": "The repo ships a large hook set (session, shell, file, MCP and subagent events) — only this one skill file was read; nothing installed."
+      "notes": "The repo ships a large hook set (session, shell, file, MCP and subagent events) — only this one skill file was read; nothing installed.",
+      "rationale": "Chosen for COR-7 over wshobson's sql-migrations because it states the live-database checklist compactly (expand–contract, CONCURRENTLY, NOT NULL defaults, DDL/backfill split, immutable applied migrations). Only this skill was read; the ECC bundle and its large hook set are not installed."
     },
     {
       "id": "supabase-agent-skill",
@@ -284,7 +296,8 @@
       "informs": [
         "SUPA-5"
       ],
-      "notes": "Vendor skill (MIT), prompt-only. Could also be pinned as a companion later; distilled so the facts have one owner."
+      "notes": "Vendor skill (MIT), prompt-only. Could also be pinned as a companion later; distilled so the facts have one owner.",
+      "rationale": "Vendor source, so its Supabase facts are authoritative (user_metadata is user-editable, UPDATE needs WITH CHECK, scoped tokens, sessions outlive deleted users). Distilled into SUPA-5 rather than pinned, so the facts have one owner beside SUPA-1…4."
     },
     {
       "id": "firebase-rules-auditor",
@@ -303,7 +316,8 @@
       "informs": [
         "FB-3"
       ],
-      "notes": "Vendor skill (Apache-2.0), prompt-only; written as a red-team persona prompt, which this standard's instruction-file rule avoids — distilled instead of pinned."
+      "notes": "Vendor skill (Apache-2.0), prompt-only; written as a red-team persona prompt, which this standard's instruction-file rule avoids — distilled instead of pinned.",
+      "rationale": "Vendor checklist for Firestore/Storage rules, which the standard did not cover (SEC-8 is Postgres RLS). Distilled into FB-3 rather than pinned because the skill is a red-team persona prompt, which the instruction-files rule avoids."
     },
     {
       "id": "vercel-react-best-practices",
@@ -323,7 +337,8 @@
       "informs": [
         "NEXT-7"
       ],
-      "notes": "Repo licence reported as NOASSERTION; the skill's frontmatter says MIT. Already installed via the Vercel plugin; its 70 performance rules overlap PERF-14…26."
+      "notes": "Repo licence reported as NOASSERTION; the skill's frontmatter says MIT. Already installed via the Vercel plugin; its 70 performance rules overlap PERF-14…26.",
+      "rationale": "Only its server-no-shared-module-state rule was new (NEXT-7, a cross-user data leak); its other 70 performance rules overlap PERF-14…26 and stay available through the installed Vercel plugin."
     }
   ]
 }

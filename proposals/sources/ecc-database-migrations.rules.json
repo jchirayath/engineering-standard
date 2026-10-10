@@ -17,5 +17,6 @@
   "url": "https://github.com/affaan-m/ECC/tree/main/skills/database-migrations",
   "commit": "8384d609a0e6dc071503f669cb6a581420e23469",
   "license": "MIT",
-  "applied": "2026-10-10"
+  "applied": "2026-10-10",
+  "rationale": "Chosen for COR-7 over wshobson's sql-migrations because it states the live-database checklist compactly (expand–contract, CONCURRENTLY, NOT NULL defaults, DDL/backfill split, immutable applied migrations). Only this skill was read; the ECC bundle and its large hook set are not installed."
 }

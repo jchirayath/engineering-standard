@@ -18,5 +18,6 @@
   "url": "https://github.com/microsoft/playwright/tree/main/packages/playwright/src/agents",
   "commit": "d9f2fd3e2232ace8e317a84eda6cb86e25bcf49c",
   "license": "Apache-2.0",
-  "applied": "2026-10-10"
+  "applied": "2026-10-10",
+  "rationale": "Cited for the AGT-8 extension because it is the clearest real instance of the failure: its healer agent is told not to ask and to mark unfixable tests test.fixme(). Its generator guidance (role locators, no networkidle) is preferred over Anthropic's webapp-testing, which recommends networkidle waits."
 }
