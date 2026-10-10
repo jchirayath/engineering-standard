@@ -250,7 +250,11 @@ else t('lint-edit: semgrep missing → silent no-op (exit 0)', le.status === 0 &
 rmSync(tmp, { recursive: true, force: true })
 console.log('▸ consume (sources gateway)')
 {
-  const { classifyRule, parseGitHub, inventoryFiles } = await import(join(ROOT, 'bin/consume.mjs'))
+  const { classifyRule, parseGitHub, inventoryFiles, clean, manifestRefs } = await import(join(ROOT, 'bin/consume.mjs'))
+  t('clean strips escape, bidi and line-separator characters', clean('a\u001b[31mb\u202ec\u2028d') === 'a?[31mb?c?d')
+  t('parseGitHub keeps the raw ref+path for resolution', parseGitHub('https://github.com/o/r/tree/feat/x/skills/y').rest === 'feat/x/skills/y')
+  const refs = manifestRefs('plugins/p/.claude-plugin/plugin.json', { commands: './cmds', agents: ['x/a.md'], hooks: './h/hooks.json', mcpServers: { s: {} } })
+  t('manifestRefs follows custom plugin paths', refs.some((r) => r.kind === 'commands' && r.path === 'plugins/p/cmds') && refs.some((r) => r.kind === 'hooks' && r.path === 'plugins/p/h/hooks.json') && refs.length === 3)
   const ctx = { quickPrefixes: ['AGT'], prefixQuickShare: { TEST: 0.2, SEC: 0.9 }, quickIds: new Set(['TEST-15']) }
   const c = (r) => classifyRule(r, ctx).mode
   t('classify: secret handling → quick', c({ prefix: 'SEC', level: 'MUST', title: 'x', text: 'Never log an API key or token.' }) === 'quick')
@@ -286,6 +290,7 @@ console.log('▸ consume (sources gateway)')
   t('apply adds the quick rule to modes.json', modes.quick.ids.includes(newSec))
   t('apply registers the source with new + amended IDs', reg.sources.some((s) => s.id === 't-src' && s.informs.includes(newSec) && s.informs.includes('TEST-8')))
   t('apply regenerates README/REFERENCES tables', /test-source/.test(readFileSync(join(copy, 'README.md'), 'utf8')) && /test-source/.test(readFileSync(join(copy, 'REFERENCES.md'), 'utf8')))
+  rmSync(copy, { recursive: true, force: true })
 }
 
 console.log(`\n${pass} passed, ${fail} failed${OFFLINE ? ' (offline)' : ''}`)
