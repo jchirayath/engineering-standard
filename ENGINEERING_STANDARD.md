@@ -653,7 +653,7 @@ URLs to untrusted content (OpenSSF *Security-Focused Guide for AI Code Assistant
 Applies to every site, static or dynamic, on any host (Azure Static Web Apps, Netlify, cPanel/Apache,
 Caddy, nginx). Enforced at **three points**: when the site is **created** (`adopt.sh --site`, then
 `harden.mjs` to apply the profile), on every **deploy** (`check-build.mjs` before upload — including CSP
-drift — and `check-site.mjs` after), and **weekly** against every live hostname (`fleet/sites.json`;
+drift — and `check-site.mjs` after), and **weekly** against every live hostname (`local/sites.json`, git-ignored;
 failures open a GitHub issue), so certificate, DNS, vulnerability and analytics drift is caught even
 when nobody deploys. Every finding carries a one-line fix; header/exposure fixes are applied by
 `harden.mjs`, never hand-edited.
@@ -668,7 +668,7 @@ when nobody deploys. Every finding carries a one-line fix; header/exposure fixes
   (PHP, CMS core) is on a supported release — the end-of-life rule for every stack is LIFE-1.
 
 - **WEB-1 MUST** **Ship an allowlist, not a folder.** The deploy copies only listed public files into a
-  staging directory and uploads that (pattern: `a staged-allowlist deploy.sh`). Repo roots are never document
+  staging directory and uploads that. Repo roots are never document
   roots. `check-build.mjs <stage>` runs before upload and **aborts the deploy** on any private file:
   `.git`, `.env*`, keys, backups, DB dumps, logs, server code, auth/secret files, lockfiles, deploy scripts.
 - **WEB-2 MUST** HTTPS only: http → https with 301/308 on every browser-facing hostname (API hosts refuse
@@ -1327,7 +1327,7 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   tracked as issues. Repeated causes become standard rules or lint checks.
 - **REL-5 MUST** **Disaster recovery is rehearsed:** RPO/RTO per data store (OPS-3), a full DR rehearsal into a
   clean environment at least twice a year (in addition to OPS-3's quarterly restore test), and a written, tested procedure for losing the primary
-  region/host (for single-VM hosts like a single VM: rebuild from IaC + backups, timed).
+  region/host (for a single-VM host: rebuild from IaC + backups, timed).
 - **REL-6 SHOULD** **Resilience is tested, not assumed:** each critical dependency (DB, auth provider,
   payment, LLM, email) has a tested failure mode — timeouts, fallback or a clear degraded UI — exercised
   by fault-injection tests or a game day.

@@ -91,7 +91,7 @@ Repo / commit:  {{PATH}} @ {{BRANCH}} @ {{SHA}}
 Stack:          {{from Phase −1, with counts: N routes · N screens · stores · workers}}
 Roles:          {{roles + privilege boundaries; how to authenticate as each for live checks}}
 Sensitive data: {{PII / payments / credentials / health …}}   Compliance: {{GDPR/HIPAA/SOC2/none}}
-Deploy target:  {{Vercel / Azure / Hostinger / self-hosted (a self-hosted VM) …}}
+Deploy target:  {{Vercel / Azure / Hostinger / self-hosted VM …}}
 Persistence:    {{the rule — e.g. "Postgres only; in-memory state is a defect"}}
 ```
 

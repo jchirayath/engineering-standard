@@ -167,7 +167,8 @@ whether auto mode is Claude Code's default starting mode. Each becomes a rule on
 
 ## Internal sources
 
-`SecureApplication.md` and `QA_PLAYBOOK.md` (superseded by v1.0) · a rule-inventory generator from one of the owner's projects, the
-pattern behind `bin/build-rules.mjs --check` · `a staged-allowlist deploy.sh`, the staged-allowlist deploy pattern in WEB-1 ·
-findings from the owner's repos (kept in the git-ignored local/findings/) that
+`SecureApplication.md` and `QA_PLAYBOOK.md` (the owner's earlier documents, superseded by v1.0) · a rule-inventory generator
+from one of the owner's projects, the pattern behind `bin/build-rules.mjs --check` · the owner's staged-allowlist deploy
+script, the pattern in WEB-1 ·
+findings from the owner's own apps (kept in the git-ignored `local/findings/`) that
 shaped the v1.3 "act now" list (gap report §A).

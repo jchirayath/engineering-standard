@@ -65,7 +65,7 @@ if [ -n "$SITE" ]; then
   cat <<EOF
 
 Next steps (website)
-  1. Make the deploy ship ONLY public files: stage an allowlist into a temp dir (see a staged-allowlist deploy.sh) and set
+  1. Make the deploy ship ONLY public files: stage an allowlist into a temp dir (WEB-1) and set
      site.publishDir; list private paths that must 404 in site.forbid (admin pages, server code, auth files).
   2. In deploy.sh, BEFORE upload:   node tools/standard/site/check-build.mjs "\$STAGE" || exit 1
                    AFTER upload:    node tools/standard/site/check-site.mjs --config standard.config.json || exit 1

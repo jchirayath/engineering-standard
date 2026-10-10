@@ -1,0 +1,18 @@
+{
+  "$comment": "Example fleet. Copy to local/sites.json (git-ignored) and replace with your sites. host: swa | netlify | apache | caddy | nginx. analytics.id: the GA4 property every public page must carry (WEB-15). forbid: private paths that must return 404/403 on the live site (WEB-8).",
+  "sites": [
+    {
+      "name": "example.com",
+      "urls": ["https://example.com", "https://www.example.com"],
+      "host": "swa",
+      "analytics": { "id": "G-XXXXXXXXXX", "required": true },
+      "forbid": ["/admin.html", "/server.js"]
+    },
+    {
+      "name": "blog.example.org",
+      "urls": ["https://blog.example.org"],
+      "host": "caddy",
+      "analytics": { "id": "G-YYYYYYYYYY", "required": false }
+    }
+  ]
+}

@@ -18,7 +18,7 @@ site/headers/                security-header templates: Azure SWA, Netlify, Apac
 templates/SECURITY.md        vulnerability policy with fix-time targets (VULN-1/2) — adopt.sh copies it if absent
 templates/github/scorecard.yml   OpenSSF Scorecard weekly (VULN-6) — adopt.sh installs it in GitHub repos
 mappings/ASVS-5.0.md         every OWASP ASVS 5.0 requirement → our rule IDs (covered / partial / gap / n/a)
-fleet/sites.json             your website fleet + expected GA IDs; fleet/report.mjs renders results
+local/sites.json             YOUR website fleet + expected GA IDs (git-ignored; start from fleet/sites.example.json); fleet/report.mjs renders results
 .github/workflows/sites-weekly.yml   Monday check of every hostname → opens/updates/closes a `site-check` issue
 design-tokens/schema/        semantic-keys.json — the canonical token + icon names (THEME-4)
 design-tokens/scripts/       validate.mjs (keys, refs, WCAG contrast, icons) · build.mjs (css, tailwind4, ts, dart, swift; tailwind = legacy v3) — zero deps
@@ -74,14 +74,14 @@ tools/standard/check.sh --baseline                        # measure; record toda
 ```bash
 ~/code/engineering-standard/bin/adopt.sh ~/web/<site> --site swa|netlify|apache|caddy|nginx --url https://<domain>
 ```
-1. Write `deploy.sh` to **stage an allowlist** (copy `a staged-allowlist deploy.sh`) and set
+1. Write `deploy.sh` to **stage an allowlist** (copy only the listed public files into a temp dir and upload that) and set
    `standard.config.json → site.publishDir`/`site.forbid`.
 2. `node tools/standard/site/harden.mjs . --host <host> --domain <domain>` — writes the header config with a CSP
    computed from the site's own files (report-only first), https redirect, private-path blocks and
    `security.txt`. Re-run it whenever pages change; re-run with `--enforce` after a clean week.
 3. In `deploy.sh`: `check-build.mjs "$STAGE" --host <host>` **before** upload (also catches CSP drift and
    config for the wrong server), `check-site.mjs --config standard.config.json` **after** — both abort on ERROR.
-4. Add the site to `fleet/sites.json` (with its GA ID) so the weekly check covers it; add CAA/SPF/DMARC.
+4. Add the site to `local/sites.json` (with its GA ID) so the weekly check covers it; add CAA/SPF/DMARC.
 5. The first deploy is done when `check-site.mjs` shows **0 errors** on every hostname.
 
 ### Existing website

@@ -1,7 +1,9 @@
 name: sites-weekly
-# Weekly live check of every hostname in fleet/sites.json (security, vulnerabilities, GA, quality).
-# Notifies by opening/updating one issue labelled site-check (closed automatically when all pass),
-# and by failing the run.
+# Weekly live check of every hostname in your fleet (security, vulnerabilities, GA, quality).
+# The fleet comes from the repository secret SITES_JSON — the contents of your git-ignored local/sites.json.
+# Runs ONLY in a private repo: on a public repo the issue, logs and step summary would publish your sites'
+# weaknesses, so the job is skipped. Notifies by opening/updating one issue labelled site-check (closed
+# automatically when all pass), and by failing the run.
 on:
   schedule: [{ cron: "0 15 * * 1" }]   # Mondays 15:00 UTC (08:00 PT)
   workflow_dispatch:
@@ -9,20 +11,33 @@ permissions: { contents: read, issues: write }
 concurrency: { group: sites-weekly, cancel-in-progress: false }
 jobs:
   check:
+    if: github.event.repository.private
     runs-on: ubuntu-latest
+    env: { SITES_JSON: "${{ secrets.SITES_JSON }}" }
     steps:
+      - name: Skip without a fleet
+        if: env.SITES_JSON == ''
+        run: echo "::notice::No SITES_JSON secret. Add the contents of local/sites.json as a repository secret to enable the weekly check."
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683   # v4.2.2
+        if: env.SITES_JSON != ''
+        with: { persist-credentials: false }
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: env.SITES_JSON != ''
         with: { node-version: 22 }
       - name: Check all sites
-        run: node site/check-site.mjs --config fleet/sites.json --json > results.json || true
+        if: env.SITES_JSON != ''
+        run: |
+          mkdir -p local && printenv SITES_JSON > local/sites.json
+          node site/check-site.mjs --config local/sites.json --json > results.json || true
       - name: Report
+        if: env.SITES_JSON != ''
         id: report
         run: |
           set +e
           node fleet/report.mjs results.json > report.md; echo "failed=$?" >> "$GITHUB_OUTPUT"
           cat report.md >> "$GITHUB_STEP_SUMMARY"
       - name: Open, update or close the site-check issue
+        if: env.SITES_JSON != ''
         env: { GH_TOKEN: "${{ github.token }}", FAILED: "${{ steps.report.outputs.failed }}" }
         run: |
           gh label create site-check --color B60205 --description "Weekly site check" 2>/dev/null || true
@@ -33,5 +48,5 @@ jobs:
             else gh issue create --title "$title" --label site-check --body-file report.md; fi
           elif [ -n "$n" ]; then gh issue close "$n" --comment "All hostnames pass as of $(date -u +%F). Closing."; fi
       - name: Fail the run when any site has errors
-        if: steps.report.outputs.failed != '0'
+        if: env.SITES_JSON != '' && steps.report.outputs.failed != '0'
         run: exit 1

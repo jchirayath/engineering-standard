@@ -13,6 +13,8 @@ jobs:
       - run: pip install semgrep
       - name: Plugin — rules.json current, every rule ID defined once, versions match VERSION
         run: node bin/build-rules.mjs --check
+      - name: No owner data committed (local/ stays local)
+        run: node bin/check-public.mjs
       - name: Sources gateway — registry pinned, reviewed, rule IDs defined
         run: node bin/sources.mjs --check
       - name: Plugin — MCP server, hooks, parser self-test

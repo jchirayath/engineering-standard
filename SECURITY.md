@@ -4,7 +4,8 @@
 
 Please report security issues **privately** — do not open a public issue.
 
-- This repository is private: report directly to the repository owner (GitHub @jchirayath).
+- Use GitHub's **Report a vulnerability** button on the repository's Security tab (private vulnerability reporting),
+  or, if the repository is private, contact the owner directly (GitHub @jchirayath).
 
 Include what you found, how to reproduce it, and the impact you expect. We acknowledge reports within
 **3 business days** and send a first assessment within **7 days**.

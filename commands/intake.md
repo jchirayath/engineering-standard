@@ -23,7 +23,8 @@ and never copy it into skills, hooks, `CLAUDE.md` or memory (AGT-9).
      (this standard wins; which modes/commands are allowed);
    - `reference` — useful to read, not loaded by agents;
    - `rejected` — with the reason.
-6. **Write** `proposals/sources/<id>.md` (findings, conflicts table, recommendation) and a draft
+6. **Write** `proposals/sources/<id>.md` (generic — anything about the owner's own repos or sites goes in the
+   git-ignored `local/findings/`, never in `proposals/`) (findings, conflicts table, recommendation) and a draft
    `sources/registry.json` entry with `"disposition": "proposed"`, the pinned `commit`, `reviewed` date,
    `license`, `kind`, watched `paths` and the rule IDs it `informs`. **Stop there** — the user approves
    before any rule, skill or marketplace entry changes. After approval: edit the standard, run

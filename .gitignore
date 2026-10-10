@@ -1,3 +1,7 @@
 design-tokens/template/build/
 node_modules/
 .DS_Store
+
+# Your own data — never committed (site list, private findings, notes). Only local/README.md is tracked.
+/local/*
+!/local/README.md
