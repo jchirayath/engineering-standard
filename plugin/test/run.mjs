@@ -298,7 +298,7 @@ console.log('▸ consume (sources gateway)')
   spawnSync('git', ['init', '-q'], { cwd: copy }); spawnSync('git', ['add', '-A'], { cwd: copy })
   writeFileSync(join(copy, 'proposals/sources/t-src.md'), '# Intake: test\n')
   writeFileSync(join(copy, 'proposals/sources/t-src.rules.json'), JSON.stringify({ name: 'test-source', author: 'Tester', repo: 'tester/t-src', url: 'https://github.com/tester/t-src',
-    commit: 'a'.repeat(40), license: 'MIT', kind: 'skill', disposition: 'distilled', paths: ['SKILL.md'], informs: [],
+    commit: 'a'.repeat(40), license: 'MIT', kind: 'skill', disposition: 'distilled', paths: ['SKILL.md'], informs: [], rationale: 'Test source: chosen because it is the only fixture that exercises new rules, amendments and modes together.',
     newRules: [{ prefix: 'SEC', level: 'MUST', title: 'Fixtures hold no secrets', text: 'Test fixtures never contain real credentials or tokens (SEC-11).', after: 'SEC-11', mode: 'auto' },
       { prefix: 'HELP', level: 'SHOULD', title: 'Help names the owner', text: 'Each help page names the team that owns the feature.', section: '6G', mode: 'auto' }],
     amendments: [{ id: 'TEST-8', append: 'The regression test is named after the symptom.' }] }))
@@ -311,6 +311,18 @@ console.log('▸ consume (sources gateway)')
   t('apply adds the quick rule to modes.json', modes.quick.ids.includes(newSec))
   t('apply registers the source with new + amended IDs', reg.sources.some((s) => s.id === 't-src' && s.informs.includes(newSec) && s.informs.includes('TEST-8')))
   t('apply regenerates README/REFERENCES tables', /test-source/.test(readFileSync(join(copy, 'README.md'), 'utf8')) && /test-source/.test(readFileSync(join(copy, 'REFERENCES.md'), 'utf8')))
+  // de-duplication: a near-copy of an existing rule must merge or justify itself
+  writeFileSync(join(copy, 'proposals/sources/t-dup.md'), '# Intake: dup\n')
+  const dupDraft = { name: 'dup-source', author: 'T', repo: 'tester/dup', url: 'https://github.com/tester/dup', commit: 'b'.repeat(40), license: 'MIT', kind: 'skill', disposition: 'distilled', paths: ['x'], informs: [],
+    rationale: 'Test source for duplicate detection: proposes a near-copy of an existing cookie rule on purpose.',
+    newRules: [{ prefix: 'BRW', level: 'MUST', title: 'Cookie flags', text: 'Cookies use the __Host- prefix, Secure, Path=/, no Domain, SameSite Lax or Strict, and HttpOnly unless client script reads them.', after: 'BRW-2', mode: 'auto' }] }
+  writeFileSync(join(copy, 'proposals/sources/t-dup.rules.json'), JSON.stringify(dupDraft))
+  const d1 = spawnSync('node', [join(copy, 'bin/consume.mjs'), 'apply', 't-dup'], { cwd: copy, encoding: 'utf8', env: { ...process.env, STANDARD_ROOT: copy } })
+  t('consume refuses a near-duplicate rule without mergeInto/whyNew', d1.status !== 0 && /overlaps BRW-2/.test(d1.stderr), d1.stderr)
+  dupDraft.newRules[0].mergeInto = 'BRW-2'; dupDraft.newRules[0].text = 'Cookie names never contain user data.'
+  writeFileSync(join(copy, 'proposals/sources/t-dup.rules.json'), JSON.stringify(dupDraft))
+  const d2 = spawnSync('node', [join(copy, 'bin/consume.mjs'), 'apply', 't-dup'], { cwd: copy, encoding: 'utf8', env: { ...process.env, STANDARD_ROOT: copy } })
+  t('mergeInto folds the proposal into the existing rule instead of adding one', d2.status === 0 && /Cookie names never contain user data/.test(readFileSync(join(copy, 'ENGINEERING_STANDARD.md'), 'utf8')) && !/\*\*BRW-7 /.test(readFileSync(join(copy, 'ENGINEERING_STANDARD.md'), 'utf8')), d2.stdout + d2.stderr)
   rmSync(copy, { recursive: true, force: true })
 }
 

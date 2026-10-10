@@ -14,6 +14,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, realpathSync, rmSyn
 import { join, dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { execFileSync } from 'node:child_process'
+import { nearest, terms, score } from './similar.mjs'
 
 const ROOT = process.env.STANDARD_ROOT || join(dirname(fileURLToPath(import.meta.url)), '..')
 const P = (...a) => join(ROOT, ...a)
@@ -209,9 +210,19 @@ function classifyCmd(id, { quiet = false } = {}) {
   const f = P('proposals/sources', `${id}.rules.json`)
   if (!existsSync(f)) throw new Error(`missing ${f} — draft it first (see commands/consume.md for the format)`)
   const draft = readJSON(f), ctx = classifierContext()
-  for (const r of draft.newRules || []) Object.assign(r, (({ mode, reason, confidence }) => ({ mode: r.mode && r.mode !== 'auto' ? r.mode : mode, modeReason: r.modeReason || reason, modeConfidence: confidence }))(classifyRule(r, ctx)))
+  const existing = readJSON(P('build/rules.json')).rules.filter((x) => x.prefix !== 'CORE'), thr = readJSON(P('plugin/similarity.json')).threshold
+  for (const r of draft.newRules || []) {
+    Object.assign(r, (({ mode, reason, confidence }) => ({ mode: r.mode && r.mode !== 'auto' ? r.mode : mode, modeReason: r.modeReason || reason, modeConfidence: confidence }))(classifyRule(r, ctx)))
+    // Normalisation before addition: a proposed rule that overlaps an existing one merges into it (mergeInto) or
+    // says why it must stand alone (whyNew). One fact, one owner — the standard must not grow by near-duplicates.
+    r.similar = nearest(`${r.title} ${r.text}`, existing, 3).map((x) => ({ id: x.id, score: +x.score.toFixed(2), shared: x.shared.slice(0, 6) }))
+    r.overlapDecision = r.mergeInto ? `merge into ${r.mergeInto}` : r.similar[0]?.score >= thr ? (r.whyNew ? 'new (justified)' : 'NEEDED: mergeInto or whyNew') : 'new'
+  }
   writeJSON(f, draft)
-  if (!quiet) for (const r of draft.newRules || []) console.log(`  ${(r.id || r.prefix + '-?').padEnd(10)} ${r.mode.padEnd(6)} ${r.modeConfidence.padEnd(6)} ${r.title} — ${r.modeReason}`)
+  if (!quiet) for (const r of draft.newRules || []) {
+    console.log(`  ${(r.id || r.prefix + '-?').padEnd(10)} ${r.mode.padEnd(6)} ${r.modeConfidence.padEnd(6)} ${r.title} — ${r.modeReason}`)
+    console.log(`             closest: ${r.similar.map((x) => `${x.id} ${x.score}`).join(', ')} → ${r.overlapDecision}`)
+  }
   return draft
 }
 
@@ -238,6 +249,12 @@ function sectionEnd(lines, sec) {
 function applyCmd(id, { dryRun = false } = {}) {
   if (!existsSync(P('proposals/sources', `${id}.md`))) throw new Error(`missing proposals/sources/${id}.md — write the intake review first`)
   const draft = classifyCmd(id, { quiet: true })
+  if (draft.disposition !== 'proposed' && !(draft.rationale && draft.rationale.length >= 40)) throw new Error(`proposals/sources/${id}.rules.json needs a "rationale": why this disposition, and what it was chosen over`)
+  const undecided = (draft.newRules || []).filter((r) => r.overlapDecision?.startsWith('NEEDED'))
+  if (undecided.length) throw new Error(`${undecided.map((r) => `"${r.title}" overlaps ${r.similar[0].id} (${r.similar[0].score})`).join('; ')} — set "mergeInto": "<ID>" to fold it into that rule, or "whyNew" to explain why it must stand alone`)
+  // mergeInto turns a proposed rule into an amendment of the rule it overlaps
+  draft.amendments = [...(draft.amendments || []), ...(draft.newRules || []).filter((r) => r.mergeInto).map((r) => ({ id: r.mergeInto, append: r.text }))]
+  draft.newRules = (draft.newRules || []).filter((r) => !r.mergeInto)
   const invFile = P('local/consume', id, 'inventory.json'), inv = existsSync(invFile) ? readJSON(invFile) : {}
   if (draft.commit && inv.commit && draft.commit !== inv.commit) throw new Error(`proposals/sources/${id}.rules.json pins ${draft.commit.slice(0, 7)} but local/consume/${id} was fetched at ${inv.commit.slice(0, 7)} — re-fetch or fix the draft so the reviewed commit is the one recorded`)
   if (!/^[0-9a-f]{40}$/.test(draft.commit || inv.commit || '')) throw new Error(`no pinned commit for ${id} — run fetch first or set "commit" in the draft`)
@@ -258,6 +275,8 @@ function applyCmd(id, { dryRun = false } = {}) {
     }
     for (const a of draft.amendments || []) {
       const b = findBullet(lines, a.id); if (b < 0) throw new Error(`amendment target ${a.id} not found`)
+      const already = score(terms(a.append), terms(lines.slice(b, bulletEnd(lines, b)).join(' ')))
+      if (already >= 0.8 && !a.force) throw new Error(`amendment to ${a.id} repeats what it already says (overlap ${already.toFixed(2)}) — drop it, or set "force": true with a reason`)
       const e = bulletEnd(lines, b) - 1
       lines[e] = lines[e] + ' ' + a.append.trim() + ` ${cite}`
       const whole = lines.slice(b, e + 1).join(' ').replace(/\s+/g, ' ')         // re-wrap the whole bullet
@@ -268,7 +287,7 @@ function applyCmd(id, { dryRun = false } = {}) {
   const quickNew = (draft.newRules || []).filter((r) => r.mode === 'quick' && !modes.quick.prefixes.includes(r.prefix)).map((r) => r.id)
   const entry = { id, name, author: draft.author || inv.repo?.split('/')[0], repo: draft.repo || inv.repo, url: draft.url || inv.url,
     commit: draft.commit || inv.commit, ...(draft.version ? { version: draft.version } : {}), reviewed: today(),
-    license: draft.license || inv.license, kind: draft.kind, disposition: draft.disposition,
+    license: draft.license || inv.license, kind: draft.kind, disposition: draft.disposition, rationale: draft.rationale,
     paths: draft.paths || inv.files?.agentFacing?.slice(0, 20) || [], informs: [...new Set([...(draft.informs || []), ...added, ...amended])],
     ...(draft.also ? { also: draft.also } : {}), ...(draft.companion ? { companion: draft.companion } : {}), ...(draft.notes ? { notes: draft.notes } : {}) }
   const summary = { added, amended, quick: (draft.newRules || []).filter((r) => r.mode === 'quick').map((r) => r.id), registry: entry.disposition }
@@ -278,9 +297,11 @@ function applyCmd(id, { dryRun = false } = {}) {
   const i = reg.sources.findIndex((s) => s.id === id); if (i >= 0) reg.sources[i] = entry; else reg.sources.push(entry)
   writeJSON(P('sources/registry.json'), reg)
   writeJSON(P('proposals/sources', `${id}.rules.json`), { ...draft, applied: today(), newRules: draft.newRules })
+  const justified = (draft.newRules || []).filter((r) => r.whyNew && r.similar?.[0]?.score >= readJSON(P('plugin/similarity.json')).threshold)
+  if (justified.length) { const sim = readJSON(P('plugin/similarity.json')); for (const r of justified) sim.accepted[`${r.similar[0].id}~${r.id}`] = r.whyNew; writeJSON(P('plugin/similarity.json'), sim) }
   const run = (f, ...a) => { try { return { ok: true, out: execFileSync('node', [P(f), ...a], { cwd: ROOT, encoding: 'utf8' }) } } catch (e) { return { ok: false, out: `${e.stdout || ''}${e.stderr || ''}` } } }
   run('bin/build-rules.mjs'); run('bin/sources.mjs', '--render')
-  const checks = [['build-rules --check', run('bin/build-rules.mjs', '--check')], ['sources --check', run('bin/sources.mjs', '--check')], ['check-public', run('bin/check-public.mjs')]]
+  const checks = [['build-rules --check', run('bin/build-rules.mjs', '--check')], ['similar --check', run('bin/similar.mjs', '--check')], ['sources --check', run('bin/sources.mjs', '--check')], ['check-public', run('bin/check-public.mjs')]]
   console.log(`✓ applied ${id}: ${added.length} new rule(s) ${added.join(' ')}${amended.length ? ` · amended ${amended.join(' ')}` : ''} · disposition ${entry.disposition}`)
   for (const [n, r] of checks) console.log(`${r.ok ? '  ✓' : '  ✗'} ${n}\n${r.out.trim().split('\n').map((l) => '    ' + l).join('\n')}`)
   console.log('  Review `git diff`, resolve any cross-mode warning (reword or add a reviewedPointers entry), then commit.')

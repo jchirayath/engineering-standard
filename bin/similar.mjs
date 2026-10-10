@@ -31,7 +31,8 @@ export function score(a, b) {
 // The most similar existing rules to a proposed one → [{ id, score, shared }]
 export function nearest(text, rules, k = 3) {
   const { sets, strip } = corpus(rules), q = strip(terms(text))
-  return rules.map((r, i) => ({ id: r.id, title: r.title, score: score(q, sets[i]), shared: [...q].filter((w) => sets[i].has(w)).slice(0, 8) }))
+  // A short proposal can share two words with anything; damp the score until at least 4 content terms are shared.
+  return rules.map((r, i) => { const shared = [...q].filter((w) => sets[i].has(w)); return { id: r.id, title: r.title, score: score(q, sets[i]) * Math.min(1, shared.length / 4), shared: shared.slice(0, 8) } })
     .sort((x, y) => y.score - x.score).slice(0, k)
 }
 export function pairs(rules, min = 0.5) {
