@@ -23,7 +23,9 @@
 > "see X" pointer; `bin/build-rules.mjs --check` fails on duplicate or undefined rule IDs.
 
 Supersedes: `SecureApplication.md` (controls), `QA_PLAYBOOK.md` (build-time rules). Review procedure
-lives in `APP_REVIEW.md`. Tooling lives in [`~/code/engineering-standard/`](README.md).
+lives in `APP_REVIEW.md`. Tooling lives in [`~/code/engineering-standard/`](README.md). Every external
+standard, law, vendor policy and open-source project this document draws on — with the rules each one
+informs and how confident the research was — is listed in [`REFERENCES.md`](REFERENCES.md).
 
 **Quick start (per repo, ~10 minutes):**
 ```bash

@@ -1,6 +1,6 @@
 # engineering-standard kit
 
-Documents: [ENGINEERING_STANDARD.md](ENGINEERING_STANDARD.md) (what to build to) · [APP_REVIEW.md](APP_REVIEW.md) (how to review against it). Symlinked into `~/code/` so existing paths keep working.
+Documents: [ENGINEERING_STANDARD.md](ENGINEERING_STANDARD.md) (what to build to) · [APP_REVIEW.md](APP_REVIEW.md) (how to review against it) · [MODES.md](MODES.md) (which rules apply in quick vs client mode) · [REFERENCES.md](REFERENCES.md) (every source it is built on). Symlinked into `~/code/` so existing paths keep working.
 
 Makes [`~/code/ENGINEERING_STANDARD.md`](ENGINEERING_STANDARD.md) mechanical: shared token names
 across all apps (each app keeps its own look), generated theme + icon code per platform, and

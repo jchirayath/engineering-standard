@@ -160,7 +160,7 @@ function check({ json, modesMd, defs, rules, prefixes, stacksMap, modesMap }) {
   for (const [id, at] of count) if (at.length > 1) errors.push(`duplicate definition ${id} at ENGINEERING_STANDARD.md lines ${at.join(', ')}`)
 
   const defined = new Set(defs.map((d) => d.id))
-  const files = ['ENGINEERING_STANDARD.md', 'APP_REVIEW.md', 'README.md', 'mappings/asvs-map.json']
+  const files = ['ENGINEERING_STANDARD.md', 'APP_REVIEW.md', 'README.md', 'REFERENCES.md', 'MODES.md', 'mappings/asvs-map.json']
     .map((f) => join(ROOT, f)).filter(existsSync)
   for (const f of readdirSync(join(ROOT, 'semgrep'))) if (f.endsWith('.yml')) files.push(join(ROOT, 'semgrep', f))
   for (const f of readdirSync(join(ROOT, 'bin'))) if (f !== 'build-rules.mjs') files.push(join(ROOT, 'bin', f))
