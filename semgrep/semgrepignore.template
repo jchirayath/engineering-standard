@@ -3,6 +3,9 @@
 # use `nosemgrep: <rule-id> -- <reason>` on the line, or an entry in docs/STANDARD_EXCEPTIONS.md.
 :include .gitignore
 .git/
+# the engineering-standard kit itself (vendored by adopt.sh) and its generated theme code
+tools/standard/
+design/build/
 node_modules/
 build/
 dist/

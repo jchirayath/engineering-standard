@@ -1,10 +1,53 @@
-# engineering-standard kit
+# engineering-standard
 
-Documents: [ENGINEERING_STANDARD.md](ENGINEERING_STANDARD.md) (what to build to) · [APP_REVIEW.md](APP_REVIEW.md) (how to review against it) · [MODES.md](MODES.md) (which rules apply in quick vs client mode) · [REFERENCES.md](REFERENCES.md) (every source it is built on). Symlinked into `~/code/` so existing paths keep working.
+An engineering standard for apps built with AI coding agents — **356 rules** (secure · optimized · shared ·
+observable · consistent) — plus the kit and the Claude Code plugin that make it mechanical: hooks that block
+unsafe agent actions, an MCP server that hands each agent only the rules for its stack and mode, lint rules,
+design-token tooling and CI checks.
 
-Makes [`~/code/ENGINEERING_STANDARD.md`](ENGINEERING_STANDARD.md) mechanical: shared token names
-across all apps (each app keeps its own look), generated theme + icon code per platform, and
-banned-API lint rules for security, logging, config, HTTP, theme and icons.
+Documents: [ENGINEERING_STANDARD.md](ENGINEERING_STANDARD.md) (what to build to) · [APP_REVIEW.md](APP_REVIEW.md)
+(how to review against it) · [MODES.md](MODES.md) (which rules apply in quick vs client mode) ·
+[REFERENCES.md](REFERENCES.md) (every source it is built on, and why).
+
+## Use it in your apps
+
+**Once per machine** — install the plugin (every Claude Code session, every repo, gets it):
+```
+/plugin marketplace add jchirayath/engineering-standard
+/plugin install engineering-standard@engineering-standard
+```
+and clone the kit next to your apps: `git clone https://github.com/jchirayath/engineering-standard ~/code/engineering-standard`.
+
+**Once per app** — from the app's root:
+```bash
+~/code/engineering-standard/bin/adopt.sh . --mode quick      # prototype / internal tool   (or --mode client)
+tools/standard/check.sh --baseline                           # existing app: record today's violations
+git add -A && git commit -m "Adopt engineering standard"
+```
+`adopt.sh` sets the repo up to meet the standard from the first commit:
+
+| It writes | So that |
+|---|---|
+| `.claude/settings.json` | agents can't read `.env`/secrets or use bypass mode (AGT-1), and the plugin is enabled for **everyone** who opens the repo — teammates, cloud sessions, CI |
+| `standard.config.json` → `"mode"` | the plugin, checks and reviews apply the quick or client rule set (§0A); websites are always client |
+| `CLAUDE.md` | one line pointing at the standard — the plugin delivers the rules, so nothing is restated |
+| `tools/standard/`, `.semgrep/standard/` | `check.sh` runs tokens, generated-code drift, agent config, feature→test map and lint |
+| `design/` | the app's own token source + icon registry (keep its look; names are shared across apps) |
+| `.github/workflows/standard.yml`, `scorecard.yml` | CI runs the same checks on every push (GitHub repos) |
+| `SECURITY.md`, `docs/STANDARD_EXCEPTIONS.md` | disclosure policy; the one place deviations are recorded |
+
+**Every day** — just work with Claude in the app. The plugin injects the five pillars, the agent loop and the
+mode's rules for the detected stack at session start; blocks secret reads, `--no-verify`, force-push to main,
+`curl | sh`, unverified or brand-new packages, loosened tests and destructive commands (`terraform destroy`,
+`DROP TABLE`, …) unless you allow them; lints each edited file; and answers `rules_for` / `rule` / `mode` /
+`verify_dependency` / `review_plan`. Before saying "done" the agent runs `tools/standard/check.sh` and reports
+what it did **not** verify. Use `/engineering-standard:review` before a release and
+`/engineering-standard:exception` to record a justified deviation.
+
+**When the app gets real users** (store, public URL, outside users, other people's data): set `"mode": "client"`
+in `standard.config.json` (ENF-4) and run `APP_REVIEW.md` profile `standard`. **To upgrade:** `git pull` the kit,
+re-run `adopt.sh .`, run `check.sh`, commit. **Other agents** (Cursor, Codex, Copilot, Desktop) can use the MCP
+server alone — rules and checks, no hooks (see [Claude Code plugin](#claude-code-plugin-every-agent-gets-the-standard)).
 
 ```
 bin/adopt.sh <repo> [--site <host> --url <https://…>]   vendor the kit into an app or website repo (idempotent; re-run to upgrade)
@@ -56,7 +99,7 @@ one rule set (with rule IDs) and enforces it. The full list — every source, wh
   feature-dev, security-review, code-review, simplify, supabase, azure, vercel, playwright, plugin-dev
   ([table](REFERENCES.md#claude-code-plugins--skills-the-standard-uses))
 
-## Running the standard: new repo vs existing repo
+## Runbooks: new repo vs existing repo
 
 The difference: a **new** repo starts clean and every check is blocking from the first commit. An
 **existing** repo starts by *measuring*, records today's violations as a baseline so only **new**
@@ -73,11 +116,9 @@ mkdir ~/code/<app> && cd ~/code/<app> && git init        # or flutter create / n
 2. Build the platform core (§1 of the standard) **before** the first feature: config, logger + `record()`,
    authz, HTTP client, errors. Ask Claude: *"Scaffold the platform core for this repo per
    ENGINEERING_STANDARD §1"* (`feature-dev:code-architect` is a good fit).
-3. Add to `CLAUDE.md`: `Follow ~/code/ENGINEERING_STANDARD.md (kit in tools/standard). Deviations are
-   listed in docs/STANDARD_EXCEPTIONS.md. Every feature ships with unit, integration, e2e and walkthrough
-   tests tagged @feature:<key> (TEST-0/7).`
-4. Add a `tests` block to `standard.config.json` (template in `bin/check-tests.mjs`), the CI job below,
-   and enable the `engineering-standard` plugin (see below). Everything is **blocking from commit 1** — no baseline.
+3. `adopt.sh` already wrote `CLAUDE.md`, `.claude/settings.json` (plugin enabled), the mode and the CI workflow.
+4. Add a `tests` block to `standard.config.json` (template in `bin/check-tests.mjs`). Everything is
+   **blocking from commit 1** — no baseline.
 5. Before the first release: run `APP_REVIEW.md` with profile `quick`.
 
 ### Existing app repo
@@ -94,7 +135,7 @@ tools/standard/check.sh --baseline                        # measure; record toda
    `context.colors.*`, `Icons.*` → `AppIcons.*`). Re-run `--baseline` after each batch so it only shrinks.
 3. **Tests:** add the `tests` block with `allowMissing` entries (each with an `until` date) for features
    that lack a kind today; new features get no waiver.
-4. Add the `CLAUDE.md` line and CI job, and enable the plugin. CI fails only on **new** violations and expired waivers.
+4. Commit what `adopt.sh` wrote (`CLAUDE.md`, `.claude/settings.json`, mode, CI). CI fails only on **new** violations and expired waivers.
 5. Track the burn-down: baseline count and waiver count go down every release; delete
    `.semgrep/baseline.json` when it reaches zero. Re-run `APP_REVIEW.md` (`standard`) before a release.
 
@@ -128,8 +169,9 @@ node ~/code/engineering-standard/site/check-site.mjs https://<domain> https://ww
    `/schedule`) across all hostnames.
 
 ### Upgrading the kit in any repo
-Re-run `adopt.sh` (kit-owned files update, repo-owned files are kept), run `tools/standard/check.sh`,
-commit. `tools/standard/VERSION` records which kit version a repo is on.
+`git pull` in the kit, re-run `adopt.sh` (kit-owned files update; repo-owned files are kept; settings, mode and
+`CLAUDE.md` are merged, never overwritten), run `tools/standard/check.sh`, commit. `tools/standard/VERSION` records
+which kit version a repo is on; the plugin's SessionStart warns when it is behind.
 
 ## Per-platform wiring
 

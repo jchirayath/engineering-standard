@@ -44,6 +44,13 @@ jobs:
           node site/check-build.mjs /tmp/demo/public --host apache
           echo '<script>alert(2)</script>' >> /tmp/demo/public/index.html
           if node site/check-build.mjs /tmp/demo/public --host apache; then echo "drift not caught"; exit 1; fi
+      - name: adopt.sh produces a repo that passes its own checks
+        run: |
+          mkdir -p /tmp/app && cd /tmp/app && git init -q
+          printf '{ "name": "demo", "dependencies": { "next": "16.0.0" } }\n' > package.json
+          "$GITHUB_WORKSPACE/bin/adopt.sh" . --mode quick
+          test -f .claude/settings.json && grep -q '"mode": "quick"' standard.config.json && grep -q engineering-standard CLAUDE.md
+          tools/standard/check.sh
       - name: TEST-7 checker runs
         run: node bin/check-tests.mjs --config /dev/null || true
 

@@ -1,12 +1,12 @@
 # Engineering Standard — Secure · Optimized · Shared · Observable · Consistent (v1.3)
 
-> The **minimum bar** every application under `~/code` is built to. Stack-agnostic. It answers
+> The **minimum bar** every application that adopts it is built to. Stack-agnostic. It answers
 > *"what does good look like?"* — its companion [`APP_REVIEW.md`](APP_REVIEW.md) answers *"does this
 > app meet it, and could a customer actually use it?"*
 >
-> **How to adopt in a repo:** add one line to the repo's `CLAUDE.md` —
-> `Follow ~/code/ENGINEERING_STANDARD.md. Deviations are listed in docs/STANDARD_EXCEPTIONS.md.` —
-> then fill in §1 (the platform-core map) for that repo. Every rule has an ID (`SEC-4`, `LOG-2`…) so
+> **How to adopt in a repo:** run `bin/adopt.sh <repo> --mode quick|client` from the kit (README, "Use it in
+> your apps") — it writes the agent settings, the mode and a one-line `CLAUDE.md` pointer — then fill in §1
+> (the platform-core map) for that repo. Every rule has an ID (`SEC-4`, `LOG-2`…) so
 > review findings, PRs and exceptions can cite it.
 >
 > **Keywords.** **MUST** = blocking for new code: an unexcepted violation is a finding of at least P1
@@ -23,17 +23,17 @@
 > "see X" pointer; `bin/build-rules.mjs --check` fails on duplicate or undefined rule IDs.
 
 Supersedes: `SecureApplication.md` (controls), `QA_PLAYBOOK.md` (build-time rules). Review procedure
-lives in `APP_REVIEW.md`. Tooling lives in [`~/code/engineering-standard/`](README.md). Every external
+lives in `APP_REVIEW.md`. Tooling and the Claude Code plugin live in this repository ([README](README.md)). Every external
 standard, law, vendor policy and open-source project this document draws on — with the rules each one
 informs and how confident the research was — is listed in [`REFERENCES.md`](REFERENCES.md).
 
-**Quick start (per repo, ~10 minutes):**
+**Quick start (per repo, ~10 minutes)** — with the plugin installed once per machine (README):
 ```bash
-~/code/engineering-standard/bin/adopt.sh ~/code/<app>   # lint rules, token tooling, design/ template, exceptions file
-cd ~/code/<app> && tools/standard/check.sh --baseline    # record today's violations; only NEW ones fail
-# add the CLAUDE.md line above + the CI job from the kit README; fill in §1 for this repo
-~/code/engineering-standard/bin/adopt.sh ~/web/<site> --site swa|netlify|apache|caddy|nginx --url https://<domain>   # websites
+<kit>/bin/adopt.sh <app> --mode quick       # settings, mode, CLAUDE.md, lint rules, token tooling, design/, CI, exceptions file
+cd <app> && tools/standard/check.sh --baseline   # existing app: record today's violations; only NEW ones fail
+<kit>/bin/adopt.sh <site> --site swa|netlify|apache|caddy|nginx --url https://<domain>   # websites (always client mode)
 ```
+then fill in §1 for this repo.
 **New vs existing repo:** a new repo is blocking from commit 1; an existing repo measures first
 (`APP_REVIEW.md` quick + `--baseline`), fixes P0s, then burns the baseline down. Step-by-step runbooks for
 new/existing **apps** and **websites** are in the
@@ -454,13 +454,15 @@ The rest of this standard governs the *code*; this section governs the *agent wr
 matter are configuration the harness enforces — a sentence in `CLAUDE.md` is advice the agent can miss.
 The `engineering-standard` plugin checks most of these at session start and blocks the rest in hooks.
 
-- **AGT-1 MUST** Every repo commits `.claude/settings.json` whose `permissions.deny` covers
-  `Read(./.env)`, `Read(./.env.*)`, `Read(./secrets/**)`, `Read(~/.ssh/**)` and the repo's production
-  config files (e.g. `env.prod*.json`), and sets `permissions.disableBypassPermissionsMode: "disable"`.
-  `.env.example` stays readable. Security limits never live only in `CLAUDE.md`. *Enforced by:* plugin
-  `SessionStart` warning + `PreToolUse` block; agent-config lint in CI. The same file enables the
-  `engineering-standard` plugin (`enabledPlugins`) so every session — local, cloud or a teammate's —
-  loads its hooks.
+- **AGT-1 MUST** Every repo commits `.claude/settings.json` whose `permissions.deny` covers `Read(./.env)`,
+  the `.env` variants that hold real values (`.env.local`, `.env.*.local`, `.env.production` …),
+  `Read(./secrets/**)`, `Read(~/.ssh/**)` and the repo's production config files (e.g. `env.prod*.json`) —
+  listed individually, because a deny rule can't exempt `.env.example`, and sets
+  `permissions.disableBypassPermissionsMode: "disable"`. `.env.example` stays readable. Security limits
+  never live only in `CLAUDE.md`. *Enforced by:* `adopt.sh` writes it; plugin `SessionStart` warning +
+  `PreToolUse` block; `tools/standard/check-agent-config.mjs` in CI. The same file enables the
+  `engineering-standard` plugin (`enabledPlugins`) so every session — local, cloud or a teammate's — loads
+  its hooks.
 - **AGT-2 MUST** Where Claude Code's sandbox is supported, Bash runs sandboxed and is configured to
   **fail rather than fall back** to unsandboxed execution (no unsandboxed-command escape hatch), with an
   explicit network allow-list and credential paths denied; `excludedCommands` never lists an interpreter

@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 # Vendor the engineering-standard kit into a repo (idempotent; re-run to upgrade).
-#   adopt.sh <repo-path>                                   app  (Flutter / web app / Go / Python / Swift)
+#   adopt.sh <repo-path> [--mode quick|client]             app  (Flutter / web app / Go / Python / Swift)
 #   adopt.sh <repo-path> --site swa|netlify|apache|caddy|nginx [--url https://example.com]   website
 # Kit-owned (overwritten on every run): .semgrep/standard/, tools/standard/
 # Repo-owned (created only if absent):  .semgrepignore, design/, standard.config.json, docs/STANDARD_EXCEPTIONS.md,
-#                                       site header config, .well-known/security.txt
+#                                       site header config, .well-known/security.txt, .github/workflows/standard.yml
+# Merged (never overwritten):           .claude/settings.json (AGT-1 + plugin enabled), standard.config.json "mode",
+#                                       CLAUDE.md adoption line
 set -euo pipefail
 KIT="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(cd "${1:?usage: adopt.sh <repo-path> [--site <host>] [--url <https://…>]}" && pwd)"; shift
-SITE=""; URL=""
+SITE=""; URL=""; MODE=""
 while [ $# -gt 0 ]; do case "$1" in
   --site) SITE="${2:?--site needs swa|netlify|apache|caddy|nginx}"; shift 2 ;;
   --url)  URL="${2:?--url needs https://…}"; shift 2 ;;
+  --mode) MODE="${2:?--mode needs quick|client}"; shift 2 ;;
   *) echo "unknown option: $1" >&2; exit 2 ;;
 esac; done
 VERSION="$(cat "$KIT/VERSION")"
@@ -27,10 +30,11 @@ rm -f "$REPO/.semgrep/standard/"*.yml
 for f in "$KIT"/semgrep/*.yml; do case "$f" in *.test.yml) ;; *) cp "$f" "$REPO/.semgrep/standard/" ;; esac; done   # *.test.yml are rule fixtures
 echo "  updated  .semgrep/standard/ ($(ls "$KIT"/semgrep/*.yml | grep -vc '\.test\.yml$') rule files)"
 copy_if_absent "$KIT/semgrep/semgrepignore.template" "$REPO/.semgrepignore"
+grep -qx "tools/standard/" "$REPO/.semgrepignore" || { printf '\n# engineering-standard kit (vendored)\ntools/standard/\n' >> "$REPO/.semgrepignore"; echo "  updated  .semgrepignore (ignore the vendored kit)"; }
 
 # 2. Tooling (kit-owned).
 mkdir -p "$REPO/tools/standard"
-cp "$KIT/bin/check.sh" "$KIT/bin/check-tests.mjs" "$REPO/tools/standard/"
+cp "$KIT/bin/check.sh" "$KIT/bin/check-tests.mjs" "$KIT/bin/check-agent-config.mjs" "$REPO/tools/standard/"
 copy_owned "$KIT/site" "$REPO/tools/standard/site"
 if [ -z "$SITE" ]; then
   copy_owned "$KIT/design-tokens/scripts" "$REPO/tools/standard/design-tokens/scripts"
@@ -44,6 +48,7 @@ mkdir -p "$REPO/docs"
 copy_if_absent "$KIT/templates/SECURITY.md" "$REPO/SECURITY.md"
 if [ -d "$REPO/.github" ] || git -C "$REPO" remote -v 2>/dev/null | grep -q github.com; then
   copy_if_absent "$KIT/templates/github/scorecard.yml" "$REPO/.github/workflows/scorecard.yml"
+  copy_if_absent "$KIT/templates/github/standard.yml"  "$REPO/.github/workflows/standard.yml"
 fi
 [ -e "$REPO/docs/STANDARD_EXCEPTIONS.md" ] || { printf '# Standard exceptions\n\n| Rule | Where | Reason | Owner | Expires |\n|---|---|---|---|---|\n' > "$REPO/docs/STANDARD_EXCEPTIONS.md"; echo "  created  docs/STANDARD_EXCEPTIONS.md"; }
 
@@ -62,6 +67,7 @@ if [ -n "$SITE" ]; then
     echo "  created  .well-known/security.txt (check the Contact: address)"
   fi
   [ -e "$REPO/standard.config.json" ] || { printf '{\n  "site": {\n    "urls": ["%s"],\n    "forbid": [],\n    "publishDir": "."\n  }\n}\n' "${URL:-https://example.com}" > "$REPO/standard.config.json"; echo "  created  standard.config.json (site.urls, site.forbid, site.publishDir)"; }
+  node "$KIT/bin/adopt-config.mjs" "$REPO" --site
   cat <<EOF
 
 Next steps (website)
@@ -70,8 +76,7 @@ Next steps (website)
   2. In deploy.sh, BEFORE upload:   node tools/standard/site/check-build.mjs "\$STAGE" || exit 1
                    AFTER upload:    node tools/standard/site/check-site.mjs --config standard.config.json || exit 1
   3. Ship the header config with the site (it must be inside the staged dir for swa/netlify/apache).
-  4. CLAUDE.md:  Follow ~/code/ENGINEERING_STANDARD.md §2A (kit v$VERSION in tools/standard). Exceptions: docs/STANDARD_EXCEPTIONS.md
-  5. Existing site? Run check-site.mjs against the live URL now; fix ERRORs first, then WARNs.
+  4. Existing site? Run check-site.mjs against the live URL now; fix ERRORs first, then WARNs.
 EOF
   exit 0
 fi
@@ -86,13 +91,16 @@ if [ ! -e "$REPO/design/tokens.config.json" ]; then
   echo "  created  design/tokens.config.json (platforms: $plats)"
 fi
 
+node "$KIT/bin/adopt-config.mjs" "$REPO" ${MODE:+--mode "$MODE"}
+
 cat <<EOF
 
-Next steps (app) — see engineering-standard/README.md "New repo vs existing repo"
-  1. Map the app's palette into design/tokens/*.json (keep its look; names are fixed by the schema).
-  2. Add a "tests" block to standard.config.json so TEST-7 can map features → tests.
-  3. tools/standard/check.sh            # tokens, generated code, TEST-7, lint
-     Existing repo: tools/standard/check.sh --baseline  first, then burn the list down.
-  4. CLAUDE.md:  Follow ~/code/ENGINEERING_STANDARD.md (kit v$VERSION in tools/standard). Exceptions: docs/STANDARD_EXCEPTIONS.md
-  5. CI:         run tools/standard/check.sh (GitHub Actions job in the kit README)
+Next steps (app) — engineering-standard README, "Use it in your apps"
+  1. Existing repo:  tools/standard/check.sh --baseline    (records today's violations; only NEW ones fail)
+     New repo:       tools/standard/check.sh               (blocking from the first commit)
+  2. Map the app's palette into design/tokens/*.json — keep its look; the token names are fixed (THEME-4).
+  3. Add a "tests" block to standard.config.json so TEST-7 maps features → tests (template: tools/standard/check-tests.mjs).
+  4. Commit (.claude/settings.json, CLAUDE.md, standard.config.json, tools/standard, .semgrep, workflows).
+     Anyone who opens the repo in Claude Code is offered the engineering-standard plugin.
+  5. Client mode: add CODEOWNERS for CLAUDE.md, .claude/**, .mcp.json (AGT-9) and turn on branch protection (REPO-2).
 EOF

@@ -34,6 +34,9 @@ if [ -f standard.config.json ] && grep -q '"site"' standard.config.json; then
   fi
 fi
 
+echo "▸ agent config (AGT-1, AGT-5, AGT-7)"
+CA="tools/standard/check-agent-config.mjs"; [ -f "$CA" ] || CA="$(cd "$(dirname "$0")" && pwd)/check-agent-config.mjs"
+node "$CA" . || status=1
 echo "▸ tests: feature → test map (TEST-7)"
 CT="tools/standard/check-tests.mjs"; [ -f "$CT" ] || CT="$(cd "$(dirname "$0")" && pwd)/check-tests.mjs"
 node "$CT" || status=1
