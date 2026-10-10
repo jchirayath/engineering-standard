@@ -1,4 +1,4 @@
-# Engineering Standard — Secure · Optimized · Shared · Observable · Consistent (v1.3)
+# Engineering Standard — Secure · Optimized · Shared · Observable · Consistent (v1.4)
 
 > The **minimum bar** every application that adopts it is built to. Stack-agnostic. It answers
 > *"what does good look like?"* — its companion [`APP_REVIEW.md`](APP_REVIEW.md) answers *"does this

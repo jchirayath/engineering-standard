@@ -13,10 +13,11 @@ Documents: [ENGINEERING_STANDARD.md](ENGINEERING_STANDARD.md) (what to build to)
 
 **Once per machine** — install the plugin (every Claude Code session, every repo, gets it):
 ```
-/plugin marketplace add jchirayath/engineering-standard
+/plugin marketplace add jchirayath/engineering-standard@v1.4.0
 /plugin install engineering-standard@engineering-standard
 ```
-and clone the kit next to your apps: `git clone https://github.com/jchirayath/engineering-standard ~/code/engineering-standard`.
+and clone the kit at the same release: `git clone --branch v1.4.0 https://github.com/jchirayath/engineering-standard ~/code/engineering-standard`.
+Releases are immutable GitHub releases, so a pinned version never changes underneath you (AGT-5, SUP-3).
 
 **Once per app** — from the app's root:
 ```bash
@@ -28,7 +29,7 @@ git add -A && git commit -m "Adopt engineering standard"
 
 | It writes | So that |
 |---|---|
-| `.claude/settings.json` | agents can't read `.env`/secrets or use bypass mode (AGT-1), and the plugin is enabled for **everyone** who opens the repo — teammates, cloud sessions, CI |
+| `.claude/settings.json` | agents can't read `.env`/secrets or use bypass mode (AGT-1), and the plugin is enabled for **everyone** who opens the repo — teammates, cloud sessions, CI — pinned to the kit's release (`ref: v1.4.0`) |
 | `standard.config.json` → `"mode"` | the plugin, checks and reviews apply the quick or client rule set (§0A); websites are always client |
 | `CLAUDE.md` | one line pointing at the standard — the plugin delivers the rules, so nothing is restated |
 | `tools/standard/`, `.semgrep/standard/` | `check.sh` runs tokens, generated-code drift, agent config, feature→test map and lint |
@@ -45,8 +46,9 @@ what it did **not** verify. Use `/engineering-standard:review` before a release 
 `/engineering-standard:exception` to record a justified deviation.
 
 **When the app gets real users** (store, public URL, outside users, other people's data): set `"mode": "client"`
-in `standard.config.json` (ENF-4) and run `APP_REVIEW.md` profile `standard`. **To upgrade:** `git pull` the kit,
-re-run `adopt.sh .`, run `check.sh`, commit. **Other agents** (Cursor, Codex, Copilot, Desktop) can use the MCP
+in `standard.config.json` (ENF-4) and run `APP_REVIEW.md` profile `standard`. **To upgrade:** check out the new
+release tag in the kit, re-run `adopt.sh .` (it moves the repo's pin), run `check.sh`, commit; in Claude Code,
+`/plugin marketplace update engineering-standard`. **Other agents** (Cursor, Codex, Copilot, Desktop) can use the MCP
 server alone — rules and checks, no hooks (see [Claude Code plugin](#claude-code-plugin-every-agent-gets-the-standard)).
 
 ```
@@ -169,8 +171,8 @@ node ~/code/engineering-standard/site/check-site.mjs https://<domain> https://ww
    `/schedule`) across all hostnames.
 
 ### Upgrading the kit in any repo
-`git pull` in the kit, re-run `adopt.sh` (kit-owned files update; repo-owned files are kept; settings, mode and
-`CLAUDE.md` are merged, never overwritten), run `tools/standard/check.sh`, commit. `tools/standard/VERSION` records
+Check out the new release tag in the kit, re-run `adopt.sh` (kit-owned files update; repo-owned files are kept;
+settings, mode and `CLAUDE.md` are merged, never overwritten; the plugin pin moves to the new tag), run `tools/standard/check.sh`, commit. `tools/standard/VERSION` records
 which kit version a repo is on; the plugin's SessionStart warns when it is behind.
 
 ## Per-platform wiring
@@ -288,6 +290,14 @@ Your own data never enters git — it lives in the git-ignored [`local/`](local/
 
 The denylist itself is private (it sits in `local/`), so CI can't check your personal terms — that is the hook's
 job; never commit with `--no-verify` (the plugin's Bash guard blocks it for agents, ENF-2).
+
+## Releasing
+
+1. Bump `VERSION` (and `.claude-plugin/plugin.json` — `build-rules --check` fails if they differ), regenerate
+   (`node bin/build-rules.mjs`), run every check, commit to `main`.
+2. `git tag vX.Y.Z && git push origin vX.Y.Z`, then `gh release create vX.Y.Z --notes-file <notes>`. The repository
+   has **immutable releases** on, so a published tag can't be moved or deleted — what adopters pin is what they get.
+3. Adopted repos move to it when they re-run `adopt.sh` from that tag.
 
 ## Changing the kit
 

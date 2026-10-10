@@ -2,7 +2,7 @@
 // Called by adopt.sh: makes a repo's agent configuration meet the standard without overwriting what is there.
 //   node bin/adopt-config.mjs <repo> [--mode quick|client] [--site]
 // - .claude/settings.json   AGT-1 deny rules + bypass disabled, and the engineering-standard plugin enabled for
-//                           everyone who opens the repo (merged into an existing file; never removes anything)
+//                           everyone who opens the repo, pinned to the kit's release tag (merged; never removes anything)
 // - standard.config.json    "mode" (ENF-4): kept if set, else --mode, else client; websites are always client
 // - CLAUDE.md               the one adoption line (appended if the file exists and doesn't mention the standard)
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
@@ -12,6 +12,7 @@ const [repo, ...args] = process.argv.slice(2)
 if (!repo) { console.error('usage: adopt-config.mjs <repo> [--mode quick|client] [--site]'); process.exit(2) }
 const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined }
 const site = args.includes('--site'), wantMode = flag('--mode')
+const version = readFileSync(new URL('../VERSION', import.meta.url), 'utf8').trim()
 if (wantMode && !['quick', 'client'].includes(wantMode)) { console.error(`--mode must be quick or client, not "${wantMode}"`); process.exit(2) }
 const say = (verb, what) => console.log(`  ${verb.padEnd(8)} ${what}`)
 const readJSON = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')) } catch (e) { return e.code === 'ENOENT' ? null : undefined } }
@@ -28,10 +29,13 @@ else {
   s.permissions.deny = [...new Set([...(s.permissions.deny || []), ...DENY])]
   s.permissions.disableBypassPermissionsMode ??= 'disable'
   s.extraKnownMarketplaces ||= {}
-  s.extraKnownMarketplaces['engineering-standard'] ||= { source: { source: 'github', repo: 'jchirayath/engineering-standard' } }
+  // Pinned to the kit's immutable release tag (AGT-5): a push to main never changes what runs in this repo's sessions.
+  // Re-running adopt.sh from a newer kit moves the pin — that is the upgrade.
+  const ref = `v${version}`, known = s.extraKnownMarketplaces['engineering-standard']
+  if (!known || known.source?.repo === 'jchirayath/engineering-standard') s.extraKnownMarketplaces['engineering-standard'] = { source: { source: 'github', repo: 'jchirayath/engineering-standard', ref } }
   s.enabledPlugins ||= {}
   s.enabledPlugins['engineering-standard@engineering-standard'] ??= true
-  if (JSON.stringify(s) !== before) { mkdirSync(join(repo, '.claude'), { recursive: true }); write(sf, s); say(cur ? 'updated' : 'created', '.claude/settings.json (AGT-1 deny rules, bypass disabled, plugin enabled)') }
+  if (JSON.stringify(s) !== before) { mkdirSync(join(repo, '.claude'), { recursive: true }); write(sf, s); say(cur ? 'updated' : 'created', `.claude/settings.json (AGT-1 deny rules, bypass disabled, plugin enabled, pinned to v${version})`) }
   else say('keep', '.claude/settings.json')
 }
 
