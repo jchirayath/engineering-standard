@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // External sources gateway (AGT-5): every third-party skill, plugin, prompt or rule set that informs this
 // standard is recorded in sources/registry.json, pinned to a reviewed commit. Zero deps.
-//   node bin/sources.mjs --check       validate the registry (CI): schema, pins, rule IDs, proposal files
+//   node bin/sources.mjs --check       validate the registry (CI): schema, pins, rule IDs, proposal files, generated tables
+//   node bin/sources.mjs --render      regenerate the sources tables in README.md and REFERENCES.md
 //   node bin/sources.mjs --upstream    (network) compare each pin with upstream HEAD for its watched paths;
 //                                      prints a Markdown report, exit 1 when any watched path changed
-import { readFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, realpathSync } from 'node:fs'
 import { join, dirname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const REG = join(ROOT, 'sources/registry.json')
@@ -54,13 +55,41 @@ async function upstream() {
       rows.push(`| ${s.id} | \`${s.commit.slice(0, 7)}\` → \`${(cmp.commits?.at(-1)?.sha || s.commit).slice(0, 7)}\` | ${cmp.ahead_by ?? 0} | ${files.length ? files.slice(0, 8).map((f) => `\`${f}\``).join(', ') + (files.length > 8 ? ` +${files.length - 8}` : '') : '—'} |`)
     } catch (e) { drift++; rows.push(`| ${s.id} | \`${s.commit.slice(0, 7)}\` | ? | ⚠ ${e.message} |`) }
   }
-  console.log(`# Source drift — ${new Date().toISOString().slice(0, 10)}\n\n**${drift} source(s) need re-review.** A changed watched path means the prompt, hooks or rules we reviewed are different upstream: re-run \`/engineering-standard:intake\` for that source before moving its pin (AGT-5).\n\n| Source | Pin → upstream | Commits ahead | Watched files changed |\n|---|---|---|---|\n${rows.join('\n')}`)
+  console.log(`# Source drift — ${new Date().toISOString().slice(0, 10)}\n\n**${drift} source(s) need re-review.** A changed watched path means the prompt, hooks or rules we reviewed are different upstream: re-run \`/engineering-standard:consume\` for that source before moving its pin (AGT-5).\n\n| Source | Pin → upstream | Commits ahead | Watched files changed |\n|---|---|---|---|\n${rows.join('\n')}`)
   return drift
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Generated tables (README + REFERENCES) — one owner: sources/registry.json.
+const link = (s) => `[${s.name || s.id}](${s.url || `https://github.com/${s.repo}`})`
+const informs = (s) => [(s.informs || []).join(', '), s.also].filter(Boolean).join(' · ') || '—'
+const live = (s) => s.disposition !== 'proposed'
+export function renderTables(reg = JSON.parse(readFileSync(REG, 'utf8'))) {
+  const src = (reg.sources || []).filter(live)
+  return {
+    'sources-readme': ['| Source | Disposition | Rules it informs |', '|---|---|---|',
+      ...src.map((s) => `| ${link(s)} | ${s.disposition} | ${informs(s)} |`)].join('\n'),
+    'sources-references': ['| Source | Pinned commit | License | Disposition | Informs |', '|---|---|---|---|---|',
+      ...src.map((s) => `| ${link(s)} — ${s.author || s.repo.split('/')[0]} | \`${s.commit.slice(0, 7)}\`${s.version ? ` (${s.version})` : ''} | ${s.license} | ${s.disposition} | ${informs(s)} |`)].join('\n'),
+  }
+}
+const TARGETS = { 'sources-readme': 'README.md', 'sources-references': 'REFERENCES.md' }
+export function render({ write = true } = {}) {
+  const tables = renderTables(), stale = []
+  for (const [m, file] of Object.entries(TARGETS)) {
+    const path = join(ROOT, file), text = readFileSync(path, 'utf8')
+    const re = new RegExp(`(<!-- ${m}:begin[^>]*-->\\n)[\\s\\S]*?(<!-- ${m}:end -->)`)
+    if (!re.test(text)) { stale.push(`${file}: missing <!-- ${m}:begin/end --> markers`); continue }
+    const next = text.replace(re, `$1${tables[m]}\n$2`)
+    if (next !== text) { stale.push(`${file}: sources table is stale — run node bin/sources.mjs --render`); if (write) writeFileSync(path, next) }
+  }
+  return stale
+}
+
+if (process.argv[1] && pathToFileURL(realpathSync(process.argv[1])).href === import.meta.url) {   // run directly (symlink-safe)
   if (process.argv.includes('--upstream')) process.exit((await upstream()) ? 1 : 0)
+  if (process.argv.includes('--render')) { const changed = render(); console.log(changed.length ? `rendered ${changed.length} table(s)` : 'tables already current'); process.exit(0) }
   const { errors, count } = check()
+  errors.push(...render({ write: false }))
   for (const e of errors) console.error(`✗ ${e}`)
   console.log(`${count} source(s), ${errors.length} error(s)`)
   process.exit(errors.length ? 1 : 0)

@@ -479,7 +479,7 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   tool descriptions re-reviewed when they change (tool poisoning / rug pull). Third-party skills,
   plugins, prompts and rule sets reach agents **only through the sources gateway**: an entry in
   `sources/registry.json` pinned to a reviewed commit, with an intake review in `proposals/sources/`
-  (`/engineering-standard:intake`) — its ideas are either distilled into this standard or it runs as a
+  (`/engineering-standard:consume`) — its ideas are either distilled into this standard or it runs as a
   pinned *companion* whose scope and precedence are written down (this standard wins). *Enforced by:*
   `.mcp.json` lint; managed `allowedMcpServers` where available; `bin/sources.mjs --check` in CI; the
   weekly `sources-weekly` job opens an issue when a pinned source changes upstream.

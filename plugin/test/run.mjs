@@ -4,7 +4,7 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { mkdtempSync, writeFileSync, readFileSync, mkdirSync, rmSync, existsSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { ROOT } from '../../lib/rules.mjs'
 
 const OFFLINE = process.argv.includes('--offline')
@@ -248,5 +248,45 @@ if (sem.status === 0) t('lint-edit: console.log violation → exit 2', le.status
 else t('lint-edit: semgrep missing → silent no-op (exit 0)', le.status === 0 && !le.stderr)
 
 rmSync(tmp, { recursive: true, force: true })
+console.log('▸ consume (sources gateway)')
+{
+  const { classifyRule, parseGitHub, inventoryFiles } = await import(join(ROOT, 'bin/consume.mjs'))
+  const ctx = { quickPrefixes: ['AGT'], prefixQuickShare: { TEST: 0.2, SEC: 0.9 }, quickIds: new Set(['TEST-15']) }
+  const c = (r) => classifyRule(r, ctx).mode
+  t('classify: secret handling → quick', c({ prefix: 'SEC', level: 'MUST', title: 'x', text: 'Never log an API key or token.' }) === 'quick')
+  t('classify: user docs → client', c({ prefix: 'HELP', level: 'MUST', title: 'x', text: 'Every feature has a docs/user page.' }) === 'client')
+  t('classify: SHOULD without floor → client', c({ prefix: 'PERF', level: 'SHOULD', title: 'x', text: 'Prefer streaming.' }) === 'client')
+  t('classify: agent behaviour → quick', c({ prefix: 'AGT', level: 'MUST', title: 'x', text: 'The agent states what it did not run.' }) === 'quick')
+  t('classify: placed after a quick rule → quick', c({ prefix: 'TEST', level: 'MUST', title: 'x', text: 'One slice per cycle.', after: 'TEST-15' }) === 'quick')
+  t('classify: floor + client term → quick, low confidence', classifyRule({ prefix: 'SEC', level: 'MUST', title: 'x', text: 'Encrypt the analytics export.' }, ctx).confidence === 'low')
+  t('classify: explicit mode wins', c({ prefix: 'SEC', level: 'MUST', title: 'x', text: 'secret', mode: 'client', modeReason: 'r' }) === 'client')
+  const g = parseGitHub('https://github.com/a-b/c.d/tree/main/skills/x')
+  t('parseGitHub repo + ref + path', g.owner === 'a-b' && g.repo === 'c.d' && g.ref === 'main' && g.path === 'skills/x')
+  const inv = inventoryFiles(['skills/x/SKILL.md', 'hooks/hooks.json', 'hooks/run.js', 'README.md', 'src/lib.ts', 'AGENTS.md'])
+  t('inventory sorts agent-facing / manifests / executable', inv.agent.length === 2 && inv.manifests.includes('hooks/hooks.json') && inv.executable.includes('src/lib.ts'))
+  // apply, offline, on a throwaway copy of the repo
+  const copy = mkdtempSync(join(tmpdir(), 'es-consume-'))
+  for (const f of spawnSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean)) {
+    if (!existsSync(join(ROOT, f))) continue
+    mkdirSync(dirname(join(copy, f)), { recursive: true }); writeFileSync(join(copy, f), readFileSync(join(ROOT, f)))
+  }
+  spawnSync('git', ['init', '-q'], { cwd: copy }); spawnSync('git', ['add', '-A'], { cwd: copy })
+  writeFileSync(join(copy, 'proposals/sources/t-src.md'), '# Intake: test\n')
+  writeFileSync(join(copy, 'proposals/sources/t-src.rules.json'), JSON.stringify({ name: 'test-source', author: 'Tester', repo: 'tester/t-src', url: 'https://github.com/tester/t-src',
+    commit: 'a'.repeat(40), license: 'MIT', kind: 'skill', disposition: 'distilled', paths: ['SKILL.md'], informs: [],
+    newRules: [{ prefix: 'SEC', level: 'MUST', title: 'Fixtures hold no secrets', text: 'Test fixtures never contain real credentials or tokens (SEC-11).', after: 'SEC-11', mode: 'auto' },
+      { prefix: 'HELP', level: 'SHOULD', title: 'Help names the owner', text: 'Each help page names the team that owns the feature.', section: '6G', mode: 'auto' }],
+    amendments: [{ id: 'TEST-8', append: 'The regression test is named after the symptom.' }] }))
+  const r = spawnSync('node', [join(copy, 'bin/consume.mjs'), 'apply', 't-src'], { cwd: copy, encoding: 'utf8', env: { ...process.env, STANDARD_ROOT: copy } })
+  const md = readFileSync(join(copy, 'ENGINEERING_STANDARD.md'), 'utf8'), reg = JSON.parse(readFileSync(join(copy, 'sources/registry.json'), 'utf8'))
+  const modes = JSON.parse(readFileSync(join(copy, 'plugin/modes.json'), 'utf8')), newSec = (md.match(/\*\*(SEC-\d+) MUST\*\* \*\*Fixtures hold no secrets/) || [])[1]
+  t('apply exits 0 and every check passes', r.status === 0, r.stdout + r.stderr)
+  t('apply inserts rules with the next free ID, cited', !!newSec && /\*\(source: test-source\)\*/.test(md) && /\*\*HELP-\d+ SHOULD\*\* \*\*Help names the owner/.test(md))
+  t('apply amends TEST-8', /named after the symptom\. \*\(source: test-source\)\*/.test(md))
+  t('apply adds the quick rule to modes.json', modes.quick.ids.includes(newSec))
+  t('apply registers the source with new + amended IDs', reg.sources.some((s) => s.id === 't-src' && s.informs.includes(newSec) && s.informs.includes('TEST-8')))
+  t('apply regenerates README/REFERENCES tables', /test-source/.test(readFileSync(join(copy, 'README.md'), 'utf8')) && /test-source/.test(readFileSync(join(copy, 'REFERENCES.md'), 'utf8')))
+}
+
 console.log(`\n${pass} passed, ${fail} failed${OFFLINE ? ' (offline)' : ''}`)
 process.exit(fail ? 1 : 0)
