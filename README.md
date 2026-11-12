@@ -13,10 +13,10 @@ Documents: [ENGINEERING_STANDARD.md](ENGINEERING_STANDARD.md) (what to build to)
 
 **Once per machine** — install the plugin (every Claude Code session, every repo, gets it):
 ```
-/plugin marketplace add jchirayath/engineering-standard@v1.4.0
+/plugin marketplace add jchirayath/engineering-standard@v1.4.1
 /plugin install engineering-standard@engineering-standard
 ```
-and clone the kit at the same release: `git clone --branch v1.4.0 https://github.com/jchirayath/engineering-standard ~/code/engineering-standard`.
+and clone the kit at the same release: `git clone --branch v1.4.1 https://github.com/jchirayath/engineering-standard ~/code/engineering-standard`.
 Releases are immutable GitHub releases, so a pinned version never changes underneath you (AGT-5, SUP-3).
 
 **Once per app** — from the app's root:
@@ -29,7 +29,7 @@ git add -A && git commit -m "Adopt engineering standard"
 
 | It writes | So that |
 |---|---|
-| `.claude/settings.json` | agents can't read `.env`/secrets or use bypass mode (AGT-1), and the plugin is enabled for **everyone** who opens the repo — teammates, cloud sessions, CI — pinned to the kit's release (`ref: v1.4.0`) |
+| `.claude/settings.json` | agents can't read `.env`/secrets or use bypass mode (AGT-1), and the plugin is enabled for **everyone** who opens the repo — teammates, cloud sessions, CI — pinned to the kit's release (`ref: v1.4.1`) |
 | `standard.config.json` → `"mode"` | the plugin, checks and reviews apply the quick or client rule set (§0A); websites are always client |
 | `CLAUDE.md` | one line pointing at the standard — the plugin delivers the rules, so nothing is restated |
 | `tools/standard/`, `.semgrep/standard/` | `check.sh` runs tokens, generated-code drift, agent config, feature→test map and lint |
