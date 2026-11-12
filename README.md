@@ -307,3 +307,12 @@ job; never commit with `--no-verify` (the plugin's Bash guard blocks it for agen
 - **Rules**: every rule gets `ruleid:` and `ok:` cases in the matching fixture; `semgrep --test semgrep/`
   must pass. Bump `VERSION`, then re-run `adopt.sh` in each repo.
 - Put this folder in its own git repo so CI and other machines can pin a version.
+
+## Licence
+
+GNU General Public License v3.0 — see [LICENSE](LICENSE). Copyright (c) 2026 Jacob Chirayath.
+
+Note what this means for adoption: `adopt.sh` **copies** part of the kit into the repo it is
+adopting — `tools/standard/`, `.semgrep/standard/`, the CI workflows and the templates — and
+those copies carry this same licence. Using the kit to build and check your app places no
+licence on *your* app; the GPL applies to the kit's own files and to changes you make to them.
