@@ -66,8 +66,8 @@
       "author": "Matt Pocock",
       "repo": "mattpocock/skills",
       "url": "https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling",
-      "commit": "49dd158d1076134a641b33efb035946536778336",
-      "reviewed": "2026-10-09",
+      "commit": "5863806dd4e15c63174bee4e7515a4256792ecfa",
+      "reviewed": "2026-11-13",
       "license": "MIT",
       "kind": "skill",
       "disposition": "distilled",
@@ -78,7 +78,7 @@
       "informs": [
         "AGT-11"
       ],
-      "notes": "No executable code. Unbounded rounds and no written output by design; AGT-11 bounds it per mode, adds the standard's client-mode branches (SEC-20, AZ-1, BL-2, HELP-1) and records decisions as ADRs. 'Yes accepts my recommendation' kept, with recommendations never weaker than the mode.",
+      "notes": "No executable code. Unbounded rounds and no written output by design; AGT-11 bounds it per mode, adds the standard's client-mode branches (SEC-20, AZ-1, BL-2, HELP-1) and records decisions as ADRs. 'Yes accepts my recommendation' kept, with recommendations never weaker than the mode. Re-reviewed 2026-11-13 (scout drift): grilling SKILL.md now says the fact-finding sub-agent gets a fresh context window — AGT-11 unaffected.",
       "rationale": "Chosen as the single clarify-first step (AGT-11) over superpowers' brainstorming and ponytail's 'ultra' pushback: it looks facts up itself, asks only decisions, orders questions by dependency and offers a recommended answer, which keeps quick mode cheap. Bounded per mode and given the client-mode branches (SEC-20, AZ-1, BL-2, HELP-1) because on its own it never stops and writes nothing down."
     },
     {
@@ -87,9 +87,9 @@
       "author": "Julius Brussee",
       "repo": "JuliusBrussee/caveman",
       "url": "https://github.com/JuliusBrussee/caveman",
-      "commit": "e20f07e8152a0c0360f58c09e79d30ac94329991",
-      "version": "v3.2.0",
-      "reviewed": "2026-10-09",
+      "commit": "b4ee71d557d96e3cbc14f88fa6e953a1362865f5",
+      "version": "v4.1.0",
+      "reviewed": "2026-11-13",
       "license": "Apache-2.0 (from 3.0.0; 'Caveman' is a trademark)",
       "kind": "plugin",
       "disposition": "distilled",
@@ -102,7 +102,7 @@
         "AGT-15",
         "AGT-13"
       ],
-      "notes": "Plugin/CLI/proxy not installed: hooks inject into every session and subagent and read the full transcript; CLI telemetry on by default; install.sh pulls main without checksums; 'no hedging' can turn 'should work' into 'yes' (COR-1). The 65% claim is withdrawn upstream (docs/HONEST-NUMBERS.md).",
+      "notes": "Plugin/CLI/proxy not installed: hooks inject into every session and subagent and read the full transcript; CLI telemetry on by default; install.sh pulls main without checksums; 'no hedging' can turn 'should work' into 'yes' (COR-1). The 65% claim is withdrawn upstream (docs/HONEST-NUMBERS.md). Re-reviewed 2026-11-13 (v4.1.0, scout drift): only .claude-plugin/plugin.json changed among watched paths (same four hooks, same timeouts; src/hooks/ and SKILL.md unchanged) — still not installed, AGT-15/AGT-13 unaffected.",
       "rationale": "Only the 'brief chat' idea is distilled (AGT-15), with the guard caveman lacks: verification state is never compressed away (COR-1, AGT-13). Not installed: hooks read every prompt and transcript, the CLI sends telemetry by default, and 'no hedging' can turn 'should work' into 'yes'."
     },
     {
@@ -387,6 +387,32 @@
         "AGT-5"
       ],
       "notes": "GitHub licence detection reports NOASSERTION; LICENSE is the Apache-2.0 short notice (© Cisco Systems). The vendor says detection without the LLM judge is low, so the scanner adds to the consume.mjs heuristics and the agent's own review; it doesn't replace them."
+    },
+    {
+      "id": "skillspector",
+      "name": "NVIDIA SkillSpector",
+      "author": "NVIDIA",
+      "repo": "NVIDIA/SkillSpector",
+      "url": "https://github.com/NVIDIA/SkillSpector",
+      "commit": "ce46d463a315ceaf7cf23f509abe2c7c1d80790b",
+      "version": "v2.13.4",
+      "reviewed": "2026-11-13",
+      "license": "Apache-2.0",
+      "kind": "tool",
+      "disposition": "distilled",
+      "rationale": "Distilled as an alternative scanner plus a tool-agnostic coverage rule. A paper comparison with cisco-skill-scanner favours keeping Cisco as the default: it is distributed on PyPI with a verified pin, its static core has no network, and it was reviewed first. SkillSpector adds coverage gates and MCP registry diffing. The incomplete-coverage rule closes a gap in AGT-5 whichever scanner is used.",
+      "paths": [
+        "README.md",
+        "pyproject.toml",
+        "skills/skill-inspector/SKILL.md",
+        "src/skillspector/llm_utils.py",
+        "src/skillspector/cli.py"
+      ],
+      "informs": [
+        "AGT-5",
+        "AGT-13"
+      ],
+      "notes": "Not installed by the scout. The CLI turns LLM review on by default and sends file contents to the configured provider (hosted APIs or agent CLIs), so --no-llm is mandatory under AGT-4. Even with --no-llm the SC4 check sends dependency names and versions to api.osv.dev (public data). --inspect-dependencies downloads npm tarballs. The optional MCP server (`skillspector mcp`) and the bundled skill-inspector skill are not loaded. The skill-inspector skill itself already defaults to --no-llm. 263 of 581 files were not read by the fetch (200-file limit). Owner decision 2026-11-13: Cisco stays the default intake scanner (PyPI-pinned, verified against its tag, no network in the static core). SkillSpector is an alternative until a side-by-side run on the same fixtures, which has not been done yet."
     }
   ]
 }

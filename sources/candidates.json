@@ -65,6 +65,10 @@
     "cwv": {
       "checked": "2026-11-13",
       "note": "no change: INP 200 ms threshold per web.dev"
+    },
+    "github-actions": {
+      "checked": "2026-11-13",
+      "note": "pull_request_target blocked by default in public repos from 2026-12-02 (brownouts 2026-11-09/16); verified on the GitHub changelog. SEC-17 amended: keep the block, allow only named workflows that never run PR head code."
     }
   },
   "candidates": [
@@ -678,8 +682,8 @@
       "inRegistry": false,
       "c4By": "inventory",
       "total": 79,
-      "outcome": "consume",
-      "nextReview": null,
+      "outcome": "watch",
+      "nextReview": "2026-12-13",
       "why": "Runner egress allow-list + file-tamper detection for GitHub Actions: gives AGT-4's 'network egress allow-list' leg and AGT-6 headless-agent jobs a concrete CI mechanism; SEC-17/CFG-1 say nothing about runner egress. Caveats: events go to app.stepsecurity.io; private repos and self-hosted runners need the paid tier.",
       "judged": "2026-11-13",
       "gap": [
@@ -687,7 +691,14 @@
         "AGT-6",
         "SEC-17"
       ],
-      "consumedAs": "harden-runner"
+      "consumedAs": "harden-runner",
+      "ownerOverride": {
+        "to": "watch",
+        "from": "consume",
+        "why": "Owner hold 2026-11-13: free tier covers only public repos on GitHub-hosted runners and silently does nothing on self-hosted runners without a subscription (a passing step that enforces nothing); runner events go to app.stepsecurity.io by default; two egress-bypass advisories in 2026-03. Re-assess the tool-agnostic egress allow-list principle for AGT-6 separately.",
+        "date": "2026-11-13"
+      },
+      "matrixOutcome": "consume"
     },
     {
       "repo": "Tencent/AI-Infra-Guard",

@@ -44,3 +44,5 @@ as clean.
 **Not verified:** detection quality with `--no-llm` (no vendor figure found); the 263 unread files, including
 `transitive.py` and `unicode_confusables.py`; whether the release wheel matches the tagged source; the contributor
 count. A side-by-side run of both scanners on the same fixtures should precede any switch of the default.
+
+**Owner decision 2026-11-13:** applied as an *alternative* scanner, not as the new default. The paper comparison (install/pinning, network with `--no-llm`, coverage gates, MCP diffing, published detection figures) favours keeping Cisco as the default. A side-by-side run on the same fixtures is still to do; it was not performed. The tool-agnostic part, that incomplete coverage is never recorded as clean, is adopted outright.

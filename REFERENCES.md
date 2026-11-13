@@ -112,6 +112,7 @@ listed under [Held back](#held-back--not-yet-a-source-of-any-rule), not used.
 |---|---|
 | [**pnpm 11**](https://pnpm.io/settings) `minimumReleaseAge`, build allow-list ✅ · [Dependabot `cooldown`](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference) ✅ · Renovate `minimumReleaseAge` ✅ | NPM-1, SUP-1, the plugin's install hook |
 | [**npm trusted publishing**](https://docs.npmjs.com/trusted-publishers) (OIDC) + provenance, `npm audit signatures` ✅ | SUP-2 |
+| [**GitHub Actions: `pull_request_target` blocked by default**](https://github.blog/changelog/2026-11-02-pull_request_target-blocked-by-default-december-2) in public repos from 2026-12-02; allow named workflows through an Actions event policy ✅ | SEC-17 |
 | [**GitHub immutable releases**](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases), [artifact attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) (`gh attestation verify`) ✅ | SUP-3, SUP-4, SEC-32 |
 | [**Docker Hardened Images**](https://docs.docker.com/dhi/) (Apache-2.0), distroless, Chainguard ✅ | SUP-5, SEC-16 |
 | `uv.lock` / `--require-hashes` (✅) · [PEP 751](https://peps.python.org/pep-0751/) `pylock.toml` (◐ pip support) | SUP-6 |
@@ -172,8 +173,8 @@ Third-party agent projects reach this standard only through the sources gateway 
 |---|---|---|---|---|
 | [ponytail](https://github.com/DietrichGebert/ponytail) — DietrichGebert | `96608e0` (v5.3.3) | MIT | distilled | CLEAN-13, CLEAN-5, AGT-14 · CLEAN-5 `shortcut:` comments, APP_REVIEW finding discipline |
 | [superpowers](https://github.com/obra/superpowers) — Jesse Vincent | `22f0b46` (v7.0.2) | MIT | distilled | AGT-11, AGT-12, AGT-13, AGT-14, TEST-15 |
-| [grill-me / grilling](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling) — Matt Pocock | `49dd158` | MIT | distilled | AGT-11 |
-| [caveman](https://github.com/JuliusBrussee/caveman) — Julius Brussee | `e20f07e` (v3.2.0) | Apache-2.0 (from 3.0.0; 'Caveman' is a trademark) | distilled | AGT-15, AGT-13 |
+| [grill-me / grilling](https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling) — Matt Pocock | `5863806` | MIT | distilled | AGT-11 |
+| [caveman](https://github.com/JuliusBrussee/caveman) — Julius Brussee | `b4ee71d` (v4.1.0) | Apache-2.0 (from 3.0.0; 'Caveman' is a trademark) | distilled | AGT-15, AGT-13 |
 | [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) — Anthropic | `dbd4588` | Apache-2.0 | companion | THEME-12, UX-1 |
 | [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) — Anthropic | `dbd4588` | Apache-2.0 | reference | AGT-16 |
 | [docker-destructive-guardrails](https://github.com/docker/skills/tree/main/skills/docker-destructive-guardrails) — Docker | `f791727` | Apache-2.0 | distilled | AGT-17 |
@@ -187,6 +188,7 @@ Third-party agent projects reach this standard only through the sources gateway 
 | [Vercel React best practices](https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices) — Vercel | `063bee9` | MIT (per skill frontmatter; repo licence not declared) | distilled | NEXT-7 |
 | [sandbox-runtime (srt)](https://github.com/anthropics/sandbox-runtime) — Anthropic | `0bbebed` (v0.0.83) | Apache-2.0 | distilled | AGT-2 |
 | [Cisco AI Defense skill-scanner](https://github.com/cisco-ai-defense/skill-scanner) — Cisco AI Defense | `f782465` (2.3.2) | Apache-2.0 | distilled | AGT-5 |
+| [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) — NVIDIA | `ce46d46` (v2.13.4) | Apache-2.0 | distilled | AGT-5, AGT-13 |
 <!-- sources-references:end -->
 
 ### Why each source was handled this way
@@ -212,6 +214,7 @@ the standard keeps one rule per fact.
 - **Vercel React best practices** (distilled) — Only its server-no-shared-module-state rule was new (NEXT-7, a cross-user data leak); its other 70 performance rules overlap PERF-14…26 and stay available through the installed Vercel plugin.
 - **sandbox-runtime (srt)** (distilled) — Distilled, not installed. It is the only open, cross-platform OS sandbox that wraps arbitrary agent processes and stdio MCP servers, and it is the mechanism behind Claude Code's own sandbox, so it closes the gap in AGT-2 for agents that have none. A container (AGT-3) was the alternative; it is heavier and doesn't fit a developer laptop. Pre-1.0, so it is named as an example only.
 - **Cisco AI Defense skill-scanner** (distilled) — Distilled into AGT-5's intake step. It is the most complete open skill scanner (signatures, dataflow, SARIF, CI workflow) and is Apache-2.0 with active releases. Snyk agent-scan was rejected for this role because it requires a Snyk token and sends configs to Snyk's API. NVIDIA SkillSpector is queued and not yet scored, so this choice is to be re-compared when it is.
+- **NVIDIA SkillSpector** (distilled) — Distilled as an alternative scanner plus a tool-agnostic coverage rule. A paper comparison with cisco-skill-scanner favours keeping Cisco as the default: it is distributed on PyPI with a verified pin, its static core has no network, and it was reviewed first. SkillSpector adds coverage gates and MCP registry diffing. The incomplete-coverage rule closes a gap in AGT-5 whichever scanner is used.
 <!-- sources-rationale:end -->
 
 "Distilled" means the idea was rewritten as a rule here, citing the source; none of that project's text or code is loaded by

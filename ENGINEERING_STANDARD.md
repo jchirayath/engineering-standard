@@ -168,7 +168,10 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
 - **SEC-16 MUST** Container base images are pinned by digest and run as non-root; images are scanned (`trivy
   image`). In client mode an SBOM is also generated per release (`syft`, CFG-3).
 - **SEC-17 MUST** CI actions pinned to a commit SHA; workflows lint-clean under `zizmor`; least-privilege
-  `permissions:` block; no secrets exposed to PR builds from forks.
+  `permissions:` block; no secrets exposed to PR builds from forks. **`pull_request_target`:** public repos keep
+  GitHub's default block (from 2026-12-02). A workflow that needs the trigger is allowed by name in an Actions
+  event policy, never repo-wide. It never checks out or runs the PR's head code, runs with read-only `permissions:`
+  and no secrets, and treats PR text as untrusted (AGT-6). *Enforced by:* `zizmor` `dangerous-triggers`.
 - **SEC-18 MUST** IaC scanned (`trivy config` / `checkov`): no public buckets, no `*` IAM, no open
   management ports, no default credentials.
 
@@ -501,7 +504,11 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   *(source: sentry-skills)* Intake also runs a pinned static skill scanner over the fetched files, for
   example `cisco-ai-skill-scanner==2.3.2`, and keeps its SARIF with the review. Its LLM judge is off or uses
   a local model: skill text under review never goes to a hosted model or vendor cloud (AGT-4). *(source:
-  Cisco AI Defense skill-scanner)*
+  Cisco AI Defense skill-scanner)* Any scanner that reports incomplete coverage (files skipped, size or file
+  limits hit) is recorded as incomplete, never as clean (AGT-13). NVIDIA SkillSpector is an accepted
+  alternative or second scanner. Install it from a pinned release tag, because it is not on PyPI and a PyPI
+  package of that name is not NVIDIA's. Run it with `--no-llm --fail-on-incomplete`. *(source: NVIDIA
+  SkillSpector)*
 - **AGT-6 MUST** **Headless agents on code you didn't write** (`claude -p`, Agent SDK, `claude-code-action`
   on PRs or issues) don't load that code's project settings or hooks (`--setting-sources user`,
   `disableAllHooks`), get a minimal `--allowedTools` list, a turn and time cap, and a least-privilege GitHub

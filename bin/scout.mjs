@@ -11,6 +11,7 @@
 //   node bin/scout.mjs judge <owner/repo> --fit N --novelty N --why "…" [--gap ID,ID] [--surface N]
 //                                                  the agent's C5/C6 → total, outcome, next review date
 //   node bin/scout.mjs consumed <owner/repo> --as <source-id>    link a candidate to its /consume proposal
+//   node bin/scout.mjs decide <owner/repo> --outcome watch|reject --why "…"   owner overrides the matrix (kept on re-score)
 //   node bin/scout.mjs standard <id> --note "…"    record that a cited standard was checked today
 //   node bin/scout.mjs report [--email [--if-changed]]   today's run as Markdown (saved to local/scout/), or --email:
 //                                                  subject + plain-text summary for the owner's inbox (--if-changed:
@@ -186,7 +187,7 @@ async function scoreCmd(args) {
       const keepAgentC4 = e.c4By === 'agent' && !extra.inventory  // an inventory always wins; otherwise keep the agent's documented C4
       e.scores = { ...e.scores, ...m, ...(keepAgentC4 ? { C4: e.scores.C4 } : {}) }
       e.c4By = extra.inventory ? 'inventory' : keepAgentC4 ? 'agent' : 'provisional'
-      e.total = total(e.scores, policy); e.outcome = outcome(e.total, g.failed, policy); e.nextReview = nextReview(e.outcome, policy)
+      e.total = total(e.scores, policy); e.outcome = outcome(e.total, g.failed, policy); applyOverride(e); e.nextReview = nextReview(e.outcome, policy)
       if (g.failed.length) e.why = g.results.filter((r) => !r.pass).map((r) => `${r.id}: ${r.why}`).join('; ')
       console.log(`${g.failed.length ? '✗' : '✓'} ${full}  ${meta.licence}${g.capped ? ' (distil/reference only)' : ''} · ★${meta.stars} · ${g.results.map((r) => `${r.id}${r.pass ? '' : '✗'}`).join(' ')}`
         + ` · C1 ${m.C1} C2 ${m.C2} C3 ${m.C3} C4 ${m.C4}${extra.inventory ? '' : ' (C4 provisional)'} → ${e.outcome}${e.total != null ? ` ${e.total}` : ''}`)
@@ -209,9 +210,25 @@ function judgeCmd(repo, flags) {
     e.scores.C4 = s; e.c4By = 'agent'
   }
   if (flags.gap) e.gap = flags.gap.split(',').map((s) => s.trim()).filter(Boolean)
-  e.total = total(e.scores, policy); e.outcome = outcome(e.total, e.gatesFailed || [], policy); e.nextReview = nextReview(e.outcome, policy)
+  e.total = total(e.scores, policy); e.outcome = outcome(e.total, e.gatesFailed || [], policy); applyOverride(e); e.nextReview = nextReview(e.outcome, policy)
   saveLedger(ledger)
   console.log(`${e.repo}: ${e.total}/100 → ${e.outcome}${e.capped ? ' (licence: distil/reference only)' : ''}${e.nextReview ? ` · re-check ${e.nextReview}` : ''}`)
+}
+// The owner overrides the matrix (e.g. a vendor tool whose free tier silently does nothing): recorded, not hidden in
+// the scores, and kept on every later score/judge until the owner decides again.
+export function applyOverride(e) {
+  if (e.ownerOverride && e.outcome !== e.ownerOverride.to) { e.matrixOutcome = e.outcome; e.outcome = e.ownerOverride.to }
+  return e
+}
+function decideCmd(repo, flags) {
+  const policy = loadPolicy(), ledger = loadLedger(), e = ledger.candidates.find((c) => c.repo.toLowerCase() === toRepo(repo).toLowerCase())
+  if (!e) throw new Error(`${clean(repo)} is not in the ledger`)
+  if (!['watch', 'reject'].includes(flags.outcome)) throw new Error('--outcome watch|reject (approvals go through /consume apply)')
+  if (!flags.why || flags.why.length < 20) throw new Error('--why is required (≥ 20 chars): the owner\'s reason')
+  e.ownerOverride = { to: flags.outcome, from: e.outcome, why: clean(flags.why, 600), date: today() }
+  e.matrixOutcome = e.outcome; e.outcome = flags.outcome; e.nextReview = nextReview(flags.outcome, policy)
+  saveLedger(ledger)
+  console.log(`${e.repo}: owner decision ${e.ownerOverride.from} → ${e.outcome}${e.nextReview ? ` · re-check ${e.nextReview}` : ''}`)
 }
 function consumedCmd(repo, id) {
   const ledger = loadLedger(), e = ledger.candidates.find((c) => c.repo.toLowerCase() === toRepo(repo).toLowerCase())
@@ -275,7 +292,7 @@ export function mergeQueue(queue = [], found = [], policy, scored = new Set(), n
 export function emailSummary(ledger, policy, d = today()) {
   const touched = ledger.candidates.filter((c) => c.lastScored === d || c.judged === d)
   const by = (o) => touched.filter((c) => c.outcome === o)
-  const line = (c) => `  - ${c.repo} (${c.licence}${c.capped ? ', distil/reference only' : ''}) — ${c.total ?? '–'}/100${c.consumedAs ? ` → proposals/sources/${c.consumedAs}.md` : ''}: ${c.why || ''}`
+  const line = (c) => `  - ${c.repo} (${c.licence}${c.capped ? ', distil/reference only' : ''}) — ${c.total ?? '–'}/100${c.consumedAs ? ` → proposals/sources/${c.consumedAs}.md` : ''}: ${c.ownerOverride ? `OWNER ${c.ownerOverride.from} → ${c.ownerOverride.to}: ${c.ownerOverride.why} · ` : ''}${c.why || ''}`
   const std = Object.entries(ledger.standards || {}).filter(([, v]) => v.checked === d && !/^no change/i.test(v.note))
   const decide = by('consume').length + std.length
   const subject = `[engineering-standard] Scout ${d}: ${by('consume').length} to approve, ${by('watch').length} watching, ${by('reject').length} rejected${std.length ? `, ${std.length} standard update(s)` : ''}`
@@ -296,7 +313,7 @@ function reportCmd(flags = {}) {
     console.log(`Subject: ${e.subject}\n\n${e.body}`); return
   }
   const touched = ledger.candidates.filter((c) => c.lastScored === d || c.judged === d)
-  const row = (c) => `| [${c.repo}](${c.url}) | ${c.licence}${c.capped ? ' ⚠' : ''} | ${c.gatesFailed?.length ? c.gatesFailed.join(' ') : '✓'} | ${['C1', 'C2', 'C3', 'C4', 'C5', 'C6'].map((k) => c.scores?.[k] ?? '–').join(' · ')} | ${c.total ?? '–'} | **${c.outcome}**${c.consumedAs ? ` → ${c.consumedAs}` : ''} | ${(c.why || '').replace(/\|/g, '/')} |`
+  const row = (c) => `| [${c.repo}](${c.url}) | ${c.licence}${c.capped ? ' ⚠' : ''} | ${c.gatesFailed?.length ? c.gatesFailed.join(' ') : '✓'} | ${['C1', 'C2', 'C3', 'C4', 'C5', 'C6'].map((k) => c.scores?.[k] ?? '–').join(' · ')} | ${c.total ?? '–'} | **${c.outcome}**${c.ownerOverride ? ` (owner; matrix: ${c.ownerOverride.from})` : ''}${c.consumedAs ? ` → ${c.consumedAs}` : ''} | ${(c.why || '').replace(/\|/g, '/')} |`
   console.log(`# Scout report — ${d}\n\n| Candidate | Licence | Gates | C1 · C2 · C3 · C4 · C5 · C6 | Score | Outcome | Why |\n|---|---|---|---|---|---|---|\n${touched.map(row).join('\n') || '| — | | | | | | |'}`)
   const std = Object.entries(ledger.standards || {}).filter(([, v]) => v.checked === d)
   console.log(`\n## Standards checked today\n${std.map(([k, v]) => `- ${k}: ${v.note}`).join('\n') || '- none'}`)
@@ -359,6 +376,7 @@ if (process.argv[1] && pathToFileURL(realpathSync(process.argv[1])).href === imp
     else if (cmd === 'score') { if (!pos.length) throw new Error('score <url|owner/repo>…'); await scoreCmd(pos) }
     else if (cmd === 'judge') judgeCmd(pos[0], flags)
     else if (cmd === 'consumed') consumedCmd(pos[0], flags.as)
+    else if (cmd === 'decide') decideCmd(pos[0], flags)
     else if (cmd === 'standard') standardCmd(pos[0], flags.note)
     else if (cmd === 'report') reportCmd(flags)
     else throw new Error(`unknown command "${clean(cmd)}" — see the header of bin/scout.mjs`)

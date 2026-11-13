@@ -403,6 +403,8 @@ console.log('▸ scout (decision matrix)')
     && ['owner/..', '../user', 'https://github.com/./x', 'a/.'].every((u) => throws(() => S.toRepo(u)))
     && pg('https://github.com/a/b/tree/main/skills/x').path === 'skills/x'
     && ['https://github.com/a/../tree/main', 'https://github.com/a/b/tree/main/../../user', 'https://github.com/a/b/tree/%2e%2e/x'].every((u) => throws(() => pg(u))))
+  const ov = S.applyOverride({ outcome: 'consume', ownerOverride: { to: 'watch', from: 'consume', why: 'free tier silently no-ops', date: '2026-11-13' } })
+  t('owner override wins over a re-scored matrix outcome and keeps the matrix result visible', ov.outcome === 'watch' && ov.matrixOutcome === 'consume' && S.applyOverride({ outcome: 'reject' }).outcome === 'reject')
   const quiet = node(['bin/scout.mjs', 'report', '--email', '--if-changed'], { env: { ...cleanEnv, SCOUT_TODAY: '2030-01-01' } })
   t('report --email --if-changed: quiet day → exit 3, prints nothing (scheduler sends no mail)', quiet.status === 3 && quiet.stdout === '', `exit ${quiet.status}`)
   const jobs = readFileSync(join(ROOT, 'bin/scout-jobs.sh'), 'utf8')

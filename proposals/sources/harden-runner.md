@@ -41,3 +41,10 @@ doesn't count. Mode: quick (agent safety), to be confirmed by `consume.mjs class
 insights link only when telemetry is on or in audit mode; the agent binary itself was not read); the agent binaries'
 source (`agent-ebpf` may not be public); whether the Community tier needs a StepSecurity account. `paths` lists
 `action.yml`, which the fetch did not download; check it at apply.
+
+**Owner decision 2026-11-13: held (watch, re-check 2026-12-13); not applied.** The matrix scored 79 (consume), but the tool has limits the matrix does not capture:
+- The free tier covers only public repos on GitHub-hosted runners. On self-hosted runners without a subscription, the step passes while enforcing nothing.
+- Runner events go to `app.stepsecurity.io` by default.
+- Two egress-bypass advisories were published in 2026-03.
+
+The principle it serves, an egress allow-list for CI jobs that run an agent on untrusted content (AGT-4 / AGT-6), is tool-agnostic and will be assessed separately, without naming this action.

@@ -358,6 +358,13 @@
         "cited": "see REFERENCES.md",
         "kind": "law",
         "url": "https://cppa.ca.gov/regulations/"
+      },
+      {
+        "id": "github-actions",
+        "name": "GitHub Actions security changes (changelog)",
+        "cited": "pull_request_target default block 2026-12-02",
+        "kind": "platform-policy",
+        "url": "https://github.blog/changelog/label/actions/"
       }
     ]
   }
