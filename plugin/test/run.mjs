@@ -90,6 +90,21 @@ const names = list.result.tools.map((x) => x.name).sort().join(',')
 t('tools/list = 7 tools', names === 'check,exception_add,mode,review_plan,rule,rules_for,verify_dependency', names)
 t('tool descriptions stay short (< 200 chars each)', list.result.tools.every((x) => x.description.length < 200))
 t('unknown method → -32601', (await rpc('nope/nope', {})).error?.code === -32601)
+// MCP 2026-07-28 (modern era): no handshake; version + capabilities in every request's _meta
+const MK = (k) => `io.modelcontextprotocol/${k}`, mm = (v = '2026-07-28', caps = {}) => ({ [MK('protocolVersion')]: v, [MK('clientInfo')]: { name: 'selftest', version: '0' }, ...(caps ? { [MK('clientCapabilities')]: caps } : {}) })
+const disc = await rpc('server/discover', { _meta: mm() })
+t('modern: server/discover lists 2026-07-28 + legacy versions, complete, serverInfo', disc.result?.resultType === 'complete' && disc.result.supportedVersions.includes('2026-07-28') && disc.result.supportedVersions.includes('2025-11-25')
+  && disc.result.capabilities?.tools && disc.result._meta?.[MK('serverInfo')]?.name === 'engineering-standard', JSON.stringify(disc))
+const mlist = await rpc('tools/list', { _meta: mm() })
+t('modern: tools/list works with no initialize (stateless) and carries resultType', mlist.result?.resultType === 'complete' && mlist.result.tools.length === 7)
+const mcall = await rpc('tools/call', { name: 'rule', arguments: { id: 'SEC-4' }, _meta: mm() })
+t('modern: tools/call returns the rule', mcall.result?.resultType === 'complete' && /SEC-4/.test(mcall.result.content?.[0]?.text || ''))
+const unsup = await rpc('tools/list', { _meta: mm('1900-01-01') })
+t('modern: unknown version → -32022 listing supported versions', unsup.error?.code === -32022 && unsup.error.data?.supported?.includes('2026-07-28') && unsup.error.data.requested === '1900-01-01')
+t('modern: missing clientCapabilities → -32602', (await rpc('tools/list', { _meta: mm('2026-07-28', null) })).error?.code === -32602)
+t('legacy: server/discover without _meta → -32602; initialize with a modern version falls back to 2025-11-25', (await rpc('server/discover', {})).error?.code === -32602
+  && (await rpc('initialize', { protocolVersion: '2026-07-28', capabilities: {}, clientInfo: { name: 'x', version: '0' } })).result?.protocolVersion === '2025-11-25')
+t('legacy: results unchanged (no resultType added)', (await rpc('tools/list', {})).result?.resultType === undefined)
 const sec4 = await call('rule', { id: 'SEC-4' })
 const s4 = JSON.parse(sec4.text)
 t('rule(SEC-4): text + ASVS mapping', s4.id === 'SEC-4' && /upload/i.test(s4.text) && s4.asvs.length > 0)
@@ -325,6 +340,75 @@ console.log('▸ consume (sources gateway)')
   const d2 = spawnSync('node', [join(copy, 'bin/consume.mjs'), 'apply', 't-dup'], { cwd: copy, encoding: 'utf8', env: { ...process.env, STANDARD_ROOT: copy } })
   t('mergeInto folds the proposal into the existing rule instead of adding one', d2.status === 0 && /Cookie names never contain user data/.test(readFileSync(join(copy, 'ENGINEERING_STANDARD.md'), 'utf8')) && !/\*\*BRW-7 /.test(readFileSync(join(copy, 'ENGINEERING_STANDARD.md'), 'utf8')), d2.stdout + d2.stderr)
   rmSync(copy, { recursive: true, force: true })
+}
+
+// ── agent config: auto mode warns, never fails (AGT-3) ──────────────────────────────────────────────
+console.log('▸ check-agent-config (auto mode)')
+{
+  const d = mkdtempSync(join(tmpdir(), 'es-agentcfg-')); mkdirSync(join(d, '.claude'))
+  const base = { permissions: { deny: ['Read(./.env)', 'Read(./secrets/**)'], disableBypassPermissionsMode: 'disable' } }
+  writeFileSync(join(d, '.claude/settings.json'), JSON.stringify(base))
+  const a = node(['bin/check-agent-config.mjs', d])
+  t('auto mode allowed → exit 0 with an AGT-3 warning', a.status === 0 && /⚠ AGT-3: auto mode is allowed/.test(a.stderr) && /1 warning/.test(a.stdout), a.stdout + a.stderr)
+  writeFileSync(join(d, '.claude/settings.json'), JSON.stringify({ permissions: { ...base.permissions, disableAutoMode: 'disable' } }))
+  const b = node(['bin/check-agent-config.mjs', d])
+  t('auto mode disabled → no warning', b.status === 0 && !/AGT-3/.test(b.stderr), b.stdout + b.stderr)
+  rmSync(d, { recursive: true, force: true })
+}
+
+// ── scout (daily decision matrix, §7.5) ─────────────────────────────────────────────────────────────
+console.log('▸ scout (decision matrix)')
+{
+  const S = await import(join(ROOT, 'bin/scout.mjs')), pol = S.loadPolicy(), now = '2026-11-13'
+  const base = { owner: 'someone', ownerType: 'User', licence: 'MIT', archived: false, disabled: false, fork: false, createdAt: '2025-01-01T00:00:00Z', pushedAt: '2026-11-01T00:00:00Z', stars: 500 }
+  t('policy: weights sum to 100, check passes, README matrix current', pol.criteria.reduce((s, c) => s + c.weight, 0) === 100 && S.check().length === 0 && S.render({ write: false }).length === 0, JSON.stringify([...S.check(), ...S.render({ write: false })]))
+  t('licence classes: MIT allow · CC-BY-SA conditional · none / BUSL / non-commercial denied', S.licenceClass('MIT', pol) === 'allow' && S.licenceClass('CC-BY-SA-4.0', pol) === 'conditional'
+    && ['NOASSERTION', undefined, 'BUSL-1.1', 'CC-BY-NC-4.0', 'SomethingNew'].every((l) => S.licenceClass(l, pol) === 'deny'))
+  t('gates: a healthy repo passes all six', S.gates(base, pol, now).failed.length === 0)
+  t('gates: no licence → G1 fails → reject', S.gates({ ...base, licence: 'NOASSERTION' }, pol, now).failed.includes('G1') && S.outcome(90, ['G1'], pol) === 'reject')
+  t('gates: archived G2, idle > 1y G3, fork G6', S.gates({ ...base, archived: true }, pol, now).failed.includes('G2') && S.gates({ ...base, pushedAt: '2025-06-01T00:00:00Z' }, pol, now).failed.includes('G3') && S.gates({ ...base, fork: true }, pol, now).failed.includes('G6'))
+  t('gates: brand-new repo G4 and star-farming G5 fail — unless a trusted vendor', S.gates({ ...base, createdAt: '2026-11-01T00:00:00Z', stars: 9000 }, pol, now).failed.join() === 'G4,G5'
+    && S.gates({ ...base, owner: 'trailofbits', createdAt: '2026-11-01T00:00:00Z', stars: 9000 }, pol, now).failed.length === 0)
+  t('licence text: Apache/MIT recognised behind NOASSERTION; custom or non-commercial text is not', S.licenceFromText('Copyright Cisco\n Apache License\n Version 2.0, January 2004 ... TERMS AND CONDITIONS FOR USE') === 'Apache-2.0'
+    && S.licenceFromText('Apache License Version 2.0\nCopyright 2026 Cisco\nLicensed under the Apache License, Version 2.0 (the "License");') === 'Apache-2.0'
+    && S.licenceFromText('Permission is hereby granted, free of charge, to any person obtaining a copy') === 'MIT'
+    && S.licenceFromText('Permission is hereby granted, free of charge, to any person obtaining a copy ... Commons Clause') === null && S.licenceFromText('Semgrep Rules License v1.0') === null)
+  t('gates: vendor-exempt star spike passes but is flagged for verification', /vendor-exempt/.test(S.gates({ ...base, owner: 'cloudflare', createdAt: '2026-06-18T00:00:00Z', stars: 71868 }, pol, now).results.find((r) => r.id === 'G5').why))
+  t('gates: conditional licence passes but caps the disposition', S.gates({ ...base, licence: 'CC-BY-SA-4.0' }, pol, now).capped === true)
+  const m = S.mechanical(base, { contributors: 12, releases: 3, ownerAgeDays: 1000, ownerRepos: 40 }, pol, now)
+  t('mechanical: individual with history C1 2, active+released C2 5, 500★ C3 3.4, unknown surface C4 3', m.C1 === 2 && m.C2 === 5 && m.C3 === 3.4 && m.C4 === 3, JSON.stringify(m))
+  const hooky = S.mechanical(base, { contributors: 1, releases: 0, inventory: { signals: { hooks: 'present', injectsEveryPrompt: true }, hidden: { installScripts: ['package.json: postinstall'], codeNetworkHosts: ['telemetry.example'] } } }, pol, now)
+  t('mechanical: hooks + every-prompt injection + postinstall + telemetry → C4 1', hooky.C4 === 1, JSON.stringify(hooky))
+  t('total: incomplete until C5/C6 judged → pending-judgement', S.total(m, pol) === null && S.outcome(null, [], pol) === 'pending-judgement')
+  const all5 = { C1: 5, C2: 5, C3: 5, C4: 5, C5: 5, C6: 5 }
+  t('total + outcome: all 5s → 100 consume · gap 0 novelty 0 → watch/reject boundary honoured', S.total(all5, pol) === 100 && S.outcome(100, [], pol) === 'consume'
+    && S.outcome(S.total({ ...all5, C5: 0, C6: 0 }, pol), [], pol) === 'watch' && S.outcome(49, [], pol) === 'reject')
+  t('next review: watch +30d, reject +180d, consume none', S.nextReview('watch', pol, now) === '2026-12-13' && S.nextReview('reject', pol, now) === '2027-05-12' && S.nextReview('consume', pol, now) === null)
+  t('due: unjudged, unconsumed, date reached and changed-upstream watch are due; settled ones are not',
+    S.isDue({ outcome: 'pending-judgement' }, now) && S.isDue({ outcome: 'consume' }, now) && S.isDue({ outcome: 'watch', nextReview: '2026-11-01' }, now)
+    && S.isDue({ outcome: 'watch', nextReview: '2026-12-13', pushedAt: '2026-11-01' }, now, '2026-11-10') === 'changed upstream'
+    && !S.isDue({ outcome: 'reject', nextReview: '2027-05-12' }, now) && !S.isDue({ outcome: 'consume', consumedAs: 'x' }, now))
+  t('standards due: never checked or past cadence (law 14d, default 30d)', S.standardsDue(pol, { standards: {} }, now).length === pol.standards.list.length
+    && !S.standardsDue(pol, { standards: { 'eu-cra': { checked: '2026-11-05' } } }, now).some((s) => s.id === 'eu-cra')
+    && S.standardsDue(pol, { standards: { 'eu-cra': { checked: '2026-10-20' } } }, now).some((s) => s.id === 'eu-cra'))
+  const bad = S.check({ ...pol, criteria: pol.criteria.map((c, i) => i ? c : { ...c, weight: c.weight + 1 }) }, { candidates: [{ repo: 'a/b', outcome: 'reject' }, { repo: 'A/B', outcome: 'maybe' }], standards: { nope: {} } })
+  t('check: bad weights, rejection without why, duplicate, bad outcome, unknown standard all caught', ['weights', 'needs a why', 'duplicate', 'outcome must', 'unknown standard'].every((k) => bad.some((e) => e.includes(k))), JSON.stringify(bad))
+  const mq = S.mergeQueue([{ repo: 'a/old', found: '2026-09-01', stars: 9, hits: 1 }, { repo: 'b/kept', found: '2026-11-01', stars: 5, hits: 1 }],
+    [{ repo: 'B/kept', found: now, stars: 6, hits: 2 }, { repo: 'c/scored', found: now, stars: 99, hits: 3 }, { repo: 'd/new', found: now, stars: 50, hits: 1 }], pol, new Set(['c/scored']), now)
+  t('queue: overflow kept for tomorrow, expired + scored dropped, first-found date kept, best first', mq.map((q) => q.repo).join() === 'B/kept,d/new' && mq[0].found === '2026-11-01' && mq[0].hits === 2, JSON.stringify(mq))
+  const quiet = node(['bin/scout.mjs', 'report', '--email', '--if-changed'], { env: { ...cleanEnv, SCOUT_TODAY: '2030-01-01' } })
+  t('report --email --if-changed: quiet day → exit 3, prints nothing (scheduler sends no mail)', quiet.status === 3 && quiet.stdout === '', `exit ${quiet.status}`)
+  const badTime = spawnSync('bash', [join(ROOT, 'bin/scout-jobs.sh'), 'start', '25:00'], { encoding: 'utf8' })
+  t('scout-jobs.sh rejects a bad time before touching launchd', badTime.status === 1 && /HH:MM/.test(badTime.stdout), badTime.stdout + badTime.stderr)
+  // ast.parse, not py_compile: py_compile writes bin/__pycache__/, which build-rules would then read
+  const py = spawnSync('python3', ['-I', '-c', 'import ast,sys; ast.parse(open(sys.argv[1]).read())', join(ROOT, 'bin/scout-mail.py')], { encoding: 'utf8' })
+  t('scout-mail.py compiles (stdlib only)', py.status === 0 && !/^import (?!argparse|getpass|json|os|shutil|ssl|subprocess|sys)/m.test(readFileSync(join(ROOT, 'bin/scout-mail.py'), 'utf8')), py.stderr)
+  const led = { standards: { 'mcp-spec': { checked: now, note: '2026-07-28 revision — amend AI-7' } }, candidates: [
+    { repo: 'x/new', lastScored: now, outcome: 'consume', total: 81, licence: 'MIT', consumedAs: 'x-new', why: 'fills a quick-floor gap' },
+    { repo: 'y/old', lastScored: '2026-10-01', outcome: 'watch', total: 60, licence: 'MIT' }] }
+  const em = S.emailSummary(led, pol, now)
+  t('email: subject counts today only; lists approvals and changed standards; no-change day sends nothing', /1 to approve, 0 watching, 0 rejected, 1 standard/.test(em.subject) && /x\/new/.test(em.body) && !/y\/old/.test(em.body)
+    && /mcp-spec/.test(em.body) && em.needsDecision && !S.emailSummary({ standards: {}, candidates: [] }, pol, now).changed, em.subject)
 }
 
 console.log(`\n${pass} passed, ${fail} failed${OFFLINE ? ' (offline)' : ''}`)

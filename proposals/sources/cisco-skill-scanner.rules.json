@@ -1,0 +1,30 @@
+{
+  "name": "Cisco AI Defense skill-scanner",
+  "author": "Cisco AI Defense",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "2.3.2",
+  "repo": "cisco-ai-defense/skill-scanner",
+  "url": "https://github.com/cisco-ai-defense/skill-scanner",
+  "commit": "f7824651ffeb9b89f7682ddd97d6fba8fe9c10b1",
+  "license": "Apache-2.0",
+  "paths": [
+    "README.md",
+    "pyproject.toml",
+    "skill_scanner/hooks/",
+    "skill_scanner/config/"
+  ],
+  "informs": [
+    "AGT-5"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-5",
+      "append": "Intake also runs a pinned static skill scanner over the fetched files, for example `cisco-ai-skill-scanner==2.3.2`, and keeps its SARIF with the review. Its LLM judge is off or uses a local model: skill text under review never goes to a hosted model or vendor cloud (AGT-4)."
+    }
+  ],
+  "notes": "GitHub licence detection reports NOASSERTION; LICENSE is the Apache-2.0 short notice (© Cisco Systems). The vendor says detection without the LLM judge is low, so the scanner adds to the consume.mjs heuristics and the agent's own review; it doesn't replace them.",
+  "rationale": "Distilled into AGT-5's intake step. It is the most complete open skill scanner (signatures, dataflow, SARIF, CI workflow) and is Apache-2.0 with active releases. Snyk agent-scan was rejected for this role because it requires a Snyk token and sends configs to Snyk's API. NVIDIA SkillSpector is queued and not yet scored, so this choice is to be re-compared when it is.",
+  "newRules": [],
+  "applied": "2026-11-13"
+}

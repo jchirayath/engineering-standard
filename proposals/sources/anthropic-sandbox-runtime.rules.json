@@ -1,0 +1,30 @@
+{
+  "name": "sandbox-runtime (srt)",
+  "author": "Anthropic",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "v0.0.83",
+  "repo": "anthropics/sandbox-runtime",
+  "url": "https://github.com/anthropics/sandbox-runtime",
+  "commit": "0bbebed0aa9a8e628dc4df8bc30293550a1988eb",
+  "license": "Apache-2.0",
+  "paths": [
+    "README.md",
+    "package.json",
+    "src/sandbox/",
+    "src/cli.ts"
+  ],
+  "informs": [
+    "AGT-2"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-2",
+      "append": "Agent processes with no built-in sandbox, including headless runners (AGT-6), other agent CLIs and local stdio MCP servers, run inside an OS-level sandbox with the same rules: a network allow-list, credential paths denied, and failing closed. For example, use `srt` from a pinned `@anthropic-ai/sandbox-runtime` release; the sandboxed command is pinned too (AGT-5)."
+    }
+  ],
+  "notes": "Pre-1.0 (v0.0.83). Named as an example, not mandated, so an equivalent OS sandbox (bubblewrap, a container under AGT-3) satisfies the amendment. The repo is not installed into the kit.",
+  "rationale": "Distilled, not installed. It is the only open, cross-platform OS sandbox that wraps arbitrary agent processes and stdio MCP servers, and it is the mechanism behind Claude Code's own sandbox, so it closes the gap in AGT-2 for agents that have none. A container (AGT-3) was the alternative; it is heavier and doesn't fit a developer laptop. Pre-1.0, so it is named as an example only.",
+  "newRules": [],
+  "applied": "2026-11-13"
+}

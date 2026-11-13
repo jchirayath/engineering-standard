@@ -10,7 +10,12 @@ import { verifyDependency, ECOSYSTEMS } from '../lib/deps.mjs'
 import { resolveMode, loadModes, PROMOTION_TRIGGERS } from '../lib/modes.mjs'
 import { runSemgrep } from '../lib/semgrep.mjs'
 
-const SUPPORTED = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']
+// Dual-era (MCP 2026-07-28 "Versioning and Compatibility"): modern revisions carry version + capabilities in each
+// request's _meta (no handshake, served statelessly); legacy revisions open with `initialize`.
+const MODERN = ['2026-07-28']
+const LEGACY = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05']
+const SUPPORTED = [...MODERN, ...LEGACY]
+const K = (k) => `io.modelcontextprotocol/${k}`
 const projectRoot = (p) => resolve(p || process.env.CLAUDE_PROJECT_DIR || process.cwd())
 
 const TOOLS = [
@@ -149,18 +154,29 @@ const IMPL = { rules_for: toolRulesFor, rule: toolRule, check: toolCheck, verify
 
 // ── JSON-RPC plumbing ───────────────────────────────────────────────────────────────────────────
 const send = (msg) => process.stdout.write(JSON.stringify({ jsonrpc: '2.0', ...msg }) + '\n')
-const ok = (id, result) => send({ id, result })
-const fail = (id, code, message) => send({ id, error: { code, message } })
+const fail = (id, code, message, data) => send({ id, error: { code, message, ...(data ? { data } : {}) } })
+const SERVER_INFO = () => ({ name: 'engineering-standard', version: kitVersion() })
+const INSTRUCTIONS = 'Rules of ENGINEERING_STANDARD.md for the repo\'s mode (quick ⊂ client; see mode). Use rules_for/rule instead of guessing a rule; verify_dependency before adding any package; cite rule IDs.'
+const CAPABILITIES = { tools: { listChanged: false } }
 
 async function handle(msg) {
   const { id, method, params = {} } = msg
   const isReq = id !== undefined && id !== null
+  const meta = params?._meta || {}, modern = typeof meta[K('protocolVersion')] === 'string'
+  // Modern results say they are complete and identify the server; legacy results stay exactly as before.
+  const ok = (rid, result) => send({ id: rid, result: modern ? { resultType: 'complete', ...result, _meta: { ...(result._meta || {}), [K('serverInfo')]: SERVER_INFO() } } : result })
+  if (modern && isReq) {
+    const v = meta[K('protocolVersion')]
+    if (!MODERN.includes(v)) return fail(id, -32022, 'Unsupported protocol version', { supported: SUPPORTED, requested: String(v).slice(0, 40) })
+    if (typeof meta[K('clientCapabilities')] !== 'object' || meta[K('clientCapabilities')] === null) return fail(id, -32602, `missing _meta "${K('clientCapabilities')}"`)
+  }
   switch (method) {
-    case 'initialize': {
-      const v = SUPPORTED.includes(params.protocolVersion) ? params.protocolVersion : SUPPORTED[0]
-      return ok(id, { protocolVersion: v, capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: 'engineering-standard', version: kitVersion() },
-        instructions: 'Rules of ENGINEERING_STANDARD.md for the repo\'s mode (quick ⊂ client; see mode). Use rules_for/rule instead of guessing a rule; verify_dependency before adding any package; cite rule IDs.' })
+    case 'server/discover':
+      if (!modern) return isReq ? fail(id, -32602, `missing _meta "${K('protocolVersion')}"`) : undefined
+      return ok(id, { supportedVersions: SUPPORTED, capabilities: CAPABILITIES, instructions: INSTRUCTIONS })
+    case 'initialize': {                                         // legacy era only: a modern version falls back to the newest legacy one
+      const v = LEGACY.includes(params.protocolVersion) ? params.protocolVersion : LEGACY[0]
+      return ok(id, { protocolVersion: v, capabilities: CAPABILITIES, serverInfo: SERVER_INFO(), instructions: INSTRUCTIONS })
     }
     case 'notifications/initialized': case 'notifications/cancelled': return
     case 'ping': return ok(id, {})

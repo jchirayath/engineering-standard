@@ -463,13 +463,19 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   `PreToolUse` block; `tools/standard/check-agent-config.mjs` in CI. The same file enables the
   `engineering-standard` plugin (`enabledPlugins`) so every session — local, cloud or a teammate's — loads
   its hooks.
-- **AGT-2 MUST** Where Claude Code's sandbox is supported, Bash runs sandboxed and is configured to
-  **fail rather than fall back** to unsandboxed execution (no unsandboxed-command escape hatch), with an
-  explicit network allow-list and credential paths denied; `excludedCommands` never lists an interpreter
-  (`python`, `node`, `bash`) or `docker`. The sandbox covers Bash only — AGT-1 still governs file tools.
+- **AGT-2 MUST** Where Claude Code's sandbox is supported, Bash runs sandboxed and is configured to **fail
+  rather than fall back** to unsandboxed execution (no unsandboxed-command escape hatch), with an explicit
+  network allow-list and credential paths denied; `excludedCommands` never lists an interpreter (`python`,
+  `node`, `bash`) or `docker`. The sandbox covers Bash only — AGT-1 still governs file tools. Agent
+  processes with no built-in sandbox, including headless runners (AGT-6), other agent CLIs and local stdio
+  MCP servers, run inside an OS-level sandbox with the same rules: a network allow-list, credential paths
+  denied, and failing closed. For example, use `srt` from a pinned `@anthropic-ai/sandbox-runtime` release;
+  the sandboxed command is pinned too (AGT-5). *(source: sandbox-runtime (srt))*
 - **AGT-3 MUST** Permission-bypass modes (`--dangerously-skip-permissions`, bypass/auto-approve modes)
   run only inside a disposable container or VM that holds **no production credentials**. A machine or
-  session that can reach production keeps AGT-1's `disableBypassPermissionsMode`.
+  session that can reach production keeps AGT-1's `disableBypassPermissionsMode`. **Auto mode** (a classifier
+  approves actions instead of a person) is allowed, but `check-agent-config` warns while it is enabled: a
+  machine or session that can reach production also sets `permissions.disableAutoMode: "disable"`.
 - **AGT-4 MUST** **No lethal trifecta:** no agent session, and no LLM feature in an app (AI-*), combines
   private data, untrusted content (web pages, issues, PR text from others, user uploads, tool output) and an
   outbound channel. When untrusted content is in context, remove one leg — network egress allow-list, deny
@@ -492,7 +498,10 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   (telemetry included). *Enforced by:* `.mcp.json` lint; managed `allowedMcpServers` where available;
   `bin/sources.mjs --check` in CI; the weekly `sources-weekly` job opens an issue when a pinned source
   changes upstream; `bin/consume.mjs fetch` reports hooks, MCP servers, executables and this hidden surface.
-  *(source: sentry-skills)*
+  *(source: sentry-skills)* Intake also runs a pinned static skill scanner over the fetched files, for
+  example `cisco-ai-skill-scanner==2.3.2`, and keeps its SARIF with the review. Its LLM judge is off or uses
+  a local model: skill text under review never goes to a hosted model or vendor cloud (AGT-4). *(source:
+  Cisco AI Defense skill-scanner)*
 - **AGT-6 MUST** **Headless agents on code you didn't write** (`claude -p`, Agent SDK, `claude-code-action`
   on PRs or issues) don't load that code's project settings or hooks (`--setting-sources user`,
   `disableAllHooks`), get a minimal `--allowedTools` list, a turn and time cap, and a least-privilege GitHub
@@ -613,12 +622,18 @@ URLs to untrusted content (OpenSSF *Security-Focused Guide for AI Code Assistant
   not the model's summary of them.
 - **AI-7 MUST** *If we build an MCP server* reachable over HTTP: OAuth 2.1 with PKCE (S256), protected-
   resource metadata (RFC 9728), audience-checked tokens (RFC 8707), no token passthrough to upstream
-  APIs, no session-based auth, SSRF-safe metadata fetching (SEC-5). *Test:* wrong-audience token → 401.
-  Local stdio servers take no network listener.
+  APIs, no session-based auth, SSRF-safe metadata fetching (SEC-5). The authorization server emits `iss`
+  and clients check it (RFC 9207); clients register by Client ID Metadata Document, not the deprecated
+  Dynamic Client Registration. *Test:* wrong-audience token → 401. Local stdio servers take no network
+  listener. Servers serve MCP 2026-07-28 (per-request `_meta`, `server/discover`, no `initialize` handshake)
+  and stay dual-era while legacy clients remain.
 - **AI-8 MUST** **EU AI Act Art. 50** (applies from 2026-08-02) for apps offered in the EU: a chatbot or
   assistant discloses that it is AI at the first interaction, and realistic generated images, audio or
-  video are labelled and machine-readably marked. *Test:* e2e asserts the disclosure on every assistant
-  surface.
+  video are labelled and machine-readably marked. From December 2026 (AI Omnibus, Reg. (EU) 2026/1744,
+  Prohibition 9) a feature that generates or edits images or video of people refuses sexually explicit or
+  intimate content of real people without their consent and any child sexual abuse material, for every
+  user and prompt, and logs refusals (SLOG-1). *Test:* e2e asserts the disclosure on every assistant
+  surface, and red-team prompts for prohibited content are refused.
 - **AI-9 MUST** Personal data is sent to a third-party AI provider only after the user is told which
   provider and has given explicit consent (Apple App Review 5.1.2(i)); the processor is in
   DATA_INVENTORY (REG-2). *Test:* the feature stays blocked until the consent flag is set.
@@ -1540,6 +1555,36 @@ direct icon imports, `print`/`console`, env reads outside config, raw HTTP clien
 | Vercel apps | `vercel:verification`, `vercel:vercel-firewall` |
 | Keeping repos aligned | `claude-md-management:claude-md-improver` — checks each repo's `CLAUDE.md` references this standard |
 | Live verification | Playwright plugin (`mcp__plugin_playwright_*`) — drive both themes, assert `request_id` on errors |
+
+### 7.5 Keeping this standard current — the daily scout
+
+The standard maintains itself with the same discipline it asks of apps: one decision matrix, applied the same way every
+day, with every decision recorded. This is how the standard's maintainers keep it current. It places no rule on
+adopting apps (they get the result through the plugin and `adopt.sh`).
+
+- **Inputs:** new open-source security tools, agent skills and plugins (GitHub searches, watched vendor orgs, web
+  search), upstream changes to pinned sources (`bin/sources.mjs --upstream`), and new versions of the standards in
+  REFERENCES.md (each on a 14- or 30-day cadence).
+- **Decision matrix** (`sources/scout-policy.json`, the single owner; rendered in the README):
+  1. **Hard gates.** Licence permits use, not archived, alive, not brand-new, no star-farming, not a fork. Failing
+     any one rejects the candidate. A share-alike or network-copyleft licence caps the disposition at *distilled* or
+     *reference*: ideas are restated in this standard's own words, never copied in or installed.
+  2. **Six weighted criteria**, scored 0–5: provenance, maintenance, adoption and executable surface (scored by
+     script), and gap fit and novelty against existing rules and sources (judged by the agent). Gap fit carries the
+     most weight, and the quick-mode security floor scores highest.
+  3. **Outcome by total score:** *consume* (≥ 70) goes to the sources gateway (AGT-5) up to a proposal; *watch*
+     (≥ 50) is re-scored in 30 days or when upstream changes; *reject* is re-checked after 180 days.
+- **Optimised funnel:** cheapest checks first (API metadata → gates → mechanical score → agent judgement from the
+  README → full intake fetch only for the top-ranked), within a fixed daily budget. A ledger
+  (`sources/candidates.json`) means each day looks only at what is new, changed or due.
+- **Human in the loop:** the scout writes proposals and verifies them with every check. It never applies a rule,
+  moves a pin, pushes or touches `main` without the owner's approval. A scheduled run commits its ledger and
+  proposals only to the local `scout/daily` branch, for the owner to merge. When something changed (or a run
+  failed), it emails the owner a summary of the changes and the decisions waiting for them.
+- **Run it:** `/engineering-standard:scout` by hand, or daily via `bin/scout-jobs.sh start` (a macOS LaunchAgent
+  that runs the scout headless with only the command's allowed tools, private `local/` files denied and a time
+  limit). Mail goes out through `bin/scout-mail.py`: SMTP settings from the Keychain, falling back to Mail.app;
+  nothing is stored in the repo. The mechanics are in `bin/scout.mjs`.
 
 ---
 

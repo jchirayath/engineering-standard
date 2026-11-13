@@ -7,9 +7,9 @@
       "author": "DietrichGebert",
       "repo": "DietrichGebert/ponytail",
       "url": "https://github.com/DietrichGebert/ponytail",
-      "commit": "9cc65d03aa2da1db7121b912d03596409ee340b8",
-      "version": "v5.1.0",
-      "reviewed": "2026-10-09",
+      "commit": "96608e078b2d5ea607c5c3b8b5a54d1c1fba6846",
+      "version": "v5.3.3",
+      "reviewed": "2026-11-13",
       "license": "MIT",
       "kind": "plugin",
       "disposition": "distilled",
@@ -25,7 +25,7 @@
         "CLEAN-5",
         "AGT-14"
       ],
-      "notes": "Plugin not installed: hooks inject a persona into every session and every subagent (breaks standard-reviewer's JSON output), write under ~/.claude and nudge settings.json edits; weaker test/help/logging floor; 'lite' still injects all rules. Review-discipline ideas went to APP_REVIEW §7.",
+      "notes": "Plugin not installed: hooks inject a persona into every session and every subagent (breaks standard-reviewer's JSON output), write under ~/.claude and nudge settings.json edits; weaker test/help/logging floor; 'lite' still injects all rules. Review-discipline ideas went to APP_REVIEW §7. Re-reviewed 2026-11-13 (v5.3.3): watched change is an added `off` level only — no rule impact.",
       "also": "CLEAN-5 `shortcut:` comments, APP_REVIEW finding discipline",
       "rationale": "Distilled, not installed. Its 'least code' order is the clearest statement of the idea, so it is CLEAN-13's source (superpowers and caveman reach the same goal only indirectly). Not installed because its hooks inject a persona into every session and subagent (breaking the JSON-only reviewer), write under ~/.claude, and its test/help floor is weaker than TEST-14/TEST-0."
     },
@@ -35,9 +35,9 @@
       "author": "Jesse Vincent",
       "repo": "obra/superpowers",
       "url": "https://github.com/obra/superpowers",
-      "commit": "8ca22dba9a94f28898bbce59f2537ff4d87c747d",
-      "version": "v6.4.2",
-      "reviewed": "2026-10-09",
+      "commit": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "version": "v7.0.2",
+      "reviewed": "2026-11-13",
       "license": "MIT",
       "kind": "plugin",
       "disposition": "distilled",
@@ -57,7 +57,7 @@
         "AGT-14",
         "TEST-15"
       ],
-      "notes": "Plugin not installed: SessionStart injects an <EXTREMELY_IMPORTANT> skill-first directive; subagent templates have no tools: allow-list (AGT-7); auto-commits specs/plans; specs under docs/superpowers/; 'rulings, not stalls' lets the agent decide ambiguities alone (AGT-12 narrows that); no integration/e2e/walkthrough tiers.",
+      "notes": "Plugin not installed: SessionStart injects an <EXTREMELY_IMPORTANT> skill-first directive; subagent templates have no tools: allow-list (AGT-7); auto-commits specs/plans; specs under docs/superpowers/; 'rulings, not stalls' lets the agent decide ambiguities alone (AGT-12 narrows that); no integration/e2e/walkthrough tiers. Re-reviewed 2026-11-13 (v7.0.2): hook changes are Windows/PATH launcher hardening only (same single SessionStart injection); brainstorming rebuilt and now ships a local preview server (binds 127.0.0.1 by default, --host can widen it) — still not installed, AGT-11 unchanged.",
       "rationale": "Distilled, not installed. The most complete plan → failing test → verify → root-cause-debug workflow, so it is the source for AGT-12…14 and TEST-15 — no other source covered those as fully. Its brainstorming step lost to grill-me (see there). Not installed: its SessionStart hook forces skill-first behaviour, its subagents have no tool allow-lists (AGT-7), and it auto-commits specs and plans."
     },
     {
@@ -339,6 +339,54 @@
       ],
       "notes": "Repo licence reported as NOASSERTION; the skill's frontmatter says MIT. Already installed via the Vercel plugin; its 70 performance rules overlap PERF-14…26.",
       "rationale": "Only its server-no-shared-module-state rule was new (NEXT-7, a cross-user data leak); its other 70 performance rules overlap PERF-14…26 and stay available through the installed Vercel plugin."
+    },
+    {
+      "id": "anthropic-sandbox-runtime",
+      "name": "sandbox-runtime (srt)",
+      "author": "Anthropic",
+      "repo": "anthropics/sandbox-runtime",
+      "url": "https://github.com/anthropics/sandbox-runtime",
+      "commit": "0bbebed0aa9a8e628dc4df8bc30293550a1988eb",
+      "version": "v0.0.83",
+      "reviewed": "2026-11-13",
+      "license": "Apache-2.0",
+      "kind": "tool",
+      "disposition": "distilled",
+      "rationale": "Distilled, not installed. It is the only open, cross-platform OS sandbox that wraps arbitrary agent processes and stdio MCP servers, and it is the mechanism behind Claude Code's own sandbox, so it closes the gap in AGT-2 for agents that have none. A container (AGT-3) was the alternative; it is heavier and doesn't fit a developer laptop. Pre-1.0, so it is named as an example only.",
+      "paths": [
+        "README.md",
+        "package.json",
+        "src/sandbox/",
+        "src/cli.ts"
+      ],
+      "informs": [
+        "AGT-2"
+      ],
+      "notes": "Pre-1.0 (v0.0.83). Named as an example, not mandated, so an equivalent OS sandbox (bubblewrap, a container under AGT-3) satisfies the amendment. The repo is not installed into the kit."
+    },
+    {
+      "id": "cisco-skill-scanner",
+      "name": "Cisco AI Defense skill-scanner",
+      "author": "Cisco AI Defense",
+      "repo": "cisco-ai-defense/skill-scanner",
+      "url": "https://github.com/cisco-ai-defense/skill-scanner",
+      "commit": "f7824651ffeb9b89f7682ddd97d6fba8fe9c10b1",
+      "version": "2.3.2",
+      "reviewed": "2026-11-13",
+      "license": "Apache-2.0",
+      "kind": "tool",
+      "disposition": "distilled",
+      "rationale": "Distilled into AGT-5's intake step. It is the most complete open skill scanner (signatures, dataflow, SARIF, CI workflow) and is Apache-2.0 with active releases. Snyk agent-scan was rejected for this role because it requires a Snyk token and sends configs to Snyk's API. NVIDIA SkillSpector is queued and not yet scored, so this choice is to be re-compared when it is.",
+      "paths": [
+        "README.md",
+        "pyproject.toml",
+        "skill_scanner/hooks/",
+        "skill_scanner/config/"
+      ],
+      "informs": [
+        "AGT-5"
+      ],
+      "notes": "GitHub licence detection reports NOASSERTION; LICENSE is the Apache-2.0 short notice (© Cisco Systems). The vendor says detection without the LLM judge is low, so the scanner adds to the consume.mjs heuristics and the agent's own review; it doesn't replace them."
     }
   ]
 }

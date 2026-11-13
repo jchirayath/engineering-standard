@@ -25,6 +25,8 @@ jobs:
         run: node bin/similar.mjs --check
       - name: Sources gateway — registry pinned, reviewed, rule IDs defined
         run: node bin/sources.mjs --check
+      - name: Scout — decision matrix valid, ledger consistent, README matrix current
+        run: node bin/scout.mjs --check
       - name: Plugin — MCP server, hooks, parser self-test
         run: node plugin/test/run.mjs --offline
       - name: Lint rules pass their must-fail / must-pass tests
@@ -36,6 +38,7 @@ jobs:
       - name: Scripts parse
         run: |
           for f in bin/*.sh; do bash -n "$f"; done
+          python -I -c 'import ast,sys; ast.parse(open(sys.argv[1]).read())' bin/scout-mail.py
           for f in bin/*.mjs site/*.mjs design-tokens/scripts/*.mjs lib/*.mjs mcp/*.mjs hooks/*.mjs plugin/test/*.mjs; do node --check "$f"; done
       - name: Website kit — harden a fixture, then the build gate must pass (and catch drift)
         run: |

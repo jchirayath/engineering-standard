@@ -1,0 +1,364 @@
+{
+  "$comment": "Daily scouting policy (AGT-5) — the one owner of the decision matrix. Read by bin/scout.mjs (gates, scores, outcomes, budget, due dates) and rendered into README.md by `node bin/scout.mjs --render`. Change the matrix here only; CI (`scout.mjs --check`) fails if the README table is stale. Funnel, cheapest first: discover (API) → gates (metadata) → mechanical score → agent judgement (README only) → full /consume fetch for the top-ranked within budget.",
+  "version": 1,
+  "budget": {
+    "$comment": "Per daily run. Keeps a run cheap and bounded; overflow waits for the next day, highest prescore first.",
+    "maxScored": 12,
+    "maxJudged": 6,
+    "maxConsumed": 2,
+    "maxDriftReviews": 2
+  },
+  "licences": {
+    "$comment": "SPDX ids. This repo is GPL-3.0. allow: usable as any disposition. conditional: distil ideas or reference only — never copy text or install (share-alike, network-copyleft or GPL-2.0-only incompatibilities). deny: hard gate, rejected. Anything not listed (incl. NOASSERTION / no licence) is denied: all rights reserved.",
+    "allow": [
+      "MIT",
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "ISC",
+      "0BSD",
+      "MPL-2.0",
+      "CC0-1.0",
+      "Unlicense",
+      "CC-BY-4.0",
+      "GPL-3.0",
+      "GPL-3.0-only",
+      "GPL-3.0-or-later",
+      "LGPL-3.0",
+      "LGPL-2.1",
+      "GPL-2.0-or-later",
+      "Python-2.0",
+      "BlueOak-1.0.0",
+      "Zlib"
+    ],
+    "conditional": [
+      "CC-BY-SA-4.0",
+      "AGPL-3.0",
+      "AGPL-3.0-only",
+      "AGPL-3.0-or-later",
+      "GPL-2.0",
+      "GPL-2.0-only",
+      "EPL-2.0",
+      "EUPL-1.2"
+    ],
+    "deny": [
+      "NOASSERTION",
+      "NONE",
+      "SSPL-1.0",
+      "BUSL-1.1",
+      "Elastic-2.0",
+      "CC-BY-NC-4.0",
+      "CC-BY-NC-SA-4.0",
+      "CC-BY-NC-ND-4.0",
+      "CC-BY-ND-4.0",
+      "Commons-Clause",
+      "Proprietary",
+      "PolyForm-Noncommercial-1.0.0"
+    ]
+  },
+  "gates": [
+    {
+      "id": "G1",
+      "name": "Licence permits use",
+      "test": "licence in allow (pass) or conditional (pass, disposition capped at distilled/reference); otherwise reject"
+    },
+    {
+      "id": "G2",
+      "name": "Not archived or disabled",
+      "test": "repo.archived == false && repo.disabled == false"
+    },
+    {
+      "id": "G3",
+      "name": "Alive",
+      "test": "pushed within maxIdleDays",
+      "maxIdleDays": 365
+    },
+    {
+      "id": "G4",
+      "name": "Not brand-new",
+      "test": "created ≥ minAgeDays ago, unless the owner is a trusted vendor (SUP-1)",
+      "minAgeDays": 30
+    },
+    {
+      "id": "G5",
+      "name": "No star-farming",
+      "test": "for repos younger than 180 days: stars/day ≤ maxStarsPerDay, unless trusted vendor",
+      "maxStarsPerDay": 150
+    },
+    {
+      "id": "G6",
+      "name": "Not a fork or mirror",
+      "test": "repo.fork == false (review the upstream instead)"
+    }
+  ],
+  "criteria": [
+    {
+      "id": "C1",
+      "name": "Provenance",
+      "weight": 20,
+      "by": "script",
+      "how": "5 trusted vendor org · 4 verified org · 3 org · 2 individual with ≥ 2 years and ≥ 10 public repos · 1 other individual"
+    },
+    {
+      "id": "C2",
+      "name": "Maintenance",
+      "weight": 15,
+      "by": "script",
+      "how": "recency of last push (≤ 30d 5 … ≤ 365d 1) + releases/tags + ≥ 3 contributors, averaged"
+    },
+    {
+      "id": "C3",
+      "name": "Adoption",
+      "weight": 10,
+      "by": "script",
+      "how": "log10(stars): 0 → 0, 10 → 1.25, 100 → 2.5, 1k → 3.75, 10k → 5"
+    },
+    {
+      "id": "C4",
+      "name": "Executable surface",
+      "weight": 15,
+      "by": "script after fetch, else 3",
+      "how": "5 prompt-only · −1 each: hooks, every-prompt/subagent injection, install scripts, network hosts in code, unpinned remote fetch/run · floor 0"
+    },
+    {
+      "id": "C5",
+      "name": "Gap fit",
+      "weight": 25,
+      "by": "agent",
+      "how": "5 closes a gap in the quick-mode security floor or agent safety · 4 a client-mode security gap · 3 strengthens enforcement of an existing rule (a check, a guard) · 2 client polish · 0 already covered"
+    },
+    {
+      "id": "C6",
+      "name": "Novelty",
+      "weight": 15,
+      "by": "agent",
+      "how": "5 nothing in the standard or registry says this · 3 partial overlap that an amendment would fix · 0 duplicates an existing rule or pinned source"
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "consume",
+      "min": 70,
+      "action": "run /engineering-standard:consume to the proposal stage (within budget.maxConsumed); owner approves before apply",
+      "recheckDays": 0
+    },
+    {
+      "id": "watch",
+      "min": 50,
+      "action": "keep in the ledger; re-score when it changes or after recheckDays",
+      "recheckDays": 30
+    },
+    {
+      "id": "reject",
+      "min": 0,
+      "action": "record why; re-check only after recheckDays or a major release",
+      "recheckDays": 180
+    }
+  ],
+  "trustedVendors": [
+    "anthropics",
+    "trailofbits",
+    "getsentry",
+    "semgrep",
+    "returntocorp",
+    "github",
+    "ossf",
+    "sigstore",
+    "slsa-framework",
+    "google",
+    "googlechrome",
+    "microsoft",
+    "docker",
+    "supabase",
+    "firebase",
+    "vercel-labs",
+    "stripe",
+    "owasp",
+    "aquasecurity",
+    "anchore",
+    "gitleaks",
+    "zizmorcore",
+    "woodruffw",
+    "snyk",
+    "socketdev",
+    "chainguard-dev",
+    "step-security",
+    "modelcontextprotocol",
+    "openai",
+    "cloudflare",
+    "hashicorp",
+    "bridgecrewio",
+    "projectdiscovery",
+    "invariantlabs-ai",
+    "nvidia",
+    "protectai",
+    "meta-llama"
+  ],
+  "discovery": {
+    "$comment": "Mechanical discovery: `scout.mjs discover` runs these GitHub searches (pushed since the last run) and lists repos new to the ledger and the registry. The agent adds web search on top (security news, vendor blogs, OWASP, marketplaces).",
+    "queries": [
+      "topic:claude-code security",
+      "topic:claude-skills security",
+      "topic:mcp-security",
+      "topic:agent-security",
+      "topic:prompt-injection defense",
+      "topic:llm-security stars:>100",
+      "topic:supply-chain-security stars:>200",
+      "topic:github-actions security stars:>100",
+      "topic:secret-scanning stars:>200",
+      "topic:sast stars:>300",
+      "topic:sbom stars:>300",
+      "skill scanner security agent in:name,description stars:>50",
+      "mcp scanner security in:name,description stars:>50"
+    ],
+    "queueDays": 30,
+    "queueMax": 40,
+    "watchOrgs": [
+      "trailofbits",
+      "getsentry",
+      "semgrep",
+      "anthropics",
+      "ossf",
+      "github",
+      "zizmorcore",
+      "step-security",
+      "supabase",
+      "firebase",
+      "vercel-labs",
+      "docker",
+      "modelcontextprotocol",
+      "invariantlabs-ai",
+      "socketdev"
+    ],
+    "webSearch": [
+      "new open-source security tool for AI coding agents",
+      "Claude Code security skill OR plugin released",
+      "MCP server security scanner",
+      "GitHub Actions security tool new release",
+      "software supply chain attack npm PyPI this week",
+      "OWASP new project or release"
+    ]
+  },
+  "standards": {
+    "$comment": "External standards the rules cite (REFERENCES.md). `scout.mjs due` lists each one whose last check (ledger) is older than checkEvery days.",
+    "checkEvery": {
+      "default": 30,
+      "law": 14,
+      "platform-policy": 14
+    },
+    "list": [
+      {
+        "id": "owasp-asvs",
+        "name": "OWASP ASVS",
+        "cited": "5.0",
+        "kind": "default",
+        "url": "https://owasp.org/www-project-application-security-verification-standard/"
+      },
+      {
+        "id": "owasp-top10",
+        "name": "OWASP Top 10",
+        "cited": "2025",
+        "kind": "default",
+        "url": "https://owasp.org/www-project-top-ten/"
+      },
+      {
+        "id": "owasp-api",
+        "name": "OWASP API Security Top 10",
+        "cited": "2023",
+        "kind": "default",
+        "url": "https://owasp.org/API-Security/"
+      },
+      {
+        "id": "owasp-genai",
+        "name": "OWASP LLM & Agentic Top 10",
+        "cited": "LLM Top 10 2026; Agentic Top 10 2026",
+        "kind": "default",
+        "url": "https://genai.owasp.org/"
+      },
+      {
+        "id": "owasp-masvs",
+        "name": "OWASP MASVS",
+        "cited": "see REFERENCES.md",
+        "kind": "default",
+        "url": "https://mas.owasp.org/MASVS/"
+      },
+      {
+        "id": "nist-800-63",
+        "name": "NIST SP 800-63",
+        "cited": "4",
+        "kind": "default",
+        "url": "https://pages.nist.gov/800-63-4/"
+      },
+      {
+        "id": "slsa",
+        "name": "SLSA",
+        "cited": "see REFERENCES.md",
+        "kind": "default",
+        "url": "https://slsa.dev/"
+      },
+      {
+        "id": "mcp-spec",
+        "name": "MCP specification (authorization)",
+        "cited": "2026-07-28",
+        "kind": "default",
+        "url": "https://modelcontextprotocol.io/specification/"
+      },
+      {
+        "id": "wcag",
+        "name": "WCAG",
+        "cited": "2.2",
+        "kind": "default",
+        "url": "https://www.w3.org/TR/WCAG22/"
+      },
+      {
+        "id": "cwv",
+        "name": "Core Web Vitals",
+        "cited": "see REFERENCES.md",
+        "kind": "default",
+        "url": "https://web.dev/articles/vitals"
+      },
+      {
+        "id": "claude-code",
+        "name": "Claude Code permissions & hooks docs",
+        "cited": "see REFERENCES.md",
+        "kind": "platform-policy",
+        "url": "https://code.claude.com/docs/en/permissions"
+      },
+      {
+        "id": "apple-review",
+        "name": "Apple App Review Guidelines",
+        "cited": "see REFERENCES.md",
+        "kind": "platform-policy",
+        "url": "https://developer.apple.com/app-store/review/guidelines/"
+      },
+      {
+        "id": "play-target-api",
+        "name": "Google Play target API level",
+        "cited": "see REFERENCES.md",
+        "kind": "platform-policy",
+        "url": "https://developer.android.com/google/play/requirements/target-sdk"
+      },
+      {
+        "id": "eu-cra",
+        "name": "EU Cyber Resilience Act",
+        "cited": "2024/2847",
+        "kind": "law",
+        "url": "https://eur-lex.europa.eu/eli/reg/2024/2847/oj"
+      },
+      {
+        "id": "eu-ai-act",
+        "name": "EU AI Act",
+        "cited": "2024/1689 + AI Omnibus 2026/1744",
+        "kind": "law",
+        "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj"
+      },
+      {
+        "id": "ccpa",
+        "name": "CCPA regulations / GPC",
+        "cited": "see REFERENCES.md",
+        "kind": "law",
+        "url": "https://cppa.ca.gov/regulations/"
+      }
+    ]
+  }
+}

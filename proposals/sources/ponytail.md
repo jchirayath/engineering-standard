@@ -26,3 +26,5 @@ APP_REVIEW §7: no concrete case → no finding; grep the whole tree before call
 | `/ponytail-review` defaults to "Looks good. Ship." | APP_REVIEW Prime Directive: default INCOMPLETE | review ideas distilled only |
 
 **Not verified:** whether Claude Code loads its `.toml` commands; whether SubagentStart carries `agent_type`.
+
+**Re-reviewed 2026-11-13 → `96608e0` (v5.3.3)** via the daily scout drift check. The only watched change is an `off` level in `argument-hint`. No rule change.

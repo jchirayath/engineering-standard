@@ -163,7 +163,7 @@ function check({ json, modesMd, defs, rules, prefixes, stacksMap, modesMap }) {
   const files = ['ENGINEERING_STANDARD.md', 'APP_REVIEW.md', 'README.md', 'REFERENCES.md', 'MODES.md', 'mappings/asvs-map.json']
     .map((f) => join(ROOT, f)).filter(existsSync)
   for (const f of readdirSync(join(ROOT, 'semgrep'))) if (f.endsWith('.yml')) files.push(join(ROOT, 'semgrep', f))
-  for (const f of readdirSync(join(ROOT, 'bin'))) if (f !== 'build-rules.mjs') files.push(join(ROOT, 'bin', f))
+  for (const f of readdirSync(join(ROOT, 'bin'))) if (f !== 'build-rules.mjs' && statSync(join(ROOT, 'bin', f)).isFile()) files.push(join(ROOT, 'bin', f))
   files.push(...walk(join(ROOT, 'site')))
   const undef = new Map()
   for (const f of files) {

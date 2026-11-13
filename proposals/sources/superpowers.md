@@ -25,3 +25,5 @@ cause first; after three failed fixes question the architecture).
 | "do not ask a reviewer to re-run tests" | AGT-13 re-run independently | AGT-13 |
 
 **Not verified:** receiving-code-review, dispatching-parallel-agents, writing-skills read only partly.
+
+**Re-reviewed 2026-11-13 → `22f0b46` (v7.0.2)** via the daily scout drift check. Hooks: Windows/PATH launcher hardening only (the same single `SessionStart` injection; no new events, no network). `brainstorming` rebuilt; it now ships a local preview server (`scripts/server.cjs`, binds `127.0.0.1` by default, `--host` can widen it). Still distilled, nothing loaded; AGT-11 already covers "look before you ask". No rule change.
