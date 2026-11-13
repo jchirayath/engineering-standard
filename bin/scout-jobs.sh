@@ -15,7 +15,7 @@
 #         bin/scout-jobs.sh status          is it loaded, when does it run, last log lines
 #         bin/scout-jobs.sh logs            follow the log (Ctrl-C to quit)
 #         bin/scout-jobs.sh run             run the scout now (what the LaunchAgent runs)
-#         bin/scout-jobs.sh set-token       store a read-only GitHub token for the run (else your gh token is used)
+#         bin/scout-jobs.sh set-token       store a read-only GitHub token (else the run is unauthenticated)
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -136,11 +136,17 @@ run() {
 
 $prompt"
   # bin/*.mjs send it only to api.github.com, for rate limits; the agent has no shell that could print it.
-  export GITHUB_TOKEN; GITHUB_TOKEN="$(security find-generic-password -s "$TOKEN_SERVICE" -a token -w 2>/dev/null || true)"
-  if [ -z "$GITHUB_TOKEN" ]; then
-    echo "warning: no read-only scout token (bin/scout-jobs.sh set-token); falling back to your gh token"
-    GITHUB_TOKEN="$(gh auth token 2>/dev/null || true)"
+  # Fail closed: only the scoped read-only token is used. Without it the run is unauthenticated (rate-limited, so
+  # discovery and drift may be partial); your full gh login is used only on explicit opt-in (SCOUT_ALLOW_GH_TOKEN=1).
+  local token_note=""
+  GITHUB_TOKEN="$(security find-generic-password -s "$TOKEN_SERVICE" -a token -w 2>/dev/null || true)"
+  if [ -z "$GITHUB_TOKEN" ] && [ "${SCOUT_ALLOW_GH_TOKEN:-}" = 1 ]; then
+    GITHUB_TOKEN="$(gh auth token 2>/dev/null || true)"; token_note="Ran with your gh login (SCOUT_ALLOW_GH_TOKEN=1)."
+  elif [ -z "$GITHUB_TOKEN" ]; then
+    token_note="Ran unauthenticated (no read-only token: bin/scout-jobs.sh set-token), so GitHub rate limits may have cut discovery or drift short."
   fi
+  if [ -n "$GITHUB_TOKEN" ]; then export GITHUB_TOKEN; else unset GITHUB_TOKEN; fi
+  [ -n "$token_note" ] && echo "note: $token_note"
   ( cd "$WT" && perl -e 'alarm shift; exec @ARGV' "$LIMIT_SECONDS" \
       claude -p "$prompt" --settings "$SETTINGS" --permission-mode dontAsk --allowedTools "$allowed" --disallowedTools "$DENY" --output-format text ) > "$out" 2>&1 || rc=$?
   echo "claude exit $rc (output: $out)"
@@ -157,7 +163,7 @@ $prompt"
     elif [ "$mrc" -ne 0 ]; then echo "report failed ($mrc)"
     else
       local subject; subject="$(sed -n '1s/^Subject: //p' "$body.raw")"
-      { tail -n +3 "$body.raw"; echo; echo "— Agent summary (derived from untrusted web content; read as data) —"; tail -n 40 "$out"
+      { tail -n +3 "$body.raw"; [ -n "$token_note" ] && { echo; echo "Note: $token_note"; }; echo; echo "— Agent summary (derived from untrusted web content; read as data) —"; tail -n 40 "$out"
         echo; echo "— Files changed on $BRANCH —"; git -C "$WT" add -A; git -C "$WT" diff --cached --stat | tail -n 25
         echo; echo "Review: git -C $WT log -p · merge: git merge $BRANCH"; } > "$body"
       mail "$subject" "$body"
