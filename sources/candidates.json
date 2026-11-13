@@ -69,6 +69,31 @@
   },
   "candidates": [
     {
+      "repo": "affaan-m/agentshield",
+      "url": "https://github.com/affaan-m/agentshield",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 2,
+        "C2": 4.3,
+        "C3": 3.9,
+        "C4": 3
+      },
+      "description": "AI agent security scanner. Detect vulnerabilities in agent configurations, MCP servers, and tool permissions. Available as CLI, GitHub Action, ECC plugin, and GitHub App integration. 🛡️",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 1400,
+      "pushedAt": "2026-10-18T02:39:18Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
       "repo": "AikidoSec/safe-chain",
       "url": "https://github.com/AikidoSec/safe-chain",
       "firstSeen": "2026-11-13",
@@ -129,6 +154,38 @@
       ],
       "c4By": "inventory",
       "consumedAs": "anthropic-sandbox-runtime"
+    },
+    {
+      "repo": "boostsecurityio/poutine",
+      "url": "https://github.com/boostsecurityio/poutine",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 3.4,
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
+      },
+      "description": "poutine, a supply chain vulnerability scanner for build pipelines",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 535,
+      "pushedAt": "2026-10-21T16:15:18Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 60,
+      "outcome": "watch",
+      "nextReview": "2026-12-13",
+      "why": "CI pipeline misconfiguration scanner (GitHub, GitLab, Azure, Tekton; SARIF). For GitHub Actions zizmor (SEC-17) and std.workflows semgrep already cover it; adds only non-GitHub CI. Version-check telemetry on by default.",
+      "judged": "2026-11-13",
+      "gap": [
+        "SEC-17"
+      ]
     },
     {
       "repo": "cisco-ai-defense/skill-scanner",
@@ -260,6 +317,39 @@
       "judged": "2026-11-13"
     },
     {
+      "repo": "hashgraph-online/hol-guard",
+      "url": "https://github.com/hashgraph-online/hol-guard",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 3.8,
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
+      },
+      "description": "Open-source antivirus and firewall for AI agents: block risky tools, secret access, prompt injection, malicious packages, MCP servers, plugins, and skills at runtime.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 1100,
+      "pushedAt": "2026-11-13T23:34:55Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 61,
+      "outcome": "watch",
+      "nextReview": "2026-12-13",
+      "why": "Pre-tool-call guard (commands, secrets, installs, MCP) via agent hooks/MCP proxy; the plugin's own PreToolUse guards plus AGT-4/AGT-9/AGT-17 already cover this. Installs hooks; pipx install unpinned (NPM-1/SUP-6).",
+      "judged": "2026-11-13",
+      "gap": [
+        "AGT-4",
+        "AGT-17"
+      ]
+    },
+    {
       "repo": "lasso-security/claude-hooks",
       "url": "https://github.com/lasso-security/claude-hooks",
       "firstSeen": "2026-11-13",
@@ -286,6 +376,172 @@
       "nextReview": "2027-05-12",
       "why": "Prompt-injection hooks for Claude Code; idle since 2026-01-08 with 274 stars; the plugin guards and AGT-4 already cover this ground.",
       "judged": "2026-11-13"
+    },
+    {
+      "repo": "mongodb/kingfisher",
+      "url": "https://github.com/mongodb/kingfisher",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 3.9,
+        "C4": 3
+      },
+      "description": "Detect secrets. Validate them live. Map blast radius. Revoke fast. Run the CLI or embed in Rust, Python, or Node.js.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 1310,
+      "pushedAt": "2026-11-09T20:07:48Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "nolabs-ai/nono",
+      "url": "https://github.com/nolabs-ai/nono",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 4.6,
+        "C4": 3
+      },
+      "description": "agent runtime security - zero trust, zero setup, zero latency agent sandboxing",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 4960,
+      "pushedAt": "2026-11-13T23:31:55Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "NVIDIA/SkillSpector",
+      "url": "https://github.com/NVIDIA/SkillSpector",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 5,
+        "C2": 5,
+        "C3": 5,
+        "C4": 3,
+        "C5": 3,
+        "C6": 2
+      },
+      "description": "Security scanner for AI agent skills. Detect vulnerabilities, malicious patterns, security risks, prompt injection, data exfiltration, and supply-chain risks in Claude Code, Codex, and MCP skills befo",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 25888,
+      "pushedAt": "2026-11-13T23:13:59Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "inventory",
+      "total": 75,
+      "outcome": "consume",
+      "nextReview": null,
+      "why": "Second static skill scanner for AGT-5 intake (71 patterns, AST, taint, YARA, SARIF, coverage gates) plus MCP registry snapshot diff for rug pulls; registry asks to re-compare with cisco-skill-scanner. Caveats: LLM review on by default (needs --no-llm for AGT-4), OSV lookups even with --no-llm, README installs from main unpinned.",
+      "judged": "2026-11-13",
+      "gap": [
+        "AGT-5"
+      ],
+      "consumedAs": "skillspector"
+    },
+    {
+      "repo": "openqodex/openqodex",
+      "url": "https://github.com/openqodex/openqodex",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 3,
+        "C2": 4.3,
+        "C3": 3.8,
+        "C4": 3
+      },
+      "description": "Open source AI code review for coding agents. A separate reviewer checks every change your agent writes before you push, in Claude Code, Codex, Cursor and Cline. No account or key of its own.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 1181,
+      "pushedAt": "2026-11-11T23:22:57Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "owasp-dep-scan/dep-scan",
+      "url": "https://github.com/owasp-dep-scan/dep-scan",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 3.9,
+        "C4": 3
+      },
+      "description": "OWASP dep-scan is a next-generation security and risk audit tool based on known vulnerabilities, advisories, and license limitations for project dependencies. Both local repositories and container ima",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 1330,
+      "pushedAt": "2026-11-12T18:01:12Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "pipelab-org/pipelock",
+      "url": "https://github.com/pipelab-org/pipelock",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 3.7,
+        "C4": 3,
+        "C5": 3,
+        "C6": 2
+      },
+      "description": "Open-source AI agent firewall for MCP security and agent egress. Scans mediated HTTP, MCP, A2A, and WebSocket traffic for exfiltration, SSRF, and prompt injection, and emits mediator-signed action rec",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 990,
+      "pushedAt": "2026-11-13T22:58:24Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 68,
+      "outcome": "watch",
+      "nextReview": "2026-12-13",
+      "why": "Egress proxy with DLP, response-injection scan and MCP tools/list change detection; mostly covered by the pinned anthropic-sandbox-runtime network allow-list (AGT-4) and AGT-5 re-review. Release binaries bundle ELv2 enterprise code; Community build only from source.",
+      "judged": "2026-11-13",
+      "gap": [
+        "AGT-4",
+        "AGT-5"
+      ]
     },
     {
       "repo": "semgrep/skills",
@@ -374,6 +630,95 @@
       "why": "G1: licence NOASSERTION → deny"
     },
     {
+      "repo": "solongate/agent-security",
+      "url": "https://github.com/solongate/agent-security",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 3.5,
+        "C4": 3
+      },
+      "description": "Local-first, open-source security gateway for AI coding agents. Enforce tool-call policies, detect secrets, and audit actions on-device.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 684,
+      "pushedAt": "2026-11-12T19:32:19Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "step-security/harden-runner",
+      "url": "https://github.com/step-security/harden-runner",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 5,
+        "C2": 5,
+        "C3": 3.9,
+        "C4": 4,
+        "C5": 3,
+        "C6": 3
+      },
+      "description": "Harden-Runner is a CI/CD security agent that works like an EDR for GitHub Actions runners. It monitors network egress, file integrity, and process activity on those runners, detecting threats in real-",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 1299,
+      "pushedAt": "2026-11-12T09:05:50Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "inventory",
+      "total": 79,
+      "outcome": "consume",
+      "nextReview": null,
+      "why": "Runner egress allow-list + file-tamper detection for GitHub Actions: gives AGT-4's 'network egress allow-list' leg and AGT-6 headless-agent jobs a concrete CI mechanism; SEC-17/CFG-1 say nothing about runner egress. Caveats: events go to app.stepsecurity.io; private repos and self-hosted runners need the paid tier.",
+      "judged": "2026-11-13",
+      "gap": [
+        "AGT-4",
+        "AGT-6",
+        "SEC-17"
+      ],
+      "consumedAs": "harden-runner"
+    },
+    {
+      "repo": "Tencent/AI-Infra-Guard",
+      "url": "https://github.com/Tencent/AI-Infra-Guard",
+      "firstSeen": "2026-11-13",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 4.8,
+        "C4": 3,
+        "C5": 1,
+        "C6": 1
+      },
+      "description": "A full-stack AI Red Teaming platform securing AI ecosystems via Agent Scan, Skills Scan, MCP scan, AI Infra scan and LLM jailbreak evaluation.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 7496,
+      "pushedAt": "2026-11-13T01:37:17Z",
+      "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 58,
+      "outcome": "watch",
+      "nextReview": "2026-12-13",
+      "why": "Red-team platform (agent/skill/MCP/infra scans, jailbreak eval) as an unauthenticated Docker web UI needing a hosted LLM key; skill/MCP scanning already covered by AGT-5 intake (cisco), red-teaming is outside the standard's floor.",
+      "judged": "2026-11-13"
+    },
+    {
       "repo": "trailofbits/claude-code-config",
       "url": "https://github.com/trailofbits/claude-code-config",
       "firstSeen": "2026-11-13",
@@ -434,38 +779,6 @@
   ],
   "queue": [
     {
-      "repo": "NVIDIA/SkillSpector",
-      "stars": 25883,
-      "licence": "Apache-2.0",
-      "desc": "Security scanner for AI agent skills. Detect vulnerabilities, malicious patterns, security risks, prompt injection, data",
-      "found": "2026-11-13",
-      "hits": 5
-    },
-    {
-      "repo": "openqodex/openqodex",
-      "stars": 1181,
-      "licence": "Apache-2.0",
-      "desc": "Open source AI code review for coding agents. A separate reviewer checks every change your agent writes before you push,",
-      "found": "2026-11-13",
-      "hits": 5
-    },
-    {
-      "repo": "nolabs-ai/nono",
-      "stars": 4960,
-      "licence": "Apache-2.0",
-      "desc": "agent runtime security - zero trust, zero setup, zero latency agent sandboxing",
-      "found": "2026-11-13",
-      "hits": 4
-    },
-    {
-      "repo": "hashgraph-online/hol-guard",
-      "stars": 1100,
-      "licence": "Apache-2.0",
-      "desc": "Open-source antivirus and firewall for AI agents: block risky tools, secret access, prompt injection, malicious packages",
-      "found": "2026-11-13",
-      "hits": 4
-    },
-    {
       "repo": "alexgreensh/repo-forensics",
       "stars": 206,
       "licence": "NOASSERTION",
@@ -482,22 +795,6 @@
       "hits": 3
     },
     {
-      "repo": "pipelab-org/pipelock",
-      "stars": 990,
-      "licence": "Apache-2.0",
-      "desc": "Open-source AI agent firewall for MCP security and agent egress. Scans mediated HTTP, MCP, A2A, and WebSocket traffic fo",
-      "found": "2026-11-13",
-      "hits": 3
-    },
-    {
-      "repo": "solongate/agent-security",
-      "stars": 684,
-      "licence": "Apache-2.0",
-      "desc": "Local-first, open-source security gateway for AI coding agents. Enforce tool-call policies, detect secrets, and audit ac",
-      "found": "2026-11-13",
-      "hits": 3
-    },
-    {
       "repo": "RiccardoBiosas/awesome-MLSecOps",
       "stars": 491,
       "licence": "MIT",
@@ -510,14 +807,6 @@
       "stars": 31113,
       "licence": "MIT",
       "desc": "A lightweight alternative to OpenClaw that runs in containers for security. Connects to WhatsApp, Telegram, Slack, Disco",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "Tencent/AI-Infra-Guard",
-      "stars": 7496,
-      "licence": "Apache-2.0",
-      "desc": "A full-stack AI Red Teaming platform securing AI ecosystems via Agent Scan, Skills Scan, MCP scan, AI Infra scan and LLM",
       "found": "2026-11-13",
       "hits": 2
     },
@@ -550,38 +839,6 @@
       "stars": 1574,
       "licence": "Apache-2.0",
       "desc": "GUAC aggregates software security metadata into a high fidelity graph database.",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "affaan-m/agentshield",
-      "stars": 1399,
-      "licence": "MIT",
-      "desc": "AI agent security scanner. Detect vulnerabilities in agent configurations, MCP servers, and tool permissions. Available ",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "owasp-dep-scan/dep-scan",
-      "stars": 1330,
-      "licence": "MIT",
-      "desc": "OWASP dep-scan is a next-generation security and risk audit tool based on known vulnerabilities, advisories, and license",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "mongodb/kingfisher",
-      "stars": 1310,
-      "licence": "Apache-2.0",
-      "desc": "Detect secrets. Validate them live. Map blast radius. Revoke fast. Run the CLI or embed in Rust, Python, or Node.js.",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "step-security/harden-runner",
-      "stars": 1299,
-      "licence": "Apache-2.0",
-      "desc": "Harden-Runner is a CI/CD security agent that works like an EDR for GitHub Actions runners. It monitors network egress, f",
       "found": "2026-11-13",
       "hits": 2
     },
@@ -646,14 +903,6 @@
       "stars": 592,
       "licence": "Apache-2.0",
       "desc": "Open-source runtime AI agent security tool - monitors and controls AI agents, catching malicious tool use, prompt inject",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "boostsecurityio/poutine",
-      "stars": 535,
-      "licence": "Apache-2.0",
-      "desc": "poutine, a supply chain vulnerability scanner for build pipelines",
       "found": "2026-11-13",
       "hits": 2
     },

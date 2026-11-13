@@ -1,0 +1,31 @@
+{
+  "name": "NVIDIA SkillSpector",
+  "author": "NVIDIA",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "v2.13.4",
+  "repo": "NVIDIA/SkillSpector",
+  "url": "https://github.com/NVIDIA/SkillSpector",
+  "commit": "ce46d463a315ceaf7cf23f509abe2c7c1d80790b",
+  "license": "Apache-2.0",
+  "paths": [
+    "README.md",
+    "pyproject.toml",
+    "skills/skill-inspector/SKILL.md",
+    "src/skillspector/llm_utils.py",
+    "src/skillspector/cli.py"
+  ],
+  "informs": [
+    "AGT-5",
+    "AGT-13"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-5",
+      "append": "NVIDIA SkillSpector, installed from a pinned release tag (it is not on PyPI) and run with `--no-llm --fail-on-incomplete`, may replace or join the Cisco scanner. A scan that reports incomplete coverage (files skipped, limits hit) is recorded as incomplete, never as clean (AGT-13)."
+    }
+  ],
+  "notes": "Not installed by the scout. The CLI turns LLM review on by default and sends file contents to the configured provider (hosted APIs or agent CLIs), so --no-llm is mandatory under AGT-4. Even with --no-llm the SC4 check sends dependency names and versions to api.osv.dev (public data). --inspect-dependencies downloads npm tarballs. The optional MCP server (`skillspector mcp`) and the bundled skill-inspector skill are not loaded. The skill-inspector skill itself already defaults to --no-llm. 263 of 581 files were not read by the fetch (200-file limit).",
+  "rationale": "Distilled into AGT-5 next to the Cisco scanner, which the registry asked to re-compare. SkillSpector comes from a trusted vendor (NVIDIA) with frequent tagged releases. It adds MCP registry snapshot diffs (rug-pull detection), explicit coverage gates and an evasion corpus. Cisco's scanner stays the default because it is pinnable from PyPI and is already wired into intake. SkillSpector is not on PyPI, so a squatted package of that name is a supply-chain risk, and its CLI defaults to a hosted LLM. Snyk agent-scan stays rejected for this role (token and vendor API).",
+  "newRules": []
+}

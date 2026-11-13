@@ -23,3 +23,11 @@ irreversible steps, chat only — never persisted text) with the guard caveman l
 
 **Measured effect:** upstream withdrew the 65% figure (`docs/HONEST-NUMBERS.md`); its own run shows 3–35% fewer output tokens
 vs. "Answer concisely", n=10. Not re-measured here.
+
+**Drift review 2026-11-13 (scout):** `e20f07e` (v3.2.0) → `b4ee71d` (v4.1.0, 834 commits). Of the watched paths, only
+`.claude-plugin/plugin.json` changed. Its version is now 4.1.0, and it still registers the same four Node hooks with the same
+timeouts: SessionStart and SubagentStart run `caveman-activate.js`, UserPromptSubmit runs `caveman-mode-tracker.js` (30 s each)
+and SessionEnd runs `caveman-stats.js --record` (5 s). `skills/caveman/SKILL.md` and `src/hooks/` are not reported as changed.
+Nothing has been added to inject, call the network or give instructions, so this has **no impact** on AGT-15/AGT-13 and the
+"not installed" disposition still holds. Moving the pin to `b4ee71d` is safe once the owner approves. The change in the hook
+scripts was not re-read: none was reported.

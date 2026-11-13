@@ -1,0 +1,32 @@
+{
+  "name": "StepSecurity Harden-Runner",
+  "author": "StepSecurity",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "v2.21.0",
+  "repo": "step-security/harden-runner",
+  "url": "https://github.com/step-security/harden-runner",
+  "commit": "1d88384fd173af6ecb012dfd0264a306b711241a",
+  "license": "Apache-2.0",
+  "paths": [
+    "action.yml",
+    "src/setup.ts",
+    "src/install-agent.ts",
+    "src/policy-utils.ts",
+    "src/configs.ts",
+    "src/checksum.ts"
+  ],
+  "informs": [
+    "AGT-6",
+    "AGT-4"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-6",
+      "append": "A job that runs an AI agent on untrusted event content also limits runner egress to an allow-list in block mode, for example `step-security/harden-runner` pinned by SHA with `egress-policy: block`, explicit `allowed-endpoints` and `disable-telemetry: true`, or a self-hosted runner behind the CFG-1 network allow-list. Audit mode only observes traffic, so it doesn't remove AGT-4's outbound leg."
+    }
+  ],
+  "notes": "Not installed in this repo by the scout. The action downloads a pinned agent binary (step-security/agent v0.18.1 or agent-ebpf v1.9.6), checks its SHA-256 and runs it as a root systemd service. It sends job events to *.stepsecurity.io unless telemetry is disabled. The free Community tier covers only public repos on GitHub-hosted runners: private repos and self-hosted/ARC runners need the paid tier, which is why the amendment also allows a network-layer allow-list.",
+  "rationale": "Distilled into AGT-6 as one way to remove AGT-4's outbound leg in CI. AGT-4 asks for an egress allow-list and CFG-1 restricts host egress, but nothing told an agent workflow how to block egress on a GitHub runner. Harden-Runner is the most widely used open action that enforces it, and its blocklist caught tj-actions/changed-files (CVE-2025-30066). zizmor (SEC-17) lints workflow text but can't block traffic at runtime, so the two complement each other. pipelab-org/pipelock (watch, 68) covers local agent egress rather than CI runners, where the pinned anthropic-sandbox-runtime already applies.",
+  "newRules": []
+}

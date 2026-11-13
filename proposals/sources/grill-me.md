@@ -18,3 +18,9 @@ limits, HELP-1 help) and decisions written to ADRs / the PR.
 | "yes accepts my recommendation" can drift weaker | modes | recommendations never weaker than the mode |
 
 Overlaps with superpowers *brainstorming* and ponytail *ultra* — AGT-11 is the single clarify step; neither of those is loaded.
+
+**Drift review 2026-11-13 (scout):** `49dd158` → `5863806` (10 commits). The only watched-file change is one line in
+`skills/productivity/grilling/SKILL.md` (upstream 7739eae, #1341): "dispatch a sub-agent to find it" became "dispatch a
+sub-agent with a fresh context window to find it". `grill-me/SKILL.md` is unchanged. AGT-11 says only that the agent looks
+facts up itself, not how it does that, so this has **no impact**. Moving the pin to `5863806` is safe once the owner approves
+(the registry is edited by hand, not by the scout).
