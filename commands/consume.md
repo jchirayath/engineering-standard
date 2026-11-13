@@ -1,7 +1,7 @@
 ---
 description: Consume a GitHub repo (skill, plugin, prompt or standard) into the engineering standard — review, classify quick/client, apply
 argument-hint: <github URL — repo, or /tree/<ref>/<path> for one skill>
-allowed-tools: Read, Grep, Glob, WebFetch, Bash(node bin/consume.mjs:*), Bash(node bin/build-rules.mjs:*), Bash(node bin/sources.mjs:*), Bash(node bin/check-public.mjs), Bash(git diff:*), Bash(git status), Write(proposals/sources/**), mcp__plugin_engineering-standard_standard__rules_for, mcp__plugin_engineering-standard_standard__rule, mcp__plugin_engineering-standard_standard__mode
+allowed-tools: Read, Grep, Glob, WebFetch, Bash(node bin/consume.mjs:*), Bash(node bin/build-rules.mjs:*), Bash(node bin/sources.mjs:*), Bash(node bin/check-public.mjs), Bash(git diff:*), Bash(git status), Edit(proposals/sources/**), mcp__plugin_engineering-standard_standard__rules_for, mcp__plugin_engineering-standard_standard__rule, mcp__plugin_engineering-standard_standard__mode
 ---
 
 Consume **$ARGUMENTS** into the standard — the only way third-party agent content gets in (AGT-5). Work in the

@@ -1,7 +1,7 @@
 ---
 description: Daily scout — find new security tools, skills and standards changes, decide with the matrix, write proposals, report (never applies or commits without approval)
 argument-hint: "[optional: extra GitHub URLs to score today]"
-allowed-tools: WebSearch, WebFetch, Bash(node bin/scout.mjs:*), Bash(node bin/sources.mjs:*), Bash(node bin/consume.mjs fetch:*), Bash(node bin/consume.mjs classify:*), Bash(node bin/build-rules.mjs --check), Bash(node bin/similar.mjs --check), Bash(node bin/check-public.mjs), Bash(node plugin/test/run.mjs:*), Bash(semgrep --test semgrep/), Bash(git diff:*), Bash(git status), Bash(python3 -I bin/scout-mail.py send:*), Bash(python3 -I bin/scout-mail.py status), Write(proposals/sources/**), Write(local/scout/**), mcp__plugin_engineering-standard_standard__rules_for, mcp__plugin_engineering-standard_standard__rule, mcp__plugin_engineering-standard_standard__mode
+allowed-tools: WebSearch, WebFetch, Bash(node bin/scout.mjs:*), Bash(node bin/sources.mjs:*), Bash(node bin/consume.mjs fetch:*), Bash(node bin/consume.mjs classify:*), Bash(node bin/build-rules.mjs --check), Bash(node bin/similar.mjs --check), Bash(node bin/check-public.mjs), Bash(node plugin/test/run.mjs:*), Bash(semgrep --test semgrep/), Bash(git diff:*), Bash(git status), Bash(python3 -I bin/scout-mail.py send:*), Bash(python3 -I bin/scout-mail.py status), Edit(proposals/sources/**), Edit(local/scout/**), mcp__plugin_engineering-standard_standard__rules_for, mcp__plugin_engineering-standard_standard__rule, mcp__plugin_engineering-standard_standard__mode
 ---
 
 Run today's scout for the engineering standard (§7.5). Work in the engineering-standard repo, on a branch or worktree,

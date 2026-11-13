@@ -36,6 +36,8 @@ LIMIT_SECONDS="${SCOUT_LIMIT_SECONDS:-5400}"      # 90 minutes, then the run is 
 DENY="Read(./local/denylist.txt),Read(./local/sites.json),Read(./local/findings/**),Read(./.env),Read(./.env.*),Read(~/.ssh/**),Read(~/.config/**),Read(~/.aws/**),Read(~/.netrc),Read(~/.npmrc),Read(~/Library/**),Bash(git push:*),Bash(git commit:*),Bash(curl:*),Bash(python3:*)"
 TOKEN_SERVICE="engineering-standard-github"     # Keychain: a fine-grained, read-only, public-repos token for the scout
 # File tools refuse anything outside the worktree, in every permission mode (Claude Code ≥ 2.1.257; writes ≥ 2.1.314).
+# The run loads only the repo's own (reviewed) project settings — `--setting-sources project` — never your user or
+# local settings: a broad user-level allow (bare Edit / Write / Bash) would otherwise widen this agent past its list.
 SETTINGS='{"permissions":{"blockReadsOutsideWorkingDirectories":true,"blockWritesOutsideWorkingDirectories":true}}'
 MIN_CLAUDE="2.1.257"
 version_ge() { [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -n1)" = "$2" ]; }   # version_ge HAVE NEED
@@ -132,7 +134,7 @@ run() {
   local cmd="$WT/commands/scout.md" allowed prompt rc=0
   allowed="$(sed -n 's/^allowed-tools: //p' "$cmd")"
   prompt="$(awk 'f>=2{print} /^---$/{f++}' "$cmd" | sed 's/\$ARGUMENTS//g')"
-  prompt="You are running unattended on a schedule: ask nothing, make decisions within the policy, and stop at proposals. The wrapper saves the report, sends the email and commits; skip sending email yourself.
+  prompt="You are running unattended on a schedule: ask nothing, make decisions within the policy, and stop at proposals. The wrapper saves the report, sends the email and commits; skip sending email yourself. The plugin's MCP tools (rules_for, rule, mode) are not loaded in this run: look rules up in build/rules.json and ENGINEERING_STANDARD.md instead.
 
 $prompt"
   # bin/*.mjs send it only to api.github.com, for rate limits; the agent has no shell that could print it.
@@ -148,7 +150,7 @@ $prompt"
   if [ -n "$GITHUB_TOKEN" ]; then export GITHUB_TOKEN; else unset GITHUB_TOKEN; fi
   [ -n "$token_note" ] && echo "note: $token_note"
   ( cd "$WT" && perl -e 'alarm shift; exec @ARGV' "$LIMIT_SECONDS" \
-      claude -p "$prompt" --settings "$SETTINGS" --permission-mode dontAsk --allowedTools "$allowed" --disallowedTools "$DENY" --output-format text ) > "$out" 2>&1 || rc=$?
+      claude -p "$prompt" --setting-sources project --settings "$SETTINGS" --permission-mode dontAsk --allowedTools "$allowed" --disallowedTools "$DENY" --output-format text ) > "$out" 2>&1 || rc=$?
   echo "claude exit $rc (output: $out)"
 
   ( cd "$WT" && node bin/scout.mjs report > "$LOGDIR/$day.md" ) || true
@@ -177,7 +179,12 @@ $prompt"
 # Store a fine-grained GitHub token (public repositories, read-only, no other permissions) for the scout's API
 # calls, so the unattended run never carries your full gh login. The secret goes to `security` on stdin, not argv.
 set_token() {
-  local tok
+  # GitHub has no API for minting fine-grained tokens, so open its pre-filled form: no repository access and no
+  # permissions = read-only on public repos, which is all the scout needs. Expires after 366 days (the maximum).
+  local tok url="https://github.com/settings/personal-access-tokens/new?name=engineering-standard+scout&description=Daily+scout%3A+read-only+public+repo+metadata.+No+permissions.&expires_in=366"
+  echo "Create the token here (leave Repository access on 'Public repositories', grant no permissions):"
+  echo "  $url"
+  command -v open >/dev/null && open "$url"
   read -r -s -p "Fine-grained GitHub token (public repos, read-only): " tok; echo
   [ -n "$tok" ] || { echo "aborted: empty"; return 1; }
   [[ "$tok" =~ ^[A-Za-z0-9_]+$ ]] || { echo "aborted: that doesn't look like a GitHub token"; return 1; }

@@ -413,6 +413,9 @@ console.log('▸ scout (decision matrix)')
     && !/^allowed-tools:.*\b(Read|Grep|Glob)\s*,/m.test(readFileSync(join(ROOT, 'commands/scout.md'), 'utf8')))
   t('scheduled run never falls back to the gh login unless SCOUT_ALLOW_GH_TOKEN=1 (fail closed)',
     /\[ -z "\$GITHUB_TOKEN" \] && \[ "\$\{SCOUT_ALLOW_GH_TOKEN:-\}" = 1 \]; then\s*\n?\s*GITHUB_TOKEN="\$\(gh auth token/.test(jobs) && (jobs.match(/gh auth token/g) || []).length === 1 && /unset GITHUB_TOKEN/.test(jobs))
+  t('scheduled run loads only project settings (no inherited user-level Bash/Edit allows)', /claude -p "\$prompt" --setting-sources project /.test(jobs))
+  t('command allowed-tools scope file writes with Edit(path) — Write(path) rules match nothing in Claude Code',
+    ['scout', 'consume'].every((c) => { const fm = readFileSync(join(ROOT, `commands/${c}.md`), 'utf8').match(/^allowed-tools:.*$/m)[0]; return !/\bWrite\(/.test(fm) && /\bEdit\(proposals\/sources\/\*\*\)/.test(fm) }))
   t('Keychain writes never put the secret on argv', !/"-w",\s*secret/.test(readFileSync(join(ROOT, 'bin/scout-mail.py'), 'utf8')) && /security", "-i"/.test(readFileSync(join(ROOT, 'bin/scout-mail.py'), 'utf8')))
   const badTime = spawnSync('bash', [join(ROOT, 'bin/scout-jobs.sh'), 'start', '25:00'], { encoding: 'utf8' })
   t('scout-jobs.sh rejects a bad time before touching launchd', badTime.status === 1 && /HH:MM/.test(badTime.stdout), badTime.stdout + badTime.stderr)
