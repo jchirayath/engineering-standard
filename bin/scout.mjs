@@ -33,7 +33,7 @@ export const loadPolicy = () => readJSON(P('sources/scout-policy.json'))
 const LEDGER = () => P('sources/candidates.json')
 export const loadLedger = () => existsSync(LEDGER()) ? readJSON(LEDGER()) : { candidates: [], standards: {} }
 const saveLedger = (l) => { l.candidates.sort((a, b) => a.repo.localeCompare(b.repo)); writeJSON(LEDGER(), l) }
-const REPO = /^[\w.-]+\/[\w.-]+$/
+const REPO = /^(?!\.{1,2}\/)[\w.-]+\/(?!\.{1,2}$)[\w.-]+$/
 
 // ── the decision matrix (pure; tested offline) ───────────────────────────────────────────────────────────────
 export function licenceClass(spdx, policy) {
@@ -109,6 +109,7 @@ export function standardsDue(policy, ledger, now = today()) {
 
 // ── GitHub (network) ─────────────────────────────────────────────────────────────────────────────────────────
 async function ghRaw(path) {
+  if (String(path).split(/[/?]/).some((s) => s === '.' || s === '..' || /%2e/i.test(s))) throw new Error(`refusing API path with a dot segment: ${clean(path)}`)
   const res = await fetch(`https://api.github.com/${path}`, { signal: AbortSignal.timeout(20000), headers: { accept: 'application/vnd.github+json',
     'user-agent': 'engineering-standard-scout', ...(process.env.GITHUB_TOKEN ? { authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}) } })
   if (!res.ok) { const e = new Error(`GitHub ${res.status} for ${clean(path)}${res.status === 403 ? ' (rate limit? set GITHUB_TOKEN=$(gh auth token))' : ''}`); e.status = res.status; throw e }
@@ -120,7 +121,14 @@ async function countOf(path) {                                    // total items
   const last = (res.headers.get('link') || '').match(/[?&]page=(\d+)>; rel="last"/)
   return last ? Number(last[1]) : Array.isArray(body) ? body.length : 0
 }
-const toRepo = (s) => { const m = String(s).trim().replace(/\.git$/, '').match(/^(?:https?:\/\/github\.com\/)?([\w.-]+\/[\w.-]+)/); if (!m) throw new Error(`not a GitHub repo: ${clean(s)}`); return m[1] }
+// owner/repo segments: GitHub's own charset, never "." or ".." (an authenticated API path must not be steered to
+// another endpoint — the token is attached to every call).
+const SEG = /^(?!\.{1,2}$)[\w.-]{1,100}$/
+export const toRepo = (s) => {
+  const m = String(s).trim().replace(/\.git$/, '').match(/^(?:https?:\/\/github\.com\/)?([^/\s]+)\/([^/\s#?]+)/)
+  if (!m || !SEG.test(m[1]) || !SEG.test(m[2])) throw new Error(`not a GitHub repo: ${clean(s)}`)
+  return `${m[1]}/${m[2]}`
+}
 
 // GitHub says NOASSERTION when a standard licence file has an extra header or notice. Recognise the canonical
 // texts so a real Apache/MIT/BSD/GPL repo isn't rejected; anything else stays NOASSERTION (denied by G1).

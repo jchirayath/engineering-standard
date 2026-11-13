@@ -15,6 +15,7 @@
 #         bin/scout-jobs.sh status          is it loaded, when does it run, last log lines
 #         bin/scout-jobs.sh logs            follow the log (Ctrl-C to quit)
 #         bin/scout-jobs.sh run             run the scout now (what the LaunchAgent runs)
+#         bin/scout-jobs.sh set-token       store a read-only GitHub token for the run (else your gh token is used)
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -28,8 +29,16 @@ WT="$KIT/.claude/worktrees/scout-daily"
 BRANCH="scout/daily"
 DOMAIN="gui/$(id -u)"
 LIMIT_SECONDS="${SCOUT_LIMIT_SECONDS:-5400}"      # 90 minutes, then the run is killed and reported as failed
-# Private owner data the unattended agent must never read (it also reads untrusted web content: AGT-4).
-DENY="Read(./local/denylist.txt),Read(./local/sites.json),Read(./local/findings/**),Read(./.env),Read(./.env.*),Bash(git push:*),Bash(git commit:*),Bash(curl:*),Bash(python3:*)"   # the wrapper, not the agent, sends mail
+# The unattended agent reads untrusted web content and has WebFetch, so it must not reach anything private (AGT-4).
+# Reads outside the worktree already need approval, which --permission-mode dontAsk turns into a denial (commands/
+# scout.md grants no unscoped Read/Grep/Glob). The denies below are a backstop: owner data inside the worktree,
+# credential stores in $HOME, and the commands it must never run (the wrapper, not the agent, sends mail and commits).
+DENY="Read(./local/denylist.txt),Read(./local/sites.json),Read(./local/findings/**),Read(./.env),Read(./.env.*),Read(~/.ssh/**),Read(~/.config/**),Read(~/.aws/**),Read(~/.netrc),Read(~/.npmrc),Read(~/Library/**),Bash(git push:*),Bash(git commit:*),Bash(curl:*),Bash(python3:*)"
+TOKEN_SERVICE="engineering-standard-github"     # Keychain: a fine-grained, read-only, public-repos token for the scout
+# File tools refuse anything outside the worktree, in every permission mode (Claude Code ≥ 2.1.257; writes ≥ 2.1.314).
+SETTINGS='{"permissions":{"blockReadsOutsideWorkingDirectories":true,"blockWritesOutsideWorkingDirectories":true}}'
+MIN_CLAUDE="2.1.257"
+version_ge() { [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -n1)" = "$2" ]; }   # version_ge HAVE NEED
 
 loaded() { launchctl print "$DOMAIN/$LABEL" >/dev/null 2>&1; }
 
@@ -109,6 +118,16 @@ run() {
     mail "[engineering-standard] Scout $day: NOT RUN (merge conflict)" "$body"; return 1
   fi
 
+  # Fail closed: the unattended agent reads untrusted web content and has WebFetch, so the file tools must refuse
+  # reads outside the worktree (permissions.blockReadsOutsideWorkingDirectories, Claude Code ≥ MIN_CLAUDE). On an
+  # older Claude Code that setting is silently ignored, so the run does not start.
+  local ver; ver="$(claude --version 2>/dev/null | grep -oE '^[0-9]+\.[0-9]+\.[0-9]+' || echo 0.0.0)"
+  if ! version_ge "$ver" "$MIN_CLAUDE"; then
+    printf 'The daily scout did not run: Claude Code %s is older than %s, so it cannot keep the unattended agent from\nreading files outside its worktree (permissions.blockReadsOutsideWorkingDirectories).\nUpgrade Claude Code (e.g. brew upgrade claude-code), then: bin/scout-jobs.sh run\n' "$ver" "$MIN_CLAUDE" > "$body"
+    echo "not run: Claude Code $ver < $MIN_CLAUDE"
+    mail "[engineering-standard] Scout $day: NOT RUN (upgrade Claude Code)" "$body"; return 1
+  fi
+
   # The prompt is the scout command itself (independent of which plugin version is installed).
   local cmd="$WT/commands/scout.md" allowed prompt rc=0
   allowed="$(sed -n 's/^allowed-tools: //p' "$cmd")"
@@ -116,9 +135,14 @@ run() {
   prompt="You are running unattended on a schedule: ask nothing, make decisions within the policy, and stop at proposals. The wrapper saves the report, sends the email and commits; skip sending email yourself.
 
 $prompt"
-  export GITHUB_TOKEN; GITHUB_TOKEN="$(gh auth token 2>/dev/null || true)"   # read-only use by bin/*.mjs (rate limits)
+  # bin/*.mjs send it only to api.github.com, for rate limits; the agent has no shell that could print it.
+  export GITHUB_TOKEN; GITHUB_TOKEN="$(security find-generic-password -s "$TOKEN_SERVICE" -a token -w 2>/dev/null || true)"
+  if [ -z "$GITHUB_TOKEN" ]; then
+    echo "warning: no read-only scout token (bin/scout-jobs.sh set-token); falling back to your gh token"
+    GITHUB_TOKEN="$(gh auth token 2>/dev/null || true)"
+  fi
   ( cd "$WT" && perl -e 'alarm shift; exec @ARGV' "$LIMIT_SECONDS" \
-      claude -p "$prompt" --permission-mode dontAsk --allowedTools "$allowed" --disallowedTools "$DENY" --output-format text ) > "$out" 2>&1 || rc=$?
+      claude -p "$prompt" --settings "$SETTINGS" --permission-mode dontAsk --allowedTools "$allowed" --disallowedTools "$DENY" --output-format text ) > "$out" 2>&1 || rc=$?
   echo "claude exit $rc (output: $out)"
 
   ( cd "$WT" && node bin/scout.mjs report > "$LOGDIR/$day.md" ) || true
@@ -144,11 +168,23 @@ $prompt"
   echo "=== done $(date +%T)"
 }
 
+# Store a fine-grained GitHub token (public repositories, read-only, no other permissions) for the scout's API
+# calls, so the unattended run never carries your full gh login. The secret goes to `security` on stdin, not argv.
+set_token() {
+  local tok
+  read -r -s -p "Fine-grained GitHub token (public repos, read-only): " tok; echo
+  [ -n "$tok" ] || { echo "aborted: empty"; return 1; }
+  [[ "$tok" =~ ^[A-Za-z0-9_]+$ ]] || { echo "aborted: that doesn't look like a GitHub token"; return 1; }
+  printf 'add-generic-password -U -s "%s" -a token -l "engineering-standard scout github" -w "%s"\n' "$TOKEN_SERVICE" "$tok" | security -i >/dev/null
+  echo "saved in the Keychain ($TOKEN_SERVICE)"
+}
+
 case "${1:-}" in
+  set-token) set_token ;;
   start)  shift; start "$@" ;;
   stop)   stop ;;
   status) status ;;
   logs)   mkdir -p "$LOGDIR"; touch "$LOG"; tail -f "$LOG" ;;
   run)    run ;;
-  *)      sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *)      sed -n '2,21p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

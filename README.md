@@ -296,7 +296,11 @@ bin/scout-jobs.sh start 07:30               # LaunchAgent: daily run at 07:30 ·
 ```
 Each run updates the long-lived worktree `.claude/worktrees/scout-daily` (branch `scout/daily`) from
 `origin/main`, then runs the scout headless with `--permission-mode dontAsk`. Only the command's allowed tools
-are available; it can't read `local/` private files, `curl`, commit or push, and it has a 90-minute limit.
+are available. The file tools refuse anything outside the worktree (`blockReadsOutsideWorkingDirectories`), and
+the run **refuses to start on Claude Code older than 2.1.257**, which lacks that setting. It can't read the
+private `local/` files or your home credential stores, can't `curl`, commit or push, and has a 90-minute limit. Its
+GitHub API calls use a read-only token from the Keychain (`bin/scout-jobs.sh set-token`, a fine-grained token with
+public repositories and read-only access); without one, they fall back to your `gh` login, with a warning.
 Afterwards the wrapper saves `local/scout/<date>.md`, emails the summary when something changed (or a failure
 notice), and commits the ledger and proposals to the **local** `scout/daily` branch. Review and merge
 `scout/daily`; it is never pushed.

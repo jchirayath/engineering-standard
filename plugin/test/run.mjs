@@ -396,8 +396,22 @@ console.log('▸ scout (decision matrix)')
   const mq = S.mergeQueue([{ repo: 'a/old', found: '2026-09-01', stars: 9, hits: 1 }, { repo: 'b/kept', found: '2026-11-01', stars: 5, hits: 1 }],
     [{ repo: 'B/kept', found: now, stars: 6, hits: 2 }, { repo: 'c/scored', found: now, stars: 99, hits: 3 }, { repo: 'd/new', found: now, stars: 50, hits: 1 }], pol, new Set(['c/scored']), now)
   t('queue: overflow kept for tomorrow, expired + scored dropped, first-found date kept, best first', mq.map((q) => q.repo).join() === 'B/kept,d/new' && mq[0].found === '2026-11-01' && mq[0].hits === 2, JSON.stringify(mq))
+  const throws = (f) => { try { f(); return false } catch { return true } }
+  const { parseGitHub: pg } = await import(join(ROOT, 'bin/consume.mjs'))
+  t('API paths: "." / ".." segments refused in scout and consume (token rides on every call)',
+    S.toRepo('https://github.com/zizmorcore/zizmor') === 'zizmorcore/zizmor' && S.toRepo('owner/repo.js') === 'owner/repo.js'
+    && ['owner/..', '../user', 'https://github.com/./x', 'a/.'].every((u) => throws(() => S.toRepo(u)))
+    && pg('https://github.com/a/b/tree/main/skills/x').path === 'skills/x'
+    && ['https://github.com/a/../tree/main', 'https://github.com/a/b/tree/main/../../user', 'https://github.com/a/b/tree/%2e%2e/x'].every((u) => throws(() => pg(u))))
   const quiet = node(['bin/scout.mjs', 'report', '--email', '--if-changed'], { env: { ...cleanEnv, SCOUT_TODAY: '2030-01-01' } })
   t('report --email --if-changed: quiet day → exit 3, prints nothing (scheduler sends no mail)', quiet.status === 3 && quiet.stdout === '', `exit ${quiet.status}`)
+  const jobs = readFileSync(join(ROOT, 'bin/scout-jobs.sh'), 'utf8')
+  const gate = spawnSync('bash', ['-c', `${jobs.match(/^version_ge\(\).*$/m)[0]}\nfor v in 2.1.84 2.1.256 2.1.257 2.10.0 0.0.0; do version_ge $v 2.1.257 && echo "$v run" || echo "$v refuse"; done`], { encoding: 'utf8' })
+  t('scheduled run fails closed below Claude Code 2.1.257 (read boundary unsupported)', gate.stdout.trim().split('\n').join() === '2.1.84 refuse,2.1.256 refuse,2.1.257 run,2.10.0 run,0.0.0 refuse', gate.stdout + gate.stderr)
+  t('scheduled run: read/write boundary on, no unscoped Read/Grep/Glob, home credential stores denied',
+    /blockReadsOutsideWorkingDirectories":true/.test(jobs) && /--settings "\$SETTINGS"/.test(jobs) && /Read\(~\/\.config\/\*\*\)/.test(jobs) && /Read\(~\/\.ssh\/\*\*\)/.test(jobs)
+    && !/^allowed-tools:.*\b(Read|Grep|Glob)\s*,/m.test(readFileSync(join(ROOT, 'commands/scout.md'), 'utf8')))
+  t('Keychain writes never put the secret on argv', !/"-w",\s*secret/.test(readFileSync(join(ROOT, 'bin/scout-mail.py'), 'utf8')) && /security", "-i"/.test(readFileSync(join(ROOT, 'bin/scout-mail.py'), 'utf8')))
   const badTime = spawnSync('bash', [join(ROOT, 'bin/scout-jobs.sh'), 'start', '25:00'], { encoding: 'utf8' })
   t('scout-jobs.sh rejects a bad time before touching launchd', badTime.status === 1 && /HH:MM/.test(badTime.stdout), badTime.stdout + badTime.stderr)
   // ast.parse, not py_compile: py_compile writes bin/__pycache__/, which build-rules would then read

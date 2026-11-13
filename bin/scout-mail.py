@@ -42,7 +42,7 @@ def kc_get(account, service=SERVICE):
     return r.stdout.rstrip("\n") or None
 
 
-def kc_set(account, secret):
+def kc_set(account, secret, service=SERVICE):
     if not _keychain():
         CRED_FILE.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         try:
@@ -54,8 +54,14 @@ def kc_set(account, secret):
         with os.fdopen(fd, "w") as f:
             json.dump(d, f)
         return
-    subprocess.run(["security", "add-generic-password", "-s", SERVICE, "-a", account, "-w", secret, "-U",
-                    "-l", f"engineering-standard email {account}"], check=True, capture_output=True, text=True)
+    # The secret goes to `security -i` on stdin, never on argv (argv is visible to every local process via ps).
+    if any(c in secret for c in "\r\n\0"):
+        raise ValueError(f"{account}: line breaks are not allowed")
+    q = lambda s: '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    cmd = f"add-generic-password -U -s {q(service)} -a {q(account)} -l {q('engineering-standard email ' + account)} -w {q(secret)}\n"
+    r = subprocess.run(["security", "-i"], input=cmd, capture_output=True, text=True)
+    if r.returncode != 0 or "error" in (r.stderr + r.stdout).lower():
+        raise RuntimeError(f"Keychain write failed for {account}: {(r.stderr or r.stdout).strip()[:200]}")
 
 
 def kc_delete(account):

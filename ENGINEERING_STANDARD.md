@@ -1582,8 +1582,9 @@ adopting apps (they get the result through the plugin and `adopt.sh`).
   proposals only to the local `scout/daily` branch, for the owner to merge. When something changed (or a run
   failed), it emails the owner a summary of the changes and the decisions waiting for them.
 - **Run it:** `/engineering-standard:scout` by hand, or daily via `bin/scout-jobs.sh start` (a macOS LaunchAgent
-  that runs the scout headless with only the command's allowed tools, private `local/` files denied and a time
-  limit). Mail goes out through `bin/scout-mail.py`: SMTP settings from the Keychain, falling back to Mail.app;
+  that runs the scout headless with only the command's allowed tools, file tools fenced to the worktree, private
+  `local/` files and home credential stores denied, a read-only GitHub token and a time limit; it fails closed on a
+  Claude Code too old to fence reads, AGT-4). Mail goes out through `bin/scout-mail.py`: SMTP settings from the Keychain, falling back to Mail.app;
   nothing is stored in the repo. The mechanics are in `bin/scout.mjs`.
 
 ---

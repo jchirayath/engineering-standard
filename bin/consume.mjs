@@ -32,10 +32,13 @@ export function parseGitHub(url) {
   const m = String(url).trim().replace(/\.git$/, '').match(/^(?:https?:\/\/github\.com\/)?([\w.-]+)\/([\w.-]+)(?:\/(?:tree|blob)\/(.+?))?\/?$/)
   if (!m) throw new Error(`not a GitHub repo URL: ${clean(url)}`)
   const rest = m[3] || '', segs = rest ? rest.split('/') : []
+  // No "." / ".." segment anywhere: the token rides on every API call, so a path must not be steered elsewhere.
+  if ([m[1], m[2], ...segs].some((s) => s === '.' || s === '..' || /%2e|%2f/i.test(s))) throw new Error(`not a GitHub repo URL (dot segment): ${clean(url)}`)
   // ref vs path is ambiguous when a branch name contains '/' — fetch resolves it against GitHub (resolveRef).
   return { owner: m[1], repo: m[2], rest, ref: segs[0] || null, path: segs.slice(1).join('/') }
 }
 async function gh(path) {
+  if (String(path).split(/[/?]/).some((s) => s === '.' || s === '..')) throw new Error(`refusing API path with a dot segment: ${clean(path)}`)
   const res = await fetch(`https://api.github.com/${path}`, { signal: AbortSignal.timeout(20000), headers: { accept: 'application/vnd.github+json',
     'user-agent': 'engineering-standard-consume', ...(process.env.GITHUB_TOKEN ? { authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}) } })
   if (!res.ok) { const e = new Error(`GitHub ${res.status} for ${clean(path)}${res.status === 403 ? ' (rate limit? set GITHUB_TOKEN=$(gh auth token))' : ''}`); e.status = res.status; throw e }
