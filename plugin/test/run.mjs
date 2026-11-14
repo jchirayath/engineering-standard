@@ -496,11 +496,14 @@ console.log('▸ scout (decision matrix)')
     runFn.indexOf('PR_TOKEN_SERVICE') > runFn.indexOf('claude -p') && /password=%s\\n" "\$SCOUT_PR_TOKEN"/.test(jobs) && !/push[^\n]*\$PR_TOKEN/.test(jobs.replace(/SCOUT_PR_TOKEN="\$PR_TOKEN"/g, '')) && /^ghp\(\) \{ GH_TOKEN="\$PR_TOKEN" gh /m.test(jobs))
   t('merge from main: ledger merged by hunk (scout wins only real conflicts, must stay valid JSON), main\'s proposals, stops on anything else',
     /git merge-file --ours/.test(jobs) && /JSON\.parse/.test(jobs) && /proposals\/\*\) git -C "\$WT" checkout --theirs/.test(jobs) && /\*\) bad=1/.test(jobs) && /MERGE_HEAD/.test(jobs))
+  t('agent-changed code is reset to main before the wrapper runs anything from the scout checkout (and before the tool list is read)',
+    runFn.indexOf('restore_code "before the run"') < runFn.indexOf('allowed="$(sed') && runFn.indexOf('restore_code "after the agent"') > runFn.indexOf('claude -p')
+    && runFn.indexOf('restore_code "after the agent"') < runFn.indexOf('node bin/scout.mjs report') && /restored="\$\(restore_code "before publishing"\)"/.test(jobs))
   t('PR plumbing: pushes only scout/* to the https URL, binds only same-repo PRs, never pushes a failed apply or an unscanned PR text',
     /SCOUT_BRANCH='\^scout\//.test(jobs) && /push --quiet --force "https:\/\/github\.com\/\$2\.git" "HEAD:refs\/heads\/\$3"/.test(jobs) && /isCrossRepository \| not/.test(jobs)
     && /apply or its checks failed; not pushed/.test(jobs) && /public_ok "\$title" "\$bodyf"/.test(jobs) && /alarm shift; exec @ARGV' 300 node bin\/consume\.mjs apply/.test(jobs))
   const sh = spawnSync(existsSync('/bin/bash') ? '/bin/bash' : 'bash', [join(ROOT, 'plugin/test/scout-jobs.test.sh'), join(ROOT, 'bin/scout-jobs.sh')], { encoding: 'utf8', env: { ...cleanEnv, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' } })
-  t('scout-jobs.sh on real repos: slug parsing, merge policy, credential helper, bash 3.2 safety', sh.status === 0 && !/FAIL/.test(sh.stdout) && /slug https:\/\/gitlab\.com\/o\/r\.git -> NONE/.test(sh.stdout) && (sh.stdout.match(/^ok /gm) || []).length === 9, sh.stdout + sh.stderr)
+  t('scout-jobs.sh on real repos: slug parsing, merge policy, credential helper, bash 3.2 safety', sh.status === 0 && !/FAIL/.test(sh.stdout) && /slug https:\/\/gitlab\.com\/o\/r\.git -> NONE/.test(sh.stdout) && (sh.stdout.match(/^ok /gm) || []).length === 11, sh.stdout + sh.stderr)
   t('PR branches are scout/<kind>/<name> built from origin/main; nothing is pushed to main', /branch="scout\/\$2\/\$3"/.test(jobs) && !/push[^\n]*\b(origin main|HEAD:main)\b/.test(jobs) && /--base main/.test(jobs))
 }
 

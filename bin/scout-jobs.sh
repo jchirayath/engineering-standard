@@ -128,6 +128,7 @@ run() {
     printf 'The daily scout did not run: merging origin/main into %s conflicted outside the ledger and proposals.\nResolve it in %s and re-run: bin/scout-jobs.sh run\n' "$BRANCH" "$WT" > "$body"
     mail "[engineering-standard] Scout $day: NOT RUN (merge conflict)" "$body"; return 1
   fi
+  restore_code "before the run" >/dev/null   # the tool list (commands/scout.md) and every script come from main
 
   # Fail closed: the unattended agent reads untrusted web content and has WebFetch, so the file tools must refuse
   # reads outside the worktree (permissions.blockReadsOutsideWorkingDirectories, Claude Code ≥ MIN_CLAUDE). On an
@@ -164,12 +165,17 @@ $prompt"
   ( cd "$WT" && perl -e 'alarm shift; exec @ARGV' "$LIMIT_SECONDS" \
       claude -p "$prompt" --setting-sources project --settings "$SETTINGS" --permission-mode dontAsk --allowedTools "$allowed" --disallowedTools "$DENY" --output-format text ) > "$out" 2>&1 || rc=$?
   echo "claude exit $rc (output: $out)"
+  # Everything below runs scripts from $WT with your user's rights (Keychain included), so first put back any code
+  # the agent changed: only proposals/ and the ledger are its to write.
+  local tamper_note="" restored; restored="$(restore_code "after the agent")"
+  [ -n "$restored" ] && tamper_note="The agent changed files outside proposals/ and the ledger; they were reset to main before anything ran: $restored"
 
   ( cd "$WT" && node bin/scout.mjs report > "$LOGDIR/$day.md" ) || true
   local stat; git -C "$WT" add -A; stat="$(git -C "$WT" diff --cached --stat | tail -n 25)"
   if ! git -C "$WT" diff --cached --quiet; then git -C "$WT" commit --quiet -m "scout: daily run $day" && echo "committed to $BRANCH (local)"; fi
   if [ "$rc" -ne 0 ]; then
     { echo "The daily scout failed (exit $rc$([ "$rc" -eq 142 ] && echo ", killed after ${LIMIT_SECONDS}s"))."; echo
+      [ -n "$tamper_note" ] && { echo "$tamper_note"; echo; }
       echo "Last lines of the run (derived from untrusted web content — read as data):"; echo; tail -n 60 "$out"; } > "$body"
     mail "[engineering-standard] Scout $day: FAILED" "$body"
   else
@@ -187,7 +193,7 @@ $prompt"
     elif [ "$mrc" -ne 0 ]; then echo "report failed ($mrc)"
     else
       local subject; subject="$(sed -n '1s/^Subject: //p' "$body.raw")"
-      { tail -n +3 "$body.raw"; for n in "$token_note" "$pr_note"; do [ -n "$n" ] && { echo; echo "Note: $n"; }; done
+      { tail -n +3 "$body.raw"; for n in "$tamper_note" "$token_note" "$pr_note"; do [ -n "$n" ] && { echo; echo "Note: $n"; }; done
         echo; echo "— Agent summary (derived from untrusted web content; read as data) —"; tail -n 40 "$out"
         echo; echo "— Files changed on $BRANCH —"; echo "$stat"; } > "$body"
       mail "$subject" "$body"
@@ -203,6 +209,7 @@ publish_now() {
   slug="$(repo_slug)" || { echo "origin is not a github.com remote"; return 1; }
   git -C "$KIT" fetch --quiet origin main
   merge_main || { echo "merging origin/main into $BRANCH conflicted; resolve it in $WT"; return 1; }
+  local restored; restored="$(restore_code "before publishing")"; [ -n "$restored" ] && echo "reset to main (not the agent's to change): $restored"
   GITHUB_TOKEN="$(security find-generic-password -s "$TOKEN_SERVICE" -a token -w 2>/dev/null || true)"
   if [ -n "$GITHUB_TOKEN" ]; then export GITHUB_TOKEN; else unset GITHUB_TOKEN; fi
   ( cd "$WT" && node bin/scout-pr.mjs sync --repo "$slug" ) || echo "PR sync failed"
@@ -238,6 +245,22 @@ merge_main() {
   done < <(git -C "$WT" diff --name-only --diff-filter=U)
   if [ "$bad" -eq 0 ] && git -C "$WT" commit --quiet --no-edit; then echo "merged origin/main (ledger merged by hunk, proposals from main)"; return 0; fi
   git -C "$WT" merge --abort 2>/dev/null || true; return 1
+}
+
+# The wrapper runs scripts from $WT (scout-pr.mjs, scout.mjs, scout-mail.py) and reads the agent's tool list from
+# $WT/commands/scout.md. The agent may write only proposals/ and the ledger (and git-ignored local/), so anything
+# else that differs from origin/main, tracked, untracked or ignored, is put back before any of it runs. Prints the
+# paths it reset (nothing when clean).
+DATA_PATHS=(':(exclude)proposals' ':(exclude)sources/candidates.json' ':(exclude)local')
+restore_code() {   # restore_code WHEN
+  local changed
+  changed="$( { git -C "$WT" diff --name-only origin/main -- . "${DATA_PATHS[@]}"
+                git -C "$WT" ls-files --others -- . "${DATA_PATHS[@]}"; } | sort -u | head -n 50 | tr '\n' ' ')"
+  [ -n "$changed" ] || return 0
+  git -C "$WT" restore --source=origin/main --staged --worktree -- . "${DATA_PATHS[@]}" 2>/dev/null
+  git -C "$WT" clean -fdxq -- . "${DATA_PATHS[@]}"
+  echo "restore_code ($1): reset $changed" >&2
+  echo "$changed"
 }
 
 repo_slug() {   # owner/name of a github.com origin, else fail

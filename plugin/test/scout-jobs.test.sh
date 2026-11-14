@@ -40,6 +40,14 @@ merge_main; rc=$?
 check "merge_main refuses other conflicts" '[ $rc -ne 0 ]'
 check "and leaves no merge in progress" '! [ -f "$WT/.git/MERGE_HEAD" ]'
 
+# restore_code: code the agent changed (tracked, untracked or ignored) goes back to main; its data stays
+git -C "$WT" merge --abort 2>/dev/null; git -C "$WT" reset -q --hard origin/main
+mkdir -p "$WT/bin" "$WT/local/scout"; echo evil > "$WT/README.md"; echo 'run()' > "$WT/bin/evil.mjs"; echo x > "$WT/bin/cache.pyc"
+printf 'local/\n*.pyc\n' > "$WT/.git/info/exclude"; echo keep > "$WT/local/scout/report.md"; echo mine > "$WT/proposals/sources/new.md"
+reset="$(restore_code test 2>/dev/null)"
+check "restore_code resets tracked, untracked and ignored code" '! grep -q evil "$WT/README.md" && [ ! -e "$WT/bin/evil.mjs" ] && [ ! -e "$WT/bin/cache.pyc" ]'
+check "restore_code keeps proposals and local/ and reports what it reset" '[ -f "$WT/proposals/sources/new.md" ] && [ -f "$WT/local/scout/report.md" ] && echo "$reset" | grep -q "bin/evil.mjs" && [ -z "$(restore_code again 2>/dev/null)" ]'
+
 # credential helper: token comes from the environment, prints only for "get"
 PR_TOKEN=tok_123
 out="$(printf 'protocol=https\nhost=github.com\n\n' | SCOUT_PR_TOKEN="$PR_TOKEN" git -c credential.helper= -c 'credential.helper=!f() { test "$1" = get && printf "username=x-access-token\npassword=%s\n" "$SCOUT_PR_TOKEN"; }; f' credential fill 2>/dev/null)"
