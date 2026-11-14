@@ -41,13 +41,15 @@ export function safeMd(s, max = 4000) {
     .replace(/@(?=[A-Za-z0-9-])/g, '@​')               // every @-mention, even after a lone backtick
 }
 const RULE_ID = /^[A-Z]+-\d+$/
+// Plain URLs only: no Markdown/HTML metacharacters ([ ] ( ) ! @ < > quotes, backticks) that could forge a link or image.
+export const SAFE_URL = /^https:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9._~%/?#=&+:,-]*)?$/
 const multiline = (s, max) => String(s ?? '').split('\n').map((l) => safeMd(l, 2000)).join('\n').slice(0, max)
 const quote = (s, max = 3000) => multiline(s, max).split('\n').map((l) => `> ${l}`).join('\n')
 // {"watch": {id, name, cited, kind, group, url}}: add a standard to the scout's watch list. Validated, never trusted.
 export function watchOf(draft) {
   const w = draft.watch; if (!w || typeof w !== 'object') return null
   if (!/^[a-z0-9][a-z0-9-]{1,40}$/.test(w.id || '') || !['default', 'law', 'platform-policy'].includes(w.kind) || !['security', 'quality', 'platform', 'law'].includes(w.group)
-    || !/^https:\/\/[\w.-]+\/[^\s<>"'`]*$/.test(w.url || '') || !String(w.name || '').trim()) return null
+    || !SAFE_URL.test(w.url || '') || !String(w.name || '').trim()) return null
   return { id: w.id, name: clean(w.name, 80), cited: clean(w.cited || 'see REFERENCES.md', 80), kind: w.kind, group: w.group, url: w.url }
 }
 export const overlapsOf = (draft) => Object.entries(draft.acceptOverlaps && typeof draft.acceptOverlaps === 'object' ? draft.acceptOverlaps : {})
@@ -144,10 +146,10 @@ export function standardBody({ name, draft = {}, checks = [], policy }) {
     '### What changed upstream', '',
     `**${safeMd(std?.name || draft.standard || '–', 120)}**${std?.url ? ` (${std.url})` : ''}, noticed ${safeMd(draft.date || '–', 12)}.`, '',
     draft.summary ? quote(draft.summary) : '', '',
-    ...(Array.isArray(draft.sources) && draft.sources.length ? ['Sources:', ...draft.sources.filter((u) => /^https:\/\/[\w.-]+\/[^\s<>"'`]*$/.test(u)).map((u) => `- ${safeMd(u, 300)}`), ''] : []),
+    ...(Array.isArray(draft.sources) && draft.sources.length ? ['Sources:', ...draft.sources.filter((u) => SAFE_URL.test(u)).map((u) => `- ${safeMd(u, 300)}`), ''] : []),
     '### What changes in the standard', '',
     ...amendmentsOf(draft), '',
-    ...(watchOf(draft) ? [`**Adds to the scout's watch list** (and the README's "Built on" visual): ${safeMd(watchOf(draft).name, 80)} (${watchOf(draft).group}, cited ${safeMd(watchOf(draft).cited, 80)}) · ${watchOf(draft).url}`, ''] : []),
+    ...(watchOf(draft) ? [`**Adds to the scout's watch list** (and the README's "Built on" visual): ${safeMd(watchOf(draft).name, 80)} (${watchOf(draft).group}, cited ${safeMd(watchOf(draft).cited, 80)}) · ${safeMd(watchOf(draft).url, 300)}`, ''] : []),
     ...(overlapsOf(draft).length ? ['**Also records these rule pairs as reviewed, not duplicates** (the new wording shifts word weights in the overlap check):',
       ...overlapsOf(draft).map(([k, why]) => `- ${k.replace('~', ' and ')}: ${safeMd(why, 300)}`), ''] : []),
     '### Checks run on this branch', '', checksTable(checks), '',

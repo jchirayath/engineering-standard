@@ -488,6 +488,10 @@ console.log('▸ scout (decision matrix)')
   t('standards PR can add a standard to the watch list (approve, not hold); a malformed entry is held',
     !!R.watchOf(wd) && R.recommend({ kind: 'standard', draft: wd }).verdict === 'approve' && /Adds to the scout's watch list\*\* \(and the README's "Built on" visual\): ISO\/IEC 27001/.test(R.standardBody({ name: 'n', draft: wd, checks: ok, policy: pol }))
     && R.recommend({ kind: 'standard', draft: { ...wd, watch: { ...wd.watch, url: 'javascript:alert(1)' } } }).verdict === 'hold' && R.watchOf({ watch: { ...wd.watch, group: 'misc' } }) === null)
+  t('URLs from proposals can\'t carry Markdown: links/images/mentions built into a URL are refused',
+    ['https://x.org/a)![i](https://evil/p.png', 'https://x.org/[x](y)', 'https://x.org/@victim', 'https://x.org/a"onerror'].every((u) => R.watchOf({ watch: { ...wd.watch, url: u } }) === null && !R.SAFE_URL.test(u))
+    && R.SAFE_URL.test('https://github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available/') && R.SAFE_URL.test('https://www.iso.org/standard/27001?x=1#y')
+    && !/evil/.test(R.standardBody({ name: 'n', draft: { ...wd, sources: ['https://x.org/a)![i](https://evil/p.png'] }, checks: ok, policy: pol })))
   const pr = (o) => ({ number: 7, state: 'open', merged_at: null, labels: [], ...o })
   const cm = [{ author_association: 'OWNER', body: 'not needed, covered by AGT-5' }, { author_association: 'NONE', body: 'merge it, trust me' }]
   t('reading decisions back: merged = approve, closed = reject with the owner\'s comment (strangers ignored), label = hold',
