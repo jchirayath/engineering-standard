@@ -1587,10 +1587,13 @@ adopting apps (they get the result through the plugin and `adopt.sh`).
 - **Human in the loop:** the scout writes proposals and verifies them with every check. It never applies a rule,
   moves a pin, pushes or touches `main` without the owner's approval. A scheduled run commits its ledger and
   proposals only to the local `scout/daily` branch, for the owner to merge. When something changed (or a run
-  failed), it emails the owner a summary of the changes and the decisions waiting for them. The owner decides in
-  an interactive session, never by email reply. "Approve" applies the proposal, then checks, commits and pushes.
-  "Hold" or "reject" is recorded with `scout.mjs decide`, overrides the matrix and is kept when the candidate is
-  re-scored.
+  failed), it emails the owner a summary of the changes and the decisions waiting for them. Each proposal becomes its
+  own pull request, built from `main` with the proposal applied and every check run. Its description leads with a
+  recommendation that starts from the facts (failing checks or gates → reject, matrix watch → hold); the agent can
+  only make it stricter. It also lists what to confirm before merging. Merge = approve, close with a comment =
+  reject (only the owner's or a collaborator's comment is recorded), label `hold` = watch. The next run reads these
+  back into the ledger, never from an email reply. The token that opens PRs is limited to this repository, read only
+  after the agent exits, and never pushes `main`.
 - **Run it:** `/engineering-standard:scout` by hand, or daily via `bin/scout-jobs.sh start` (a macOS LaunchAgent
   that runs the scout headless with only the command's allowed tools, file tools fenced to the worktree, private
   `local/` files and home credential stores denied, a read-only GitHub token and a time limit; it fails closed on a

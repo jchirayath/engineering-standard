@@ -1,0 +1,19 @@
+{
+  "standard": "github-actions",
+  "date": "2026-11-14",
+  "title": "Pin transitive actions with workflow lockfiles",
+  "summary": "GitHub Actions workflow lockfiles are generally available since 2026-10-28 (Free, Team and Enterprise Cloud). `gh actions-lock` writes `.github/workflows/actions.lock`, which records commits for actions and their transitive dependencies, and the runner then runs those recorded commits. A verify mode checks the lockfile in CI without changing files, and admins can turn on a 'Require lockfile' policy. SEC-17's SHA pins cover only the `uses:` lines a workflow writes itself, so dependencies pulled in by those actions still run unpinned today. GitHub notes that a lockfile records what was reviewed; it doesn't make a dependency safe.",
+  "sources": [
+    "https://github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available/"
+  ],
+  "amendments": [
+    {
+      "id": "SEC-17",
+      "append": "Workflows are onboarded to an Actions lockfile (`.github/workflows/actions.lock`, written by `gh actions-lock`), so the actions' transitive dependencies run at recorded commits too. CI checks that the lockfile is current, and in client mode the 'Require lockfile' policy is on. A lockfile records what was reviewed; it doesn't make a dependency safe (SUP-1 still applies)."
+    }
+  ],
+  "recommendation": {
+    "verdict": "approve",
+    "why": "It closes the gap SEC-17 leaves open, unpinned transitive actions, with a generally available GitHub feature on every plan this standard targets. The risk is low: the CI check fails only when the lockfile is out of date, and the policy is client-mode only."
+  }
+}

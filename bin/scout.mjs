@@ -288,29 +288,40 @@ export function mergeQueue(queue = [], found = [], policy, scored = new Set(), n
     const prev = byRepo.get(k); byRepo.set(k, prev ? { ...q, found: prev.found, hits: Math.max(prev.hits || 1, q.hits || 1) } : q) }
   return [...byRepo.values()].sort((a, b) => (b.hits - a.hits) || (b.stars - a.stars)).slice(0, policy.discovery.queueMax ?? 40)
 }
-// Replying to the email does nothing (nothing reads the inbox): decisions are made in an interactive session.
+// Replying to the email does nothing (nothing reads the inbox). Each proposal is a pull request (bin/scout-pr.mjs);
+// without the PR token the owner decides in an interactive session instead.
 export const APPROVE_HOWTO = ['',
-  'HOW TO DECIDE (replying to this email does nothing). Open Claude Code in the engineering-standard folder and say:',
-  '  "approve <repo>"               → merges scout/daily, applies proposals/sources/<id>.md, runs every check, commits, pushes',
-  '  "approve the <standard> change" → amends the standard from the note above, same checks',
-  '  "hold <repo>" / "reject <repo>, because …" → recorded with scout.mjs decide; kept when re-scored',
-  'Not ready? Do nothing: proposals stay on the local scout/daily branch and each run carries them forward.']
+  'HOW TO DECIDE (replying to this email does nothing):',
+  '  Each proposal is a pull request with a recommendation and the full change. On GitHub (the mobile app works):',
+  '    merge = approve · close with a comment = reject (your comment is the reason) · label "hold" = watch.',
+  '  The next run records the decision. Not ready? Leave the PR open.',
+  '  No PR link above? PRs are off (bin/scout-jobs.sh set-pr-token). Decide in Claude Code in this folder instead:',
+  '    "approve <repo>", "approve the <standard> change", "hold <repo>" or "reject <repo>, because …" (scout.mjs decide).']
+const PR_STATES = new Set(['open', 'hold', 'merged', 'closed'])
+export function prLines(ledger) {
+  return Object.entries(ledger.prs || {}).filter(([, p]) => p.state === 'open' || p.state === 'hold')
+    .map(([k, p]) => `  - ${p.url} · ${k} · recommended: ${(p.recommendation || '?').toUpperCase()}${p.state === 'hold' ? ' (on hold)' : ''}${p.needsRebuild ? ' (conflicts with main; rebuilt next run)' : ''}`)
+}
 // Plain-text summary for the owner's inbox: only what changed today and what needs their decision.
 export function emailSummary(ledger, policy, d = today()) {
   const touched = ledger.candidates.filter((c) => c.lastScored === d || c.judged === d)
   const by = (o) => touched.filter((c) => c.outcome === o)
   const line = (c) => `  - ${c.repo} (${c.licence}${c.capped ? ', distil/reference only' : ''}) — ${c.total ?? '–'}/100${c.consumedAs ? ` → proposals/sources/${c.consumedAs}.md` : ''}: ${c.ownerOverride ? `OWNER ${c.ownerOverride.from} → ${c.ownerOverride.to}: ${c.ownerOverride.why} · ` : ''}${c.why || ''}`
   const std = Object.entries(ledger.standards || {}).filter(([, v]) => v.checked === d && !/^no change/i.test(v.note))
-  const decide = by('consume').length + std.length
-  const subject = `[engineering-standard] Scout ${d}: ${by('consume').length} to approve, ${by('watch').length} watching, ${by('reject').length} rejected${std.length ? `, ${std.length} standard update(s)` : ''}`
+  const prs = prLines(ledger)
+  const decided = Object.entries(ledger.prs || {}).filter(([, p]) => p.decided === d).map(([k, p]) => `  - ${k}: ${p.why}`)
+  const decide = by('consume').length + std.length + prs.length
+  const subject = `[engineering-standard] Scout ${d}: ${prs.length ? `${prs.length} PR(s) to decide, ` : ''}${by('consume').length} to approve, ${by('watch').length} watching, ${by('reject').length} rejected${std.length ? `, ${std.length} standard update(s)` : ''}`
   const body = [`Daily scout — ${d}`, '',
+    ...(prs.length ? [`Pull requests waiting for your decision (${prs.length}):`, ...prs, ''] : []),
+    ...(decided.length ? [`Your decisions recorded today (${decided.length}):`, ...decided, ''] : []),
     `Needs your approval (${by('consume').length}) — proposals written, nothing applied or committed:`, ...(by('consume').map(line).length ? by('consume').map(line) : ['  - none']), '',
     `Standards that changed (${std.length}):`, ...(std.length ? std.map(([k, v]) => `  - ${k}: ${v.note}`) : ['  - none']), '',
     `Watching (${by('watch').length}):`, ...(by('watch').map(line).length ? by('watch').map(line) : ['  - none']), '',
     `Rejected (${by('reject').length}):`, ...(by('reject').map(line).length ? by('reject').map(line) : ['  - none']), '',
     `Matrix: gates ${policy.gates.map((g) => g.id).join('/')} · weights ${policy.criteria.map((c) => `${c.id} ${c.weight}`).join(', ')} · consume ≥ ${policy.outcomes.find((o) => o.id === 'consume').min}.`,
     ...(decide ? APPROVE_HOWTO : ['Nothing needs a decision today.'])].join('\n')
-  return { subject, body, needsDecision: decide > 0, changed: touched.length + std.length > 0 }
+  return { subject, body, needsDecision: decide > 0, changed: touched.length + std.length + decided.length > 0 }
 }
 function reportCmd(flags = {}) {
   const policy = loadPolicy(), ledger = loadLedger(), d = today()
@@ -361,6 +372,11 @@ export function check(policy = loadPolicy(), ledger = loadLedger()) {
     if (!outs.has(c.outcome)) errors.push(`${at}: outcome must be one of ${[...outs].join('|')}`)
     if (c.outcome === 'reject' && !c.why) errors.push(`${at}: a rejection needs a why`)
     if (c.consumedAs && !existsSync(P('proposals/sources', `${c.consumedAs}.md`))) errors.push(`${at}: consumedAs ${c.consumedAs} has no proposals/sources/${c.consumedAs}.md`)
+  }
+  for (const [k, p] of Object.entries(ledger.prs || {})) {
+    if (!/^(source|standard):[a-z0-9][a-z0-9-]{0,80}$/.test(k)) errors.push(`candidates.json prs: bad key "${k}"`)
+    if (!PR_STATES.has(p.state)) errors.push(`candidates.json prs "${k}": state must be one of ${[...PR_STATES].join('|')}`)
+    if (!Number.isInteger(p.number) || !/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/pull\/\d+$/.test(p.url || '')) errors.push(`candidates.json prs "${k}": needs a PR number and URL`)
   }
   for (const id of Object.keys(ledger.standards || {})) if (!policy.standards.list.some((s) => s.id === id)) errors.push(`candidates.json: unknown standard "${id}"`)
   return errors

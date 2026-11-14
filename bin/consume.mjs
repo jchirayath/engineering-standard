@@ -249,6 +249,25 @@ function sectionEnd(lines, sec) {
   if (last < 0) throw new Error(`section §${sec} has no rule bullets to append after — give "after": "<ID>"`)
   return bulletEnd(lines, last)
 }
+// Append each amendment to its rule bullet (in place on `lines`), cited, and re-wrap the bullet. Also used by
+// bin/scout-pr.mjs for standards-change proposals. Returns the amended ids.
+export function amendLines(lines, amendments, cite) {
+  const amended = []
+  for (const a of amendments) {
+    if (!/^[A-Z]+-\d+$/.test(a.id || '') || !String(a.append || '').trim()) throw new Error(`amendment needs "id" (e.g. SEC-17) and "append" text`)
+    const b = findBullet(lines, a.id); if (b < 0) throw new Error(`amendment target ${a.id} not found`)
+    const already = score(terms(a.append), terms(lines.slice(b, bulletEnd(lines, b)).join(' ')))
+    if (already >= 0.8 && !a.force) throw new Error(`amendment to ${a.id} repeats what it already says (overlap ${already.toFixed(2)}) — drop it, or set "force": true with a reason`)
+    const e = bulletEnd(lines, b) - 1
+    const add = a.append.trim() + (cite ? ` ${cite}` : '')
+    let whole = lines.slice(b, e + 1).join(' ').replace(/\s+/g, ' ')
+    const enf = whole.lastIndexOf(' *Enforced by:*')                         // the enforcement note stays last
+    whole = enf > 0 ? `${whole.slice(0, enf)} ${add}${whole.slice(enf)}` : `${whole} ${add}`
+    lines.splice(b, e - b + 1, ...wrap(whole).split('\n'))                  // re-wrap the whole bullet
+    amended.push(a.id)
+  }
+  return amended
+}
 function applyCmd(id, { dryRun = false } = {}) {
   if (!existsSync(P('proposals/sources', `${id}.md`))) throw new Error(`missing proposals/sources/${id}.md — write the intake review first`)
   const draft = classifyCmd(id, { quiet: true })
@@ -269,6 +288,10 @@ function applyCmd(id, { dryRun = false } = {}) {
   if (!['reference', 'rejected'].includes(draft.disposition)) {
     for (const r of draft.newRules || []) {
       if (!/^[A-Z]+$/.test(r.prefix || '')) throw new Error(`new rule "${r.title}": prefix must be uppercase letters`)
+      // These reach a RegExp: a crafted value could backtrack for hours on an unattended run.
+      if (r.id && !/^[A-Z]+-\d+$/.test(r.id)) throw new Error(`new rule "${clean(r.title)}": id must look like SEC-4`)
+      if (r.after && !/^[A-Z]+-\d+$/.test(r.after)) throw new Error(`new rule "${clean(r.title)}": "after" must be a rule id like SEC-4`)
+      if (!r.after && !/^[0-9A-Za-z][0-9A-Za-z.]{0,10}$/.test(r.section || '')) throw new Error(`new rule "${clean(r.title)}": "section" must be like 2 or 7.5`)
       r.id ||= `${r.prefix}-${maxN(r.prefix) + 1 + added.filter((x) => x.startsWith(r.prefix + '-')).length}`
       if (findBullet(lines, r.id) >= 0) throw new Error(`${r.id} already exists`)
       const at = r.after ? (() => { const b = findBullet(lines, r.after); if (b < 0) throw new Error(`after: ${r.after} not found`); return bulletEnd(lines, b) })() : sectionEnd(lines, r.section)
@@ -276,16 +299,7 @@ function applyCmd(id, { dryRun = false } = {}) {
       lines.splice(at, 0, wrap(`- **${r.id} ${level}** **${r.title.replace(/\.$/, '')}.** ${r.text.trim()} ${cite}`))
       added.push(r.id)
     }
-    for (const a of draft.amendments || []) {
-      const b = findBullet(lines, a.id); if (b < 0) throw new Error(`amendment target ${a.id} not found`)
-      const already = score(terms(a.append), terms(lines.slice(b, bulletEnd(lines, b)).join(' ')))
-      if (already >= 0.8 && !a.force) throw new Error(`amendment to ${a.id} repeats what it already says (overlap ${already.toFixed(2)}) — drop it, or set "force": true with a reason`)
-      const e = bulletEnd(lines, b) - 1
-      lines[e] = lines[e] + ' ' + a.append.trim() + ` ${cite}`
-      const whole = lines.slice(b, e + 1).join(' ').replace(/\s+/g, ' ')         // re-wrap the whole bullet
-      lines.splice(b, e - b + 1, ...wrap(whole).split('\n'))
-      amended.push(a.id)
-    }
+    amended.push(...amendLines(lines, draft.amendments || [], cite))
   }
   const quickNew = (draft.newRules || []).filter((r) => r.mode === 'quick' && !modes.quick.prefixes.includes(r.prefix)).map((r) => r.id)
   const entry = { id, name, author: draft.author || inv.repo?.split('/')[0], repo: draft.repo || inv.repo, url: draft.url || inv.url,

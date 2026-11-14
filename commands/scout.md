@@ -1,7 +1,7 @@
 ---
 description: Daily scout — find new security tools, skills and standards changes, decide with the matrix, write proposals, report (never applies or commits without approval)
 argument-hint: "[optional: extra GitHub URLs to score today]"
-allowed-tools: WebSearch, WebFetch, Bash(node bin/scout.mjs:*), Bash(node bin/sources.mjs:*), Bash(node bin/consume.mjs fetch:*), Bash(node bin/consume.mjs classify:*), Bash(node bin/build-rules.mjs --check), Bash(node bin/similar.mjs --check), Bash(node bin/check-public.mjs), Bash(node plugin/test/run.mjs:*), Bash(semgrep --test semgrep/), Bash(git diff:*), Bash(git status), Bash(python3 -I bin/scout-mail.py send:*), Bash(python3 -I bin/scout-mail.py status), Edit(proposals/sources/**), Edit(local/scout/**), mcp__plugin_engineering-standard_standard__rules_for, mcp__plugin_engineering-standard_standard__rule, mcp__plugin_engineering-standard_standard__mode
+allowed-tools: WebSearch, WebFetch, Bash(node bin/scout.mjs:*), Bash(node bin/sources.mjs:*), Bash(node bin/consume.mjs fetch:*), Bash(node bin/consume.mjs classify:*), Bash(node bin/build-rules.mjs --check), Bash(node bin/similar.mjs --check), Bash(node bin/check-public.mjs), Bash(node plugin/test/run.mjs:*), Bash(semgrep --test semgrep/), Bash(git diff:*), Bash(git status), Bash(python3 -I bin/scout-mail.py send:*), Bash(python3 -I bin/scout-mail.py status), Edit(proposals/sources/**), Edit(proposals/standards/**), Edit(local/scout/**), mcp__plugin_engineering-standard_standard__rules_for, mcp__plugin_engineering-standard_standard__rule, mcp__plugin_engineering-standard_standard__mode
 ---
 
 Run today's scout for the engineering standard (§7.5). Work in the engineering-standard repo, on a branch or worktree,
@@ -32,9 +32,18 @@ Cheapest first: each step narrows what the next, more expensive step has to look
    through the proposal and classify steps, then `node bin/scout.mjs consumed <repo> --as <id>`. After the fetch,
    re-run `score` for that repo so C4 uses the real inventory (a hook-heavy repo can drop below 70; then record it
    as watch). **Stop before `apply`**: applying needs the owner's yes.
+   Add `"recommendation": {"verdict": "approve" | "hold" | "reject", "why": "<two plain sentences for the owner: what
+   an app using the standard gains, and the main risk>"}` to `proposals/sources/<id>.rules.json`. It opens the pull
+   request's description. The wrapper's own floor (failing checks or gates → reject, matrix watch → hold) always wins,
+   so a verdict only makes the recommendation stricter. End the intake review with a `**Not verified:**` paragraph
+   whenever something wasn't read or run; it becomes the PR's "confirm before you merge" checklist.
 7. **Standards.** For each standard that is due, check the official source for a newer version, a finalised draft,
    or a date taking effect within 90 days. Record the result: `node bin/scout.mjs standard <id> --note "<change + affected rule IDs, or 'no change'>"`.
-   Draft a rule amendment only when something actually changed, and then add it to the email as a decision for the owner.
+   Only when something actually changed and a rule must say more, write `proposals/standards/<id>-<date>.json`:
+   `{"standard": "<id>", "date": "<date>", "title": "<short imperative, e.g. Pin transitive actions with lockfiles>",
+   "summary": "<what changed upstream and why the rule needs it>", "sources": ["<official https URL>", …],
+   "amendments": [{"id": "<RULE-ID>", "append": "<the sentence(s) added to that rule>"}],
+   "recommendation": {"verdict": "…", "why": "…"}}`. It becomes its own pull request.
 8. **Verify.** Run every check: `node bin/scout.mjs --check`, `node bin/sources.mjs --check`, `node bin/build-rules.mjs --check`,
    `node bin/similar.mjs --check`, `node bin/check-public.mjs`, `node plugin/test/run.mjs --offline` and `semgrep --test semgrep/`.
    Record the real pass/fail counts. If a check fails, fix it or report it; never weaken a test (AGT-8).
@@ -48,5 +57,6 @@ Cheapest first: each step narrows what the next, more expensive step has to look
    `import-netinv`) and print the email instead. Never put secrets, tokens or anything from `local/` other than the
    report in the email. **On a scheduled run (`bin/scout-jobs.sh`) skip sending: the wrapper sends.**
 10. Show the owner the decisions waiting for approval. **Don't commit and don't apply**: the owner reviews the diff
-    and approves each `/consume apply`. (A scheduled run's wrapper commits the day's ledger and proposals to the
-    local `scout/daily` branch only. It never pushes or touches `main`.)
+    and approves each `/consume apply`. (On a scheduled run the wrapper, not you, commits to the local `scout/daily`
+    branch and opens one pull request per proposal with `bin/scout-pr.mjs`. The owner merges, closes or labels
+    `hold`. Nothing is ever pushed to `main`.)

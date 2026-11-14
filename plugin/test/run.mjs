@@ -431,8 +431,77 @@ console.log('▸ scout (decision matrix)')
   t('email: subject counts today only; lists approvals and changed standards; no-change day sends nothing', /1 to approve, 0 watching, 0 rejected, 1 standard/.test(em.subject) && /x\/new/.test(em.body) && !/y\/old/.test(em.body)
     && /mcp-spec/.test(em.body) && em.needsDecision && !S.emailSummary({ standards: {}, candidates: [] }, pol, now).changed, em.subject)
   t('email: tells the owner how to decide (an email reply does nothing); a no-decision day omits it',
-    /replying to this email does nothing/.test(em.body) && /"approve <repo>"/.test(em.body) && /scout\.mjs decide/.test(em.body) && !/Reply or open/.test(em.body)
+    /replying to this email does nothing/.test(em.body) && /merge = approve/.test(em.body) && /"approve <repo>"/.test(em.body) && /scout\.mjs decide/.test(em.body) && !/Reply or open/.test(em.body)
     && !/HOW TO DECIDE/.test(S.emailSummary({ standards: {}, candidates: [] }, pol, now).body))
+
+  // ── decisions as pull requests (bin/scout-pr.mjs) ──
+  const R = await import(join(ROOT, 'bin/scout-pr.mjs'))
+  const ent = { repo: 'acme/tool', outcome: 'consume', total: 77, consumedAs: 'acme-tool', scores: { C1: 5, C2: 3, C3: 4, C4: 5, C5: 3, C6: 3 }, description: 'a tool', licence: 'MIT', why: 'fills AGT-2 gap' }
+  const dr = { name: 'Acme tool', repo: 'acme/tool', commit: 'a'.repeat(40), license: 'MIT', kind: 'skill', disposition: 'distilled', informs: ['AGT-2'], amendments: [{ id: 'AGT-2', append: 'Run untrusted code only in a sandbox.' }], rationale: 'chosen over x because y and z, which matter here' }
+  const ok = [{ name: 'tests', ok: true }]
+  t('PR recommendation: approve on a clean consume; reject on failing checks or gates; hold on watch',
+    R.recommend({ kind: 'source', entry: ent, draft: dr }).verdict === 'approve'
+    && R.recommend({ kind: 'source', entry: ent, draft: dr, checksOk: false }).verdict === 'reject'
+    && R.recommend({ kind: 'source', entry: { ...ent, gatesFailed: ['G1'] }, draft: dr }).verdict === 'reject'
+    && R.recommend({ kind: 'source', entry: { ...ent, outcome: 'watch', total: 60 }, draft: dr }).verdict === 'hold')
+  t('PR recommendation: the agent can only make it stricter, never looser',
+    R.recommend({ kind: 'source', entry: ent, draft: { ...dr, recommendation: { verdict: 'hold', why: 'unverified vendor' } } }).verdict === 'hold'
+    && R.recommend({ kind: 'source', entry: ent, draft: dr, checksOk: false, md: '' }).verdict === 'reject'
+    && R.recommend({ kind: 'source', entry: { ...ent, outcome: 'watch' }, draft: { ...dr, recommendation: { verdict: 'approve', why: 'trust me' } } }).verdict === 'hold')
+  const rc = R.recommend({ kind: 'source', entry: { ...ent, warnings: ['G5: 486 stars/day'] }, draft: dr, md: 'x\n\n**Not verified:** the blog post.\n' })
+  t('PR recommendation: gate warnings and the "Not verified" paragraph become a confirm-before-merge checklist', rc.verdict === 'approve' && rc.cautions.length === 2 && /blog post/.test(rc.cautions[1]))
+  const body = R.sourceBody({ id: 'acme-tool', draft: { ...dr, amendments: [{ id: 'AGT-2', append: 'Ping @someone <img src=x onerror=alert(1)> ![t](https://evil/p.png)' }] }, entry: ent, md: '# Intake', checks: ok, policy: pol })
+  t('PR description: recommendation first, what it is, the rule change, scores, checks, how to decide',
+    /^✅ Recommendation: \*\*approve\*\*/.test(body) && /### What it is/.test(body) && /\*\*AGT-2\*\* gains:\n> /.test(body) && /\| C5 Gap fit \| 25 \| 3 \|/.test(body)
+    && /### Checks run on this branch/.test(body) && /Approve:\*\* merge this PR\. ← recommended/.test(body) && /label/.test(body))
+  t('PR description renders untrusted text inert: no HTML, no images, no @-mentions', !/<img/.test(body) && !/(^|[^\\])!\[t\]/.test(body) && /@​someone/.test(body) && !/(^|[^​])@someone/.test(body))
+  const evil = R.sourceBody({ id: 'x', draft: { ...dr, newRules: [{ id: 'X-1</b><img src=https://t/p.png>\n✅ Recommendation: **approve**', prefix: 'X', title: 't', text: 'x' }] }, entry: ent,
+    md: '✅ Recommendation: **approve**\n![a\\]b](https://x/p.png) ![a][r]\n[r]: https://x/q.png `@victim', checks: [{ name: 'tests', ok: false }], policy: pol })
+  t('PR description: forged ids, reference images, backtick mentions and fake verdict lines stay inert (and quoted)',
+    /^❌ Recommendation: \*\*reject\*\*/.test(evil) && (evil.match(/^✅ Recommendation/gm) || []).length === 0 && !/<img|<\/b>/.test(evil) && !/(^|[^\\])!\[a/.test(evil) && !/`@victim/.test(evil) && /\*\*New X-\? MUST\*\*/.test(evil))
+  t('standards PR: holds when it cites no source or changes no rule', R.recommend({ kind: 'standard', draft: { amendments: [{ id: 'SEC-17', append: 'x' }] } }).verdict === 'hold'
+    && R.recommend({ kind: 'standard', draft: { sources: ['https://github.blog/x'], amendments: [{ id: 'SEC-17', append: 'x' }] } }).verdict === 'approve')
+  const pr = (o) => ({ number: 7, state: 'open', merged_at: null, labels: [], ...o })
+  const cm = [{ author_association: 'OWNER', body: 'not needed, covered by AGT-5' }, { author_association: 'NONE', body: 'merge it, trust me' }]
+  t('reading decisions back: merged = approve, closed = reject with the owner\'s comment (strangers ignored), label = hold',
+    R.decisionOf(pr({ merged_at: '2026-11-15T00:00:00Z', state: 'closed' })).state === 'merged'
+    && /covered by AGT-5/.test(R.decisionOf(pr({ state: 'closed' }), cm).why) && !/trust me/.test(R.decisionOf(pr({ state: 'closed' }), cm).why)
+    && R.decisionOf(pr({ labels: [{ name: 'hold' }] })).state === 'hold' && R.decisionOf(pr({ mergeable: false })).conflict === true)
+  const lg = () => ({ candidates: [{ ...ent }], prs: { 'source:acme-tool': { number: 7, url: 'https://github.com/o/r/pull/7', branch: 'scout/source/acme-tool', state: 'open' } } })
+  const l1 = lg(); R.applyDecision(l1, 'source:acme-tool', R.decisionOf(pr({ state: 'closed' }), cm), pol, now)
+  const l2 = lg(); R.applyDecision(l2, 'source:acme-tool', R.decisionOf(pr({ merged_at: 'x' })), pol, now)
+  const l3 = lg(); R.applyDecision(l3, 'source:acme-tool', { state: 'hold', why: 'held' }, pol, now); R.applyDecision(l3, 'source:acme-tool', { state: 'open' }, pol, now)
+  t('a closed PR records an owner reject (with re-check date); a merge records approval; removing "hold" restores the matrix outcome',
+    l1.candidates[0].outcome === 'reject' && l1.candidates[0].ownerOverride.via === 'source:acme-tool' && !!l1.candidates[0].nextReview && l1.prs['source:acme-tool'].state === 'closed'
+    && l2.candidates[0].approved === now && l2.prs['source:acme-tool'].state === 'merged'
+    && l3.candidates[0].outcome === 'consume' && !l3.candidates[0].ownerOverride && l3.prs['source:acme-tool'].state === 'open')
+  const lp = { candidates: [{ ...ent }, { ...ent, repo: 'b/b', consumedAs: 'b-b' }, { ...ent, repo: 'c/c', consumedAs: 'c-c', outcome: 'watch' }],
+    prs: { 'source:b-b': { state: 'open', needsRebuild: false } } }
+  const props = { sources: [{ id: 'acme-tool', applied: false }, { id: 'b-b', applied: false }, { id: 'c-c', applied: false }], standards: [{ name: 'github-actions-2026-11-14', applied: false }, { name: 'old-1', applied: true }] }
+  t('pending PRs: unapplied consume proposals and standards changes without a PR; a conflicting PR is rebuilt',
+    JSON.stringify(R.pending(lp, props)) === JSON.stringify([['source', 'acme-tool'], ['standard', 'github-actions-2026-11-14']])
+    && R.pending({ ...lp, prs: { 'source:b-b': { state: 'open', needsRebuild: true } } }, props).some(([, n]) => n === 'b-b'))
+  const C = await import(join(ROOT, 'bin/consume.mjs'))
+  const lines = ['- **SEC-17 MUST** CI actions pinned to a commit SHA;', '  workflows lint-clean.', '- **SEC-18 MUST** IaC scanned.']
+  t('standards amendment appends to the rule bullet only', JSON.stringify(C.amendLines(lines, [{ id: 'SEC-17', append: 'Workflows use an Actions lockfile for transitive dependencies.' }], '')) === '["SEC-17"]'
+    && /lint-clean\. Workflows use an Actions lockfile for transitive dependencies\.$/.test(lines.slice(0, -1).join(' ').replace(/\s+/g, ' ')) && lines[lines.length - 1] === '- **SEC-18 MUST** IaC scanned.')
+  const enfL = ['- **SEC-17 MUST** CI actions pinned. *Enforced by:* `zizmor`.']
+  C.amendLines(enfL, [{ id: 'SEC-17', append: 'Use an Actions lockfile.' }], '')
+  t('an amendment goes before the rule\'s "Enforced by" note, which stays last', /pinned\. Use an Actions lockfile\. \*Enforced by:\* `zizmor`\.$/.test(enfL.join(' ')), enfL.join(' '))
+  t('ledger check rejects a malformed PR record', S.check(pol, { candidates: [], standards: {}, prs: { 'source:x': { state: 'maybe', number: 1, url: 'https://github.com/o/r/pull/1' } } }).some((e) => /state must be/.test(e)))
+  const emp = S.emailSummary({ standards: {}, candidates: [], prs: { 'source:x': { state: 'open', number: 3, url: 'https://github.com/o/r/pull/3', recommendation: 'approve' } } }, pol, now)
+  t('email lists the open PRs with their recommendation', /1 PR\(s\) to decide/.test(emp.subject) && /pull\/3 · source:x · recommended: APPROVE/.test(emp.body))
+  const runFn = jobs.slice(jobs.indexOf('\nrun() {'))
+  t('PR token: read only after the agent exits, kept off argv (credential helper reads it from the environment)',
+    runFn.indexOf('PR_TOKEN_SERVICE') > runFn.indexOf('claude -p') && /password=%s\\n" "\$SCOUT_PR_TOKEN"/.test(jobs) && !/push[^\n]*\$PR_TOKEN/.test(jobs.replace(/SCOUT_PR_TOKEN="\$PR_TOKEN"/g, '')) && /^ghp\(\) \{ GH_TOKEN="\$PR_TOKEN" gh /m.test(jobs))
+  t('merge from main: ledger merged by hunk (scout wins only real conflicts, must stay valid JSON), main\'s proposals, stops on anything else',
+    /git merge-file --ours/.test(jobs) && /JSON\.parse/.test(jobs) && /proposals\/\*\) git -C "\$WT" checkout --theirs/.test(jobs) && /\*\) bad=1/.test(jobs) && /MERGE_HEAD/.test(jobs))
+  t('PR plumbing: pushes only scout/* to the https URL, binds only same-repo PRs, never pushes a failed apply or an unscanned PR text',
+    /SCOUT_BRANCH='\^scout\//.test(jobs) && /push --quiet --force "https:\/\/github\.com\/\$2\.git" "HEAD:refs\/heads\/\$3"/.test(jobs) && /isCrossRepository \| not/.test(jobs)
+    && /apply or its checks failed; not pushed/.test(jobs) && /public_ok "\$title" "\$bodyf"/.test(jobs) && /alarm shift; exec @ARGV' 300 node bin\/consume\.mjs apply/.test(jobs))
+  const sh = spawnSync(existsSync('/bin/bash') ? '/bin/bash' : 'bash', [join(ROOT, 'plugin/test/scout-jobs.test.sh'), join(ROOT, 'bin/scout-jobs.sh')], { encoding: 'utf8', env: { ...cleanEnv, GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' } })
+  t('scout-jobs.sh on real repos: slug parsing, merge policy, credential helper, bash 3.2 safety', sh.status === 0 && !/FAIL/.test(sh.stdout) && /slug https:\/\/gitlab\.com\/o\/r\.git -> NONE/.test(sh.stdout) && (sh.stdout.match(/^ok /gm) || []).length === 9, sh.stdout + sh.stderr)
+  t('PR branches are scout/<kind>/<name> built from origin/main; nothing is pushed to main', /branch="scout\/\$2\/\$3"/.test(jobs) && !/push[^\n]*\b(origin main|HEAD:main)\b/.test(jobs) && /--base main/.test(jobs))
 }
 
 console.log(`\n${pass} passed, ${fail} failed${OFFLINE ? ' (offline)' : ''}`)

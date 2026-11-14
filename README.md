@@ -294,6 +294,8 @@ consuming, and keeps a record of every decision (standard §7.5). Run it daily, 
 python3 -I bin/scout-mail.py set            # once: SMTP settings into the Keychain (blank password = Mail.app)
                                             #   or: python3 -I bin/scout-mail.py import-netinv
 bin/scout-jobs.sh start 07:30               # LaunchAgent: daily run at 07:30 · stop | status | logs | run (now)
+bin/scout-jobs.sh set-token                 # read-only token for API calls (else unauthenticated, rate-limited)
+bin/scout-jobs.sh set-pr-token              # this repo only, Contents + Pull requests write: one PR per proposal
 ```
 Each run updates the long-lived worktree `.claude/worktrees/scout-daily` (branch `scout/daily`) from
 `origin/main`, then runs the scout headless with `--permission-mode dontAsk`. Only the command's allowed tools
@@ -302,21 +304,40 @@ the run **refuses to start on Claude Code older than 2.1.257**, which lacks that
 private `local/` files or your home credential stores, can't `curl`, commit or push, and has a 90-minute limit. Its
 GitHub API calls use a read-only token from the Keychain (`bin/scout-jobs.sh set-token`, a fine-grained token with
 public repositories and read-only access); without one the run is unauthenticated (rate-limited; the email says so). Your `gh` login is used only with `SCOUT_ALLOW_GH_TOKEN=1`.
-Afterwards the wrapper saves `local/scout/<date>.md`, emails the summary when something changed (or a failure
-notice), and commits the ledger and proposals to the **local** `scout/daily` branch. Review and merge
-`scout/daily`; it is never pushed.
+Afterwards the wrapper saves `local/scout/<date>.md` and commits the ledger and proposals to the local `scout/daily`
+branch. It then opens a pull request for each proposal (below) and emails the summary when something changed, or a
+failure notice. `scout/daily` itself is never pushed.
 
-**Approving what the scout proposes.** The email lists what needs your decision. Replying to it does nothing,
-because nothing reads the inbox. Decide in an interactive Claude Code session opened in this folder:
+**Approving what the scout proposes: pull requests.** Replying to the email does nothing, because nothing reads the
+inbox. Each proposal becomes its own pull request instead. The wrapper (never the agent) builds a fresh branch
+`scout/source/<id>` or `scout/standard/<name>` from `origin/main`, applies the proposal, runs every check and the
+self-tests, and opens the PR (labelled `scout`). Every PR description has the same structure:
 
-| You say | What happens |
+1. **The recommendation**: approve, hold or reject, with the reasons. It starts from the facts: failing checks or a
+   failed gate means reject, and a matrix "watch" means hold. The agent's own verdict can only make it stricter.
+2. **Before you merge, confirm**: gate warnings and anything the scout didn't read or run, as a checklist.
+3. **What it is**: the repo, licence, pinned commit and stars.
+4. **What changes in the standard**: each new rule or amendment quoted, and why this source was chosen over others.
+5. **Why it scored** what it did: the six criteria and the hard gates.
+6. **Checks run on this branch**, **how to decide**, and the full intake review.
+
+| You do on GitHub (the mobile app works) | The next run records |
 |---|---|
-| "approve `<repo>`" | `scout/daily` is merged and `node bin/consume.mjs apply <id>` writes the proposal into the standard. Every check and test runs, then the change is committed and pushed (CI runs). You get a confirmation email. |
-| "approve the `<standard>` change" | The standard is amended from the note in the email, with the same checks, commit and push. |
-| "hold `<repo>`" / "reject `<repo>`, because …" | `node bin/scout.mjs decide <repo> --outcome watch\|reject --why "…"` records your call. It overrides the matrix and is kept when the candidate is re-scored. |
-| nothing | The proposal stays on `scout/daily`. Each run merges `origin/main` into that branch, so it carries forward until you decide. |
+| **Merge** the PR | approved: the rule change is in `main`; the candidate is marked approved |
+| **Close** it with a comment | rejected, with your comment as the reason (only comments from you or collaborators count; the repo is public) |
+| Add the **`hold`** label | watch: re-checked after 30 days; remove the label to undo |
+| Nothing | the PR stays open; if it starts to conflict with `main`, the next run rebuilds it |
 
-Read the proposal first: `git show scout/daily:proposals/sources/<id>.md`.
+A second, rolling PR from `scout/ledger` carries only the records (`sources/candidates.json` and the intake reviews).
+It changes no rule, so merge it whenever convenient. The email lists the open PRs with their recommendations.
+
+Setup, once: `bin/scout-jobs.sh set-pr-token` opens GitHub's pre-filled form for a fine-grained token limited to this
+repository with Contents and Pull requests write access. It is stored in the Keychain and read only after the
+agent has exited, so the agent never sees it. It goes to `git push` through a credential helper (never argv) and to
+`gh`. Only `scout/*` branches are pushed; the scout never pushes to `main`. Without the token there are no PRs:
+decide in Claude Code instead ("approve `<repo>`", "approve the `<standard>` change", "hold `<repo>`",
+"reject `<repo>`, because …"), or with `node bin/scout.mjs decide`. Protect `main` (require the selftest check) so
+a red PR can't be merged by accident.
 
 | Step | Command | Cost |
 |---|---|---|
@@ -327,7 +348,8 @@ Read the proposal first: `git show scout/daily:proposals/sources/<id>.md`.
 | consume | `/engineering-standard:consume` up to the proposal → `node bin/scout.mjs consumed <repo> --as <id>` | full intake, top-ranked only |
 | standards | `node bin/scout.mjs standard <id> --note "…"` for each standard due a check | official pages |
 | report | `node bin/scout.mjs report` → `local/scout/<date>.md`; `--email` → the owner's summary when something changed | — |
-| owner decision | `node bin/scout.mjs decide <repo> --outcome watch\|reject --why "…"`, which overrides the matrix and is kept on re-score | — |
+| pull requests | the wrapper runs `bin/scout-pr.mjs` to build, check and open one PR per proposal, and `sync` to read merges, closes and `hold` labels back | GitHub API |
+| owner decision | merge, close or `hold` the PR; without PRs, `node bin/scout.mjs decide <repo> --outcome watch\|reject --why "…"` (overrides the matrix, kept on re-score) | — |
 
 Every decision is recorded in [`sources/candidates.json`](sources/candidates.json), so a run skips anything unchanged
 and not yet due. The matrix lives in [`sources/scout-policy.json`](sources/scout-policy.json); CI checks that the table
