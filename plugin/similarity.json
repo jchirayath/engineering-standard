@@ -13,6 +13,7 @@
     "PERF-6~PERF-27": "split by level: PERF-6 SHOULD (cache hygiene) points to PERF-27 MUST (no cross-tenant cache)",
     "PERF-16~THEME-12": "pointer: THEME-12 applies PERF-16's font limits to design skills in client mode",
     "COMPAT-4~THEME-1": "pointer: THEME-1 defers the Tailwind output format to COMPAT-4",
-    "OPS-3~REL-5": "split by cadence: OPS-3 quarterly restore test, REL-5 twice-yearly full DR rehearsal"
+    "OPS-3~REL-5": "split by cadence: OPS-3 quarterly restore test, REL-5 twice-yearly full DR rehearsal",
+    "SLOG-2~SLOG-4": "different duties: SLOG-2 says which security events are logged, SLOG-4 says errors in security checks deny the request (fail closed); they share only the words authentication, authorization, validation"
   }
 }

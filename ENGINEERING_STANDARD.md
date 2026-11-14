@@ -168,10 +168,14 @@ versioned package, not a copy. Copies drift; drift becomes CVEs.
 - **SEC-16 MUST** Container base images are pinned by digest and run as non-root; images are scanned (`trivy
   image`). In client mode an SBOM is also generated per release (`syft`, CFG-3).
 - **SEC-17 MUST** CI actions pinned to a commit SHA; workflows lint-clean under `zizmor`; least-privilege
-  `permissions:` block; no secrets exposed to PR builds from forks. **`pull_request_target`:** public repos keep
-  GitHub's default block (from 2026-12-02). A workflow that needs the trigger is allowed by name in an Actions
-  event policy, never repo-wide. It never checks out or runs the PR's head code, runs with read-only `permissions:`
-  and no secrets, and treats PR text as untrusted (AGT-6). *Enforced by:* `zizmor` `dangerous-triggers`.
+  `permissions:` block; no secrets exposed to PR builds from forks. **`pull_request_target`:** public repos
+  keep GitHub's default block (from 2026-12-02). A workflow that needs the trigger is allowed by name in an
+  Actions event policy, never repo-wide. It never checks out or runs the PR's head code, runs with read-only
+  `permissions:` and no secrets, and treats PR text as untrusted (AGT-6). Workflows are onboarded to an
+  Actions lockfile (`.github/workflows/actions.lock`, written by `gh actions-lock`), so the actions'
+  transitive dependencies run at recorded commits too. CI checks that the lockfile is current, and in client
+  mode the 'Require lockfile' policy is on. A lockfile records what was reviewed; it doesn't make a
+  dependency safe (SUP-1 still applies). *Enforced by:* `zizmor` `dangerous-triggers`.
 - **SEC-18 MUST** IaC scanned (`trivy config` / `checkov`): no public buckets, no `*` IAM, no open
   management ports, no default credentials.
 
