@@ -1,0 +1,35 @@
+{
+  "name": "Cloudflare security-audit skill",
+  "author": "Cloudflare",
+  "kind": "skill",
+  "disposition": "distilled",
+  "version": "main",
+  "repo": "cloudflare/security-audit-skill",
+  "url": "https://github.com/cloudflare/security-audit-skill",
+  "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+  "license": "MIT",
+  "paths": [
+    "README.md",
+    "skills/security-audit/SKILL.md",
+    "skills/security-audit/VALIDATION-AND-REPORTING.md",
+    "skills/security-audit/HUNTING.md"
+  ],
+  "informs": [
+    "AGT-2",
+    "AGT-13"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-2",
+      "append": "An agent reviewing or auditing code it didn't write runs that code (builds, tests, fixtures, proofs of concept) only inside such a sandbox with **no** network (loopback only), an empty environment filled from an allow-list with dummy secrets, a read-only target and resource limits; it never probes deployed endpoints, shared services or production identities. When the sandbox can't give all of these, it doesn't run the code and records the finding as unconfirmed (AGT-13)."
+    },
+    {
+      "id": "AGT-13",
+      "append": "A security finding names the lower-trust actor, the input, the control it defeats, the crossed trust boundary and the concrete result; a checklist deviation or defence-in-depth advice with no reachable boundary violation is not a finding. Only confirmed findings get a severity, and a scoped or partial review says what it did not cover rather than implying the rest is clean."
+    }
+  ],
+  "notes": "Not installed by the scout; fetched as data at c1c8a8c. Prompt-only skill (15 Markdown files) plus two Node validators (validate-findings.cjs, validate-coverage-ledger.cjs) with .test.cjs files a test runner would pick up if the repo were cloned and tested. No hooks, no install scripts, no network hosts in code. The skill's full-audit mode writes to ~/security-audit-skill/<repo>/run-N outside the target and starts many parallel sub-agents (cost; AGT-7 tool lists apply). Provenance: the repo is in the cloudflare GitHub org (trusted vendor); 72.5k stars in about 5 months (486/day, vendor-exempt from G5) with 3 contributors and no push since 2026-09-14; secondary write-ups and the README's link to Cloudflare's blog agree it is Cloudflare's. Pinned to a commit: the repo has no releases.",
+  "rationale": "Distilled, not installed. APP_REVIEW already has concrete-case findings, INCOMPLETE and adversarial verification (from ponytail), so most of the method overlaps. Two ideas are new: a security finding needs a crossed trust boundary and a concrete result (AGT-13), and a reviewer runs code it didn't write only in a no-network, empty-environment sandbox and never probes live systems (AGT-2). APP_REVIEW's instruction to run archetype H/I findings currently has no such fence.",
+  "newRules": [],
+  "applied": "2026-11-14"
+}

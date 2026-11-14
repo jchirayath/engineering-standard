@@ -473,7 +473,12 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   processes with no built-in sandbox, including headless runners (AGT-6), other agent CLIs and local stdio
   MCP servers, run inside an OS-level sandbox with the same rules: a network allow-list, credential paths
   denied, and failing closed. For example, use `srt` from a pinned `@anthropic-ai/sandbox-runtime` release;
-  the sandboxed command is pinned too (AGT-5). *(source: sandbox-runtime (srt))*
+  the sandboxed command is pinned too (AGT-5). *(source: sandbox-runtime (srt))* An agent reviewing or
+  auditing code it didn't write runs that code (builds, tests, fixtures, proofs of concept) only inside such
+  a sandbox with **no** network (loopback only), an empty environment filled from an allow-list with dummy
+  secrets, a read-only target and resource limits; it never probes deployed endpoints, shared services or
+  production identities. When the sandbox can't give all of these, it doesn't run the code and records the
+  finding as unconfirmed (AGT-13). *(source: Cloudflare security-audit skill)*
 - **AGT-3 MUST** Permission-bypass modes (`--dangerously-skip-permissions`, bypass/auto-approve modes)
   run only inside a disposable container or VM that holds **no production credentials**. A machine or
   session that can reach production keeps AGT-1's `disableBypassPermissionsMode`. **Auto mode** (a classifier
@@ -575,7 +580,11 @@ rule cites its source; this standard wins over any of them):
   `tools/standard/check.sh`, the build. "Should", "probably" and "seems to" never describe verification
   state. Every final report ends with what was **not** run or verified. An agent reviewing another agent's
   work checks the diff itself; it re-runs the tests when it has a shell, and a read-only reviewer (AGT-7)
-  says "tests not re-run" instead of trusting the report. *(sources: superpowers, caveman)*
+  says "tests not re-run" instead of trusting the report. *(sources: superpowers, caveman)* A security
+  finding names the lower-trust actor, the input, the control it defeats, the crossed trust boundary and the
+  concrete result; a checklist deviation or defence-in-depth advice with no reachable boundary violation is
+  not a finding. Only confirmed findings get a severity, and a scoped or partial review says what it did not
+  cover rather than implying the rest is clean. *(source: Cloudflare security-audit skill)*
 - **AGT-14 MUST** **Debug from the root cause:** reproduce, find the cause, then fix it once at its source —
   the shared module when the cause is there (grep every caller first) — with a test proven per TEST-15.
   After three failed fixes the agent stops patching and raises the design question with the owner (headless:

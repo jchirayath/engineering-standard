@@ -413,6 +413,31 @@
         "AGT-13"
       ],
       "notes": "Not installed by the scout. The CLI turns LLM review on by default and sends file contents to the configured provider (hosted APIs or agent CLIs), so --no-llm is mandatory under AGT-4. Even with --no-llm the SC4 check sends dependency names and versions to api.osv.dev (public data). --inspect-dependencies downloads npm tarballs. The optional MCP server (`skillspector mcp`) and the bundled skill-inspector skill are not loaded. The skill-inspector skill itself already defaults to --no-llm. 263 of 581 files were not read by the fetch (200-file limit). Owner decision 2026-11-13: Cisco stays the default intake scanner (PyPI-pinned, verified against its tag, no network in the static core). SkillSpector is an alternative until a side-by-side run on the same fixtures, which has not been done yet."
+    },
+    {
+      "id": "cloudflare-security-audit",
+      "name": "Cloudflare security-audit skill",
+      "author": "Cloudflare",
+      "repo": "cloudflare/security-audit-skill",
+      "url": "https://github.com/cloudflare/security-audit-skill",
+      "commit": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+      "version": "main",
+      "reviewed": "2026-11-14",
+      "license": "MIT",
+      "kind": "skill",
+      "disposition": "distilled",
+      "rationale": "Distilled, not installed. APP_REVIEW already has concrete-case findings, INCOMPLETE and adversarial verification (from ponytail), so most of the method overlaps. Two ideas are new: a security finding needs a crossed trust boundary and a concrete result (AGT-13), and a reviewer runs code it didn't write only in a no-network, empty-environment sandbox and never probes live systems (AGT-2). APP_REVIEW's instruction to run archetype H/I findings currently has no such fence.",
+      "paths": [
+        "README.md",
+        "skills/security-audit/SKILL.md",
+        "skills/security-audit/VALIDATION-AND-REPORTING.md",
+        "skills/security-audit/HUNTING.md"
+      ],
+      "informs": [
+        "AGT-2",
+        "AGT-13"
+      ],
+      "notes": "Not installed by the scout; fetched as data at c1c8a8c. Prompt-only skill (15 Markdown files) plus two Node validators (validate-findings.cjs, validate-coverage-ledger.cjs) with .test.cjs files a test runner would pick up if the repo were cloned and tested. No hooks, no install scripts, no network hosts in code. The skill's full-audit mode writes to ~/security-audit-skill/<repo>/run-N outside the target and starts many parallel sub-agents (cost; AGT-7 tool lists apply). Provenance: the repo is in the cloudflare GitHub org (trusted vendor); 72.5k stars in about 5 months (486/day, vendor-exempt from G5) with 3 contributors and no push since 2026-09-14; secondary write-ups and the README's link to Cloudflare's blog agree it is Cloudflare's. Pinned to a commit: the repo has no releases."
     }
   ]
 }
