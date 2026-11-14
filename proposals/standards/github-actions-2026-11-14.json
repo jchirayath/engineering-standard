@@ -18,5 +18,6 @@
   },
   "acceptOverlaps": {
     "SLOG-2~SLOG-4": "different duties: SLOG-2 says which security events are logged, SLOG-4 says errors in security checks deny the request (fail closed); they share only the words authentication, authorization, validation"
-  }
+  },
+  "applied": "2026-11-14"
 }
