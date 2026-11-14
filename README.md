@@ -278,6 +278,7 @@ pinned source is re-reviewed before its pin moves. `node bin/sources.mjs --check
 | [sandbox-runtime (srt)](https://github.com/anthropics/sandbox-runtime) | distilled | AGT-2 |
 | [Cisco AI Defense skill-scanner](https://github.com/cisco-ai-defense/skill-scanner) | distilled | AGT-5 |
 | [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) | distilled | AGT-5, AGT-13 |
+| [Cloudflare security-audit skill](https://github.com/cloudflare/security-audit-skill) | distilled | AGT-2, AGT-13 |
 <!-- sources-readme:end -->
 
 ## Daily scout — keeping the standard current
