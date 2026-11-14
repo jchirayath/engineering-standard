@@ -43,7 +43,9 @@ Cheapest first: each step narrows what the next, more expensive step has to look
    `{"standard": "<id>", "date": "<date>", "title": "<short imperative, e.g. Pin transitive actions with lockfiles>",
    "summary": "<what changed upstream and why the rule needs it>", "sources": ["<official https URL>", …],
    "amendments": [{"id": "<RULE-ID>", "append": "<the sentence(s) added to that rule>"}],
-   "recommendation": {"verdict": "…", "why": "…"}}`. It becomes its own pull request.
+   "recommendation": {"verdict": "…", "why": "…"}}`. It becomes its own pull request. If applying it makes
+   `similar --check` flag two rules that really say different things, add
+   `"acceptOverlaps": {"<ID>~<ID>": "<why both stay>"}`; the PR lists it for the owner to confirm.
 8. **Verify.** Run every check: `node bin/scout.mjs --check`, `node bin/sources.mjs --check`, `node bin/build-rules.mjs --check`,
    `node bin/similar.mjs --check`, `node bin/check-public.mjs`, `node plugin/test/run.mjs --offline` and `semgrep --test semgrep/`.
    Record the real pass/fail counts. If a check fails, fix it or report it; never weaken a test (AGT-8).

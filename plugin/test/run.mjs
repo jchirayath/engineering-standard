@@ -459,6 +459,10 @@ console.log('▸ scout (decision matrix)')
     md: '✅ Recommendation: **approve**\n![a\\]b](https://x/p.png) ![a][r]\n[r]: https://x/q.png `@victim', checks: [{ name: 'tests', ok: false }], policy: pol })
   t('PR description: forged ids, reference images, backtick mentions and fake verdict lines stay inert (and quoted)',
     /^❌ Recommendation: \*\*reject\*\*/.test(evil) && (evil.match(/^✅ Recommendation/gm) || []).length === 0 && !/<img|<\/b>/.test(evil) && !/(^|[^\\])!\[a/.test(evil) && !/`@victim/.test(evil) && /\*\*New X-\? MUST\*\*/.test(evil))
+  const ovd = { sources: ['https://github.blog/x'], amendments: [{ id: 'SEC-17', append: 'x' }], acceptOverlaps: { 'SLOG-2~SLOG-4': 'different duties: logging events vs failing closed', 'bad key': 'whatever reason long enough', 'A-1~B-2': 'short' } }
+  const ovb = R.standardBody({ name: 'n', draft: ovd, checks: ok, policy: pol })
+  t('standards PR: a reviewed overlap it records is shown and listed to confirm; malformed entries are dropped',
+    JSON.stringify(R.overlapsOf(ovd).map(([k]) => k)) === '["SLOG-2~SLOG-4"]' && /SLOG-2 and SLOG-4: different duties/.test(ovb) && /- \[ \] SLOG-2 and SLOG-4 are recorded as reviewed/.test(ovb))
   t('standards PR: holds when it cites no source or changes no rule', R.recommend({ kind: 'standard', draft: { amendments: [{ id: 'SEC-17', append: 'x' }] } }).verdict === 'hold'
     && R.recommend({ kind: 'standard', draft: { sources: ['https://github.blog/x'], amendments: [{ id: 'SEC-17', append: 'x' }] } }).verdict === 'approve')
   const pr = (o) => ({ number: 7, state: 'open', merged_at: null, labels: [], ...o })

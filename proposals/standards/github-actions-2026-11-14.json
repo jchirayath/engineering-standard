@@ -15,5 +15,8 @@
   "recommendation": {
     "verdict": "approve",
     "why": "It closes the gap SEC-17 leaves open, unpinned transitive actions, with a generally available GitHub feature on every plan this standard targets. The risk is low: the CI check fails only when the lockfile is out of date, and the policy is client-mode only."
+  },
+  "acceptOverlaps": {
+    "SLOG-2~SLOG-4": "different duties: SLOG-2 says which security events are logged, SLOG-4 says errors in security checks deny the request (fail closed); they share only the words authentication, authorization, validation"
   }
 }
