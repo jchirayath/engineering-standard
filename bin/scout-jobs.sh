@@ -111,7 +111,7 @@ status() {
 }
 
 mail() {   # mail SUBJECT BODYFILE: never fails the run
-  python3 -I "$WT/bin/scout-mail.py" send --subject "$1" --body-file "$2" || echo "email failed (see above)"
+  python3 -I "$HERE/scout-mail.py" send --subject "$1" --body-file "$2" || echo "email failed (see above)"
 }
 
 run() {
@@ -128,7 +128,10 @@ run() {
     printf 'The daily scout did not run: merging origin/main into %s conflicted outside the ledger and proposals.\nResolve it in %s and re-run: bin/scout-jobs.sh run\n' "$BRANCH" "$WT" > "$body"
     mail "[engineering-standard] Scout $day: NOT RUN (merge conflict)" "$body"; return 1
   fi
-  restore_code "before the run" >/dev/null   # the tool list (commands/scout.md) and every script come from main
+  if ! restore_code "before the run" >/dev/null; then   # the tool list (commands/scout.md) and every script come from main
+    printf 'The daily scout did not run: code in %s differs from main and could not be reset (see %s).\nNothing from it was run.\n' "$WT" "$LOG" > "$body"
+    mail "[engineering-standard] Scout $day: NOT RUN (code reset failed)" "$body"; return 1
+  fi
 
   # Fail closed: the unattended agent reads untrusted web content and has WebFetch, so the file tools must refuse
   # reads outside the worktree (permissions.blockReadsOutsideWorkingDirectories, Claude Code ≥ MIN_CLAUDE). On an
@@ -167,7 +170,12 @@ $prompt"
   echo "claude exit $rc (output: $out)"
   # Everything below runs scripts from $WT with your user's rights (Keychain included), so first put back any code
   # the agent changed: only proposals/ and the ledger are its to write.
-  local tamper_note="" restored; restored="$(restore_code "after the agent")"
+  local tamper_note="" restored
+  if ! restored="$(restore_code "after the agent")"; then
+    { echo "The daily scout stopped after the agent: files outside proposals/ and the ledger changed and could not be reset to main."
+      echo "Nothing from $WT was run or committed. Inspect it before the next run (see $LOG)."; } > "$body"
+    mail "[engineering-standard] Scout $day: STOPPED (agent changed code)" "$body"; return 1
+  fi
   [ -n "$restored" ] && tamper_note="The agent changed files outside proposals/ and the ledger; they were reset to main before anything ran: $restored"
 
   ( cd "$WT" && node bin/scout.mjs report > "$LOGDIR/$day.md" ) || true
@@ -209,7 +217,8 @@ publish_now() {
   slug="$(repo_slug)" || { echo "origin is not a github.com remote"; return 1; }
   git -C "$KIT" fetch --quiet origin main
   merge_main || { echo "merging origin/main into $BRANCH conflicted; resolve it in $WT"; return 1; }
-  local restored; restored="$(restore_code "before publishing")"; [ -n "$restored" ] && echo "reset to main (not the agent's to change): $restored"
+  local restored; restored="$(restore_code "before publishing")" || { echo "code in $WT could not be reset to main; not publishing"; return 1; }
+  [ -n "$restored" ] && echo "reset to main (not the agent's to change): $restored"
   GITHUB_TOKEN="$(security find-generic-password -s "$TOKEN_SERVICE" -a token -w 2>/dev/null || true)"
   if [ -n "$GITHUB_TOKEN" ]; then export GITHUB_TOKEN; else unset GITHUB_TOKEN; fi
   ( cd "$WT" && node bin/scout-pr.mjs sync --repo "$slug" ) || echo "PR sync failed"
@@ -252,13 +261,21 @@ merge_main() {
 # else that differs from origin/main, tracked, untracked or ignored, is put back before any of it runs. Prints the
 # paths it reset (nothing when clean).
 DATA_PATHS=(':(exclude)proposals' ':(exclude)sources/candidates.json' ':(exclude)local')
+code_drift() {   # paths outside the agent's data that differ from origin/main; fails if git can't tell
+  local d o
+  d="$(git -C "$WT" diff --name-only origin/main -- . "${DATA_PATHS[@]}")" || return 1
+  o="$(git -C "$WT" ls-files --others -- . "${DATA_PATHS[@]}")" || return 1
+  printf '%s\n%s\n' "$d" "$o" | sed '/^$/d' | sort -u | head -n 50 | tr '\n' ' '
+}
+# Fails closed: if the reset can't be verified, it returns 1 and the caller runs nothing from $WT.
 restore_code() {   # restore_code WHEN
-  local changed
-  changed="$( { git -C "$WT" diff --name-only origin/main -- . "${DATA_PATHS[@]}"
-                git -C "$WT" ls-files --others -- . "${DATA_PATHS[@]}"; } | sort -u | head -n 50 | tr '\n' ' ')"
+  local changed left
+  changed="$(code_drift)" || { echo "restore_code ($1): git could not compare $WT with origin/main" >&2; return 1; }
   [ -n "$changed" ] || return 0
-  git -C "$WT" restore --source=origin/main --staged --worktree -- . "${DATA_PATHS[@]}" 2>/dev/null
-  git -C "$WT" clean -fdxq -- . "${DATA_PATHS[@]}"
+  git -C "$WT" restore --source=origin/main --staged --worktree -- . "${DATA_PATHS[@]}" || { echo "restore_code ($1): git restore failed" >&2; return 1; }
+  git -C "$WT" clean -fdxq -- . "${DATA_PATHS[@]}" || { echo "restore_code ($1): git clean failed" >&2; return 1; }
+  left="$(code_drift)" || return 1
+  [ -z "$left" ] || { echo "restore_code ($1): still differs from main after the reset: $left" >&2; return 1; }
   echo "restore_code ($1): reset $changed" >&2
   echo "$changed"
 }

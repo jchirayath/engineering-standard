@@ -48,6 +48,10 @@ reset="$(restore_code test 2>/dev/null)"
 check "restore_code resets tracked, untracked and ignored code" '! grep -q evil "$WT/README.md" && [ ! -e "$WT/bin/evil.mjs" ] && [ ! -e "$WT/bin/cache.pyc" ]'
 check "restore_code keeps proposals and local/ and reports what it reset" '[ -f "$WT/proposals/sources/new.md" ] && [ -f "$WT/local/scout/report.md" ] && echo "$reset" | grep -q "bin/evil.mjs" && [ -z "$(restore_code again 2>/dev/null)" ]'
 
+mkdir -p "$WT/bin/locked"; echo x > "$WT/bin/locked/evil.mjs"; chmod 555 "$WT/bin/locked"
+restore_code locked >/dev/null 2>&1; rc=$?; chmod 755 "$WT/bin/locked"
+check "restore_code fails closed when the reset can't be completed" '[ $rc -ne 0 ]'
+
 # credential helper: token comes from the environment, prints only for "get"
 PR_TOKEN=tok_123
 out="$(printf 'protocol=https\nhost=github.com\n\n' | SCOUT_PR_TOKEN="$PR_TOKEN" git -c credential.helper= -c 'credential.helper=!f() { test "$1" = get && printf "username=x-access-token\npassword=%s\n" "$SCOUT_PR_TOKEN"; }; f' credential fill 2>/dev/null)"
