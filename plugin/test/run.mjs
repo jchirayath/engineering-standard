@@ -430,6 +430,9 @@ console.log('▸ scout (decision matrix)')
   const em = S.emailSummary(led, pol, now)
   t('email: subject counts today only; lists approvals and changed standards; no-change day sends nothing', /1 to approve, 0 watching, 0 rejected, 1 standard/.test(em.subject) && /x\/new/.test(em.body) && !/y\/old/.test(em.body)
     && /mcp-spec/.test(em.body) && em.needsDecision && !S.emailSummary({ standards: {}, candidates: [] }, pol, now).changed, em.subject)
+  t('email: tells the owner how to decide (an email reply does nothing); a no-decision day omits it',
+    /replying to this email does nothing/.test(em.body) && /"approve <repo>"/.test(em.body) && /scout\.mjs decide/.test(em.body) && !/Reply or open/.test(em.body)
+    && !/HOW TO DECIDE/.test(S.emailSummary({ standards: {}, candidates: [] }, pol, now).body))
 }
 
 console.log(`\n${pass} passed, ${fail} failed${OFFLINE ? ' (offline)' : ''}`)

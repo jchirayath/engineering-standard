@@ -288,6 +288,13 @@ export function mergeQueue(queue = [], found = [], policy, scored = new Set(), n
     const prev = byRepo.get(k); byRepo.set(k, prev ? { ...q, found: prev.found, hits: Math.max(prev.hits || 1, q.hits || 1) } : q) }
   return [...byRepo.values()].sort((a, b) => (b.hits - a.hits) || (b.stars - a.stars)).slice(0, policy.discovery.queueMax ?? 40)
 }
+// Replying to the email does nothing (nothing reads the inbox): decisions are made in an interactive session.
+export const APPROVE_HOWTO = ['',
+  'HOW TO DECIDE (replying to this email does nothing). Open Claude Code in the engineering-standard folder and say:',
+  '  "approve <repo>"               → merges scout/daily, applies proposals/sources/<id>.md, runs every check, commits, pushes',
+  '  "approve the <standard> change" → amends the standard from the note above, same checks',
+  '  "hold <repo>" / "reject <repo>, because …" → recorded with scout.mjs decide; kept when re-scored',
+  'Not ready? Do nothing: proposals stay on the local scout/daily branch and each run carries them forward.']
 // Plain-text summary for the owner's inbox: only what changed today and what needs their decision.
 export function emailSummary(ledger, policy, d = today()) {
   const touched = ledger.candidates.filter((c) => c.lastScored === d || c.judged === d)
@@ -302,7 +309,7 @@ export function emailSummary(ledger, policy, d = today()) {
     `Watching (${by('watch').length}):`, ...(by('watch').map(line).length ? by('watch').map(line) : ['  - none']), '',
     `Rejected (${by('reject').length}):`, ...(by('reject').map(line).length ? by('reject').map(line) : ['  - none']), '',
     `Matrix: gates ${policy.gates.map((g) => g.id).join('/')} · weights ${policy.criteria.map((c) => `${c.id} ${c.weight}`).join(', ')} · consume ≥ ${policy.outcomes.find((o) => o.id === 'consume').min}.`,
-    decide ? 'Reply or open the scout branch to approve; /engineering-standard:consume applies only after you say yes.' : 'Nothing needs a decision today.'].join('\n')
+    ...(decide ? APPROVE_HOWTO : ['Nothing needs a decision today.'])].join('\n')
   return { subject, body, needsDecision: decide > 0, changed: touched.length + std.length > 0 }
 }
 function reportCmd(flags = {}) {

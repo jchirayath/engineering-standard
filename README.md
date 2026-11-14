@@ -306,6 +306,18 @@ Afterwards the wrapper saves `local/scout/<date>.md`, emails the summary when so
 notice), and commits the ledger and proposals to the **local** `scout/daily` branch. Review and merge
 `scout/daily`; it is never pushed.
 
+**Approving what the scout proposes.** The email lists what needs your decision. Replying to it does nothing,
+because nothing reads the inbox. Decide in an interactive Claude Code session opened in this folder:
+
+| You say | What happens |
+|---|---|
+| "approve `<repo>`" | `scout/daily` is merged and `node bin/consume.mjs apply <id>` writes the proposal into the standard. Every check and test runs, then the change is committed and pushed (CI runs). You get a confirmation email. |
+| "approve the `<standard>` change" | The standard is amended from the note in the email, with the same checks, commit and push. |
+| "hold `<repo>`" / "reject `<repo>`, because …" | `node bin/scout.mjs decide <repo> --outcome watch\|reject --why "…"` records your call. It overrides the matrix and is kept when the candidate is re-scored. |
+| nothing | The proposal stays on `scout/daily`. Each run merges `origin/main` into that branch, so it carries forward until you decide. |
+
+Read the proposal first: `git show scout/daily:proposals/sources/<id>.md`.
+
 | Step | Command | Cost |
 |---|---|---|
 | what's due | `node bin/scout.mjs due` · `node bin/sources.mjs --upstream` | free: ledger + GitHub API |
@@ -315,6 +327,7 @@ notice), and commits the ledger and proposals to the **local** `scout/daily` bra
 | consume | `/engineering-standard:consume` up to the proposal → `node bin/scout.mjs consumed <repo> --as <id>` | full intake, top-ranked only |
 | standards | `node bin/scout.mjs standard <id> --note "…"` for each standard due a check | official pages |
 | report | `node bin/scout.mjs report` → `local/scout/<date>.md`; `--email` → the owner's summary when something changed | — |
+| owner decision | `node bin/scout.mjs decide <repo> --outcome watch\|reject --why "…"`, which overrides the matrix and is kept on re-score | — |
 
 Every decision is recorded in [`sources/candidates.json`](sources/candidates.json), so a run skips anything unchanged
 and not yet due. The matrix lives in [`sources/scout-policy.json`](sources/scout-policy.json); CI checks that the table
