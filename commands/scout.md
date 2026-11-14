@@ -39,6 +39,9 @@ Cheapest first: each step narrows what the next, more expensive step has to look
    whenever something wasn't read or run; it becomes the PR's "confirm before you merge" checklist.
 7. **Standards.** For each standard that is due, check the official source for a newer version, a finalised draft,
    or a date taking effect within 90 days. Record the result: `node bin/scout.mjs standard <id> --note "<change + affected rule IDs, or 'no change'>"`.
+   A standard the rules start citing joins the watch list through the same file: add `"watch": {"id", "name",
+   "cited", "kind": "default|law|platform-policy", "group": "security|quality|platform|law", "url"}` (you can't edit
+   `sources/scout-policy.json`; approving the PR adds it and redraws the README's "Built on" visual).
    Only when something actually changed and a rule must say more, write `proposals/standards/<id>-<date>.json`:
    `{"standard": "<id>", "date": "<date>", "title": "<short imperative, e.g. Pin transitive actions with lockfiles>",
    "summary": "<what changed upstream and why the rule needs it>", "sources": ["<official https URL>", …],

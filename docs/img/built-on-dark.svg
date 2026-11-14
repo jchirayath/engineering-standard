@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="970" viewBox="0 0 1200 970" role="img" aria-labelledby="t d">
+  <title id="t">Built on</title>
+  <desc id="d">23 standards, platform policies and laws the daily scout watches, and 19 reviewed, pinned agent and security projects. Security standards: OWASP ASVS, OWASP Top 10, OWASP API Security Top 10, OWASP LLM &amp; Agentic Top 10, OWASP MASVS, NIST SP 800-63, SLSA, MCP specification, CISA KEV catalog, OpenSSF Scorecard. Formats &amp; quality: WCAG, Core Web Vitals, OpenTelemetry logs, RFC 9457 Problem Details, Design Tokens. Platform policies: Claude Code permissions &amp; hooks docs, Apple App Review Guidelines, Google Play target API level, GitHub Actions security changes. Law &amp; regulation: EU Cyber Resilience Act, EU AI Act, CCPA regulations / GPC, GDPR. Reviewed agent &amp; security projects (pinned): superpowers, Sentry skills, ponytail, caveman, Cloudflare security-audit skill, frontend-design, NVIDIA SkillSpector, Cisco AI Defense skill-scanner, code-modernization, docker-destructive-guardrails, ECC database-migrations, firebase-security-rules-auditor, grill-me / grilling, Playwright test agents, sandbox-runtime, skill-creator, Supabase agent skill, Trail of Bits skills, Vercel React best practices.</desc>
+  <rect width="1200" height="970" rx="20" fill="#1a1a19"/>
+  <rect x="0.5" y="0.5" width="1199" height="969" rx="20" fill="none" stroke="#2c2c2a"/>
+  <text x="40" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#f0efec">Built on 23 standards &amp; policies and 19 reviewed projects</text>
+  <text x="40" y="72" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#c3c2b7">Each one is watched by the daily scout: a new version or a new source arrives as a pull request with a recommendation.</text>
+  <g transform="translate(40,104)"><rect y="3" width="12" height="12" rx="3" fill="#3987e5"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Security standards<tspan dx="8" font-size="13" font-weight="400" fill="#898781">10</tspan></text></g>
+  <g transform="translate(40.0,130)"><title>OWASP ASVS — 5.0</title>
+    <rect width="115.0" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">OWASP ASVS</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">5.0</text></g>
+  <g transform="translate(165.0,130)"><title>OWASP Top 10 — 2025</title>
+    <rect width="130.6" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">OWASP Top 10</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2025</text></g>
+  <g transform="translate(305.7,130)"><title>OWASP API Security Top 10 — 2023</title>
+    <rect width="233.6" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">OWASP API Security Top 10</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2023</text></g>
+  <g transform="translate(549.3,130)"><title>OWASP LLM &amp; Agentic Top 10 — LLM Top 10 2026; Agentic Top 10 2026</title>
+    <rect width="265.9" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">OWASP LLM &amp; Agentic Top 10</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">LLM Top 10 2026; Agentic Top 10 2026</text></g>
+  <g transform="translate(825.2,130)"><title>OWASP MASVS</title>
+    <rect width="123.4" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">OWASP MASVS</text></g>
+  <g transform="translate(958.5,130)"><title>NIST SP 800-63 — 4</title>
+    <rect width="146.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">NIST SP 800-63</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">4</text></g>
+  <g transform="translate(40.0,190)"><title>SLSA</title>
+    <rect width="68.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">SLSA</text></g>
+  <g transform="translate(118.2,190)"><title>MCP specification — 2026-07-28</title>
+    <rect width="170.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">MCP specification</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2026-07-28</text></g>
+  <g transform="translate(298.4,190)"><title>CISA KEV catalog — live catalog</title>
+    <rect width="161.8" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">CISA KEV catalog</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">live catalog</text></g>
+  <g transform="translate(470.2,190)"><title>OpenSSF Scorecard</title>
+    <rect width="170.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#3987e5"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">OpenSSF Scorecard</text></g>
+  <g transform="translate(40,264)"><rect y="3" width="12" height="12" rx="3" fill="#d95926"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Formats &amp; quality<tspan dx="8" font-size="13" font-weight="400" fill="#898781">5</tspan></text></g>
+  <g transform="translate(40.0,290)"><title>WCAG — 2.2</title>
+    <rect width="68.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d95926"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">WCAG</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2.2</text></g>
+  <g transform="translate(118.2,290)"><title>Core Web Vitals</title>
+    <rect width="154.6" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d95926"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Core Web Vitals</text></g>
+  <g transform="translate(282.8,290)"><title>OpenTelemetry logs — log data model + semconv</title>
+    <rect width="189.9" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d95926"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">OpenTelemetry logs</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">log data model + semconv</text></g>
+  <g transform="translate(482.7,290)"><title>RFC 9457 Problem Details — RFC 9457</title>
+    <rect width="225.3" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d95926"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">RFC 9457 Problem Details</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">RFC 9457</text></g>
+  <g transform="translate(718.0,290)"><title>Design Tokens</title>
+    <rect width="139.0" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d95926"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Design Tokens</text></g>
+  <g transform="translate(40,364)"><rect y="3" width="12" height="12" rx="3" fill="#199e70"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Platform policies<tspan dx="8" font-size="13" font-weight="400" fill="#898781">4</tspan></text></g>
+  <g transform="translate(40.0,390)"><title>Claude Code permissions &amp; hooks docs</title>
+    <rect width="319.9" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#199e70"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Claude Code permissions &amp; hooks docs</text></g>
+  <g transform="translate(369.9,390)"><title>Apple App Review Guidelines</title>
+    <rect width="249.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#199e70"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Apple App Review Guidelines</text></g>
+  <g transform="translate(629.1,390)"><title>Google Play target API level</title>
+    <rect width="256.5" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#199e70"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Google Play target API level</text></g>
+  <g transform="translate(40.0,450)"><title>GitHub Actions security changes — pull_request_target default block 2026-12-02</title>
+    <rect width="317.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#199e70"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">GitHub Actions security changes</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">pull_request_target default block 2026-12-02</text></g>
+  <g transform="translate(40,524)"><rect y="3" width="12" height="12" rx="3" fill="#c98500"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Law &amp; regulation<tspan dx="8" font-size="13" font-weight="400" fill="#898781">4</tspan></text></g>
+  <g transform="translate(40.0,550)"><title>EU Cyber Resilience Act — 2024/2847</title>
+    <rect width="217.0" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#c98500"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">EU Cyber Resilience Act</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2024/2847</text></g>
+  <g transform="translate(267.0,550)"><title>EU AI Act — 2024/1689 + AI Omnibus 2026/1744</title>
+    <rect width="241.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#c98500"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">EU AI Act</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2024/1689 + AI Omnibus 2026/1744</text></g>
+  <g transform="translate(518.2,550)"><title>CCPA regulations / GPC</title>
+    <rect width="209.7" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#c98500"/>
+    <text x="16" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">CCPA regulations / GPC</text></g>
+  <g transform="translate(737.8,550)"><title>GDPR — 2016/679</title>
+    <rect width="87.3" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#c98500"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">GDPR</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2016/679</text></g>
+  <g transform="translate(40,624)"><rect y="3" width="12" height="12" rx="3" fill="#d55181"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Reviewed agent &amp; security projects (pinned)<tspan dx="8" font-size="13" font-weight="400" fill="#898781">19</tspan></text></g>
+  <g transform="translate(40.0,650)"><title>superpowers — Jesse Vincent · AGT-11, AGT-12, AGT-13 +2</title>
+    <rect width="298.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">superpowers</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Jesse Vincent · AGT-11, AGT-12, AGT-13 +2</text></g>
+  <g transform="translate(348.2,650)"><title>Sentry skills — Sentry · AGT-6, AGT-5, AGT-4 +1</title>
+    <rect width="234.5" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Sentry skills</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Sentry · AGT-6, AGT-5, AGT-4 +1</text></g>
+  <g transform="translate(592.8,650)"><title>ponytail — DietrichGebert · CLEAN-13, CLEAN-5, AGT-14</title>
+    <rect width="304.8" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">ponytail</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">DietrichGebert · CLEAN-13, CLEAN-5, AGT-14</text></g>
+  <g transform="translate(907.6,650)"><title>caveman — Julius Brussee · AGT-15, AGT-13</title>
+    <rect width="234.5" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">caveman</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Julius Brussee · AGT-15, AGT-13</text></g>
+  <g transform="translate(40.0,710)"><title>Cloudflare security-audit skill — Cloudflare · AGT-2, AGT-13</title>
+    <rect width="280.4" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Cloudflare security-audit skill</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Cloudflare · AGT-2, AGT-13</text></g>
+  <g transform="translate(330.4,710)"><title>frontend-design — Anthropic · THEME-12, UX-1</title>
+    <rect width="202.3" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">frontend-design</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Anthropic · THEME-12, UX-1</text></g>
+  <g transform="translate(542.6,710)"><title>NVIDIA SkillSpector — NVIDIA · AGT-5, AGT-13</title>
+    <rect width="185.8" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">NVIDIA SkillSpector</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">NVIDIA · AGT-5, AGT-13</text></g>
+  <g transform="translate(738.4,710)"><title>Cisco AI Defense skill-scanner — Cisco AI Defense · AGT-5</title>
+    <rect width="272.1" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Cisco AI Defense skill-scanner</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Cisco AI Defense · AGT-5</text></g>
+  <g transform="translate(40.0,770)"><title>code-modernization — Anthropic · TEST-15</title>
+    <rect width="178.5" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">code-modernization</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Anthropic · TEST-15</text></g>
+  <g transform="translate(228.5,770)"><title>docker-destructive-guardrails — Docker · AGT-17</title>
+    <rect width="264.8" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">docker-destructive-guardrails</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Docker · AGT-17</text></g>
+  <g transform="translate(503.3,770)"><title>ECC database-migrations — affaan-m · COR-7</title>
+    <rect width="217.0" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">ECC database-migrations</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">affaan-m · COR-7</text></g>
+  <g transform="translate(730.2,770)"><title>firebase-security-rules-auditor — Google (Firebase) · FB-3</title>
+    <rect width="280.4" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">firebase-security-rules-auditor</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Google (Firebase) · FB-3</text></g>
+  <g transform="translate(40.0,830)"><title>grill-me / grilling — Matt Pocock · AGT-11</title>
+    <rect width="185.8" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">grill-me / grilling</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Matt Pocock · AGT-11</text></g>
+  <g transform="translate(235.8,830)"><title>Playwright test agents — Microsoft · AGT-8</title>
+    <rect width="209.7" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Playwright test agents</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Microsoft · AGT-8</text></g>
+  <g transform="translate(455.4,830)"><title>sandbox-runtime — Anthropic · AGT-2</title>
+    <rect width="154.6" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">sandbox-runtime</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Anthropic · AGT-2</text></g>
+  <g transform="translate(620.0,830)"><title>skill-creator — Anthropic · AGT-16</title>
+    <rect width="150.9" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">skill-creator</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Anthropic · AGT-16</text></g>
+  <g transform="translate(781.0,830)"><title>Supabase agent skill — Supabase · SUPA-5</title>
+    <rect width="194.1" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Supabase agent skill</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Supabase · SUPA-5</text></g>
+  <g transform="translate(40.0,890)"><title>Trail of Bits skills — Trail of Bits · AGT-6</title>
+    <rect width="194.1" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Trail of Bits skills</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Trail of Bits · AGT-6</text></g>
+  <g transform="translate(244.1,890)"><title>Vercel React best practices — Vercel · NEXT-7</title>
+    <rect width="249.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Vercel React best practices</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Vercel · NEXT-7</text></g>
+</svg>

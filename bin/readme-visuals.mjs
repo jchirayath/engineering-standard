@@ -2,6 +2,7 @@
 // README visuals, generated from the repo's own data so they never drift (CI runs --check). Zero deps.
 //   docs/img/hero-{light,dark}.svg            banner with live counts (rules, MUST, quick mode, enforced, sources)
 //   docs/img/rules-by-area-{light,dark}.svg   rules per area, grouped by pillar; solid = in quick mode
+//   docs/img/built-on-{light,dark}.svg        the scout's standards watch list (by group) + every reviewed source
 //
 //   node bin/readme-visuals.mjs          (re)write the SVGs
 //   node bin/readme-visuals.mjs --check  exit 1 if any SVG is out of date
@@ -123,9 +124,54 @@ export function byArea(s, mode) {
 `
 }
 
+// ── built on: the scout's standards watch list (by group) + every reviewed, pinned source in the registry ────
+// Both files are what the daily scout maintains, so a new standard or an approved source PR redraws this.
+const short = (s) => String(s).replace(/\s*\([^)]*\)\s*/g, ' ').replace(/\s+/g, ' ').trim()
+const fit = (s, size, max) => { s = String(s); while (s.length > 4 && textW(s, size) > max) s = s.slice(0, -2).trimEnd() + '…'; return s.replace(/……$/, '…') }
+export function builtOnData(policy = JSON.parse(readFileSync(P('sources/scout-policy.json'), 'utf8')), sources = JSON.parse(readFileSync(P('sources/registry.json'), 'utf8')).sources) {
+  const names = policy.standards.groups || {}
+  const bands = Object.entries(names).map(([id, name]) => ({ id, name, tiles: policy.standards.list.filter((s) => s.group === id)
+    .map((s) => ({ title: short(s.name), meta: /see REFERENCES/i.test(s.cited || '') ? '' : String(s.cited || '') })) }))
+  const dispo = { distilled: 'ideas distilled', adopted: 'rules adopted', companion: 'companion', reference: 'reference' }
+  bands.push({ id: 'projects', name: 'Reviewed agent & security projects (pinned)', tiles: [...sources].sort((a, b) => (b.informs?.length || 0) - (a.informs?.length || 0) || a.name.localeCompare(b.name))
+    .map((s) => ({ title: short(s.name), meta: `${s.author || ''}${s.informs?.length ? ` · ${s.informs.slice(0, 3).join(', ')}${s.informs.length > 3 ? ` +${s.informs.length - 3}` : ''}` : ` · ${dispo[s.disposition] || s.disposition}`}` })) })
+  return { bands: bands.filter((b) => b.tiles.length), standards: policy.standards.list.length, sources: sources.length }
+}
+export function builtOn(d, mode) {
+  const t = THEMES[mode], W = 1200, left = 40, right = W - 40, tileH = 50, gx = 10, gy = 10, maxTile = 360
+  let y = 104; const parts = []
+  d.bands.forEach((b, bi) => {
+    const c = t.series[bi % t.series.length]
+    parts.push(`<g transform="translate(${left},${y})"><rect y="3" width="12" height="12" rx="3" fill="${c}"/><text x="20" y="14" font-family="${FONT}" font-size="15" font-weight="700" fill="${t.ink}">${esc(b.name)}<tspan dx="8" font-size="13" font-weight="400" fill="${t.muted}">${b.tiles.length}</tspan></text></g>`)
+    y += 26; let x = left
+    for (const tile of b.tiles) {
+      const title = fit(tile.title, 13.5, maxTile - 30), meta = fit(tile.meta, 12, maxTile - 30)
+      const w = Math.min(maxTile, Math.max(textW(title, 13.5) * 1.04, textW(meta, 12) * 0.95) + 36)
+      if (x + w > right) { x = left; y += tileH + gy }
+      parts.push(`<g transform="translate(${x.toFixed(1)},${y})"><title>${esc(tile.title)}${tile.meta ? ` — ${esc(tile.meta)}` : ''}</title>
+    <rect width="${w.toFixed(1)}" height="${tileH}" rx="10" fill="${t.chip}"/><rect x="0" y="10" width="4" height="${tileH - 20}" rx="2" fill="${c}"/>
+    <text x="16" y="${tile.meta ? 21 : 30}" font-family="${FONT}" font-size="13.5" font-weight="600" fill="${t.ink}">${esc(title)}</text>${tile.meta ? `
+    <text x="16" y="38" font-family="${FONT}" font-size="12" fill="${t.ink2}">${esc(meta)}</text>` : ''}</g>`)
+      x += w + gx
+    }
+    y += tileH + 24
+  })
+  const H = y + 6
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="t d">
+  <title id="t">Built on</title>
+  <desc id="d">${esc(`${d.standards} standards, platform policies and laws the daily scout watches, and ${d.sources} reviewed, pinned agent and security projects. ${d.bands.map((b) => `${b.name}: ${b.tiles.map((x) => x.title).join(', ')}`).join('. ')}.`)}</desc>
+  <rect width="${W}" height="${H}" rx="20" fill="${t.surface}"/>
+  <rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="20" fill="none" stroke="${t.grid}"/>
+  <text x="${left}" y="46" font-family="${FONT}" font-size="22" font-weight="700" fill="${t.ink}">Built on ${d.standards} standards &amp; policies and ${d.sources} reviewed projects</text>
+  <text x="${left}" y="72" font-family="${FONT}" font-size="13.5" fill="${t.ink2}">Each one is watched by the daily scout: a new version or a new source arrives as a pull request with a recommendation.</text>
+  ${parts.join('\n  ')}
+</svg>
+`
+}
+
 export function render() {
-  const s = stats(), out = {}
-  for (const mode of ['light', 'dark']) { out[`hero-${mode}.svg`] = hero(s, mode); out[`rules-by-area-${mode}.svg`] = byArea(s, mode) }
+  const s = stats(), b = builtOnData(), out = {}
+  for (const mode of ['light', 'dark']) { out[`hero-${mode}.svg`] = hero(s, mode); out[`rules-by-area-${mode}.svg`] = byArea(s, mode); out[`built-on-${mode}.svg`] = builtOn(b, mode) }
   return out
 }
 

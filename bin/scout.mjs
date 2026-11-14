@@ -362,6 +362,12 @@ export function check(policy = loadPolicy(), ledger = loadLedger()) {
   const errors = [], w = policy.criteria.reduce((s, c) => s + c.weight, 0)
   if (w !== 100) errors.push(`scout-policy: criteria weights sum to ${w}, must be 100`)
   if (!policy.outcomes.some((o) => o.min === 0)) errors.push('scout-policy: one outcome must have min 0')
+  // Every watched standard is drawn in the README's "Built on" visual under its group (bin/readme-visuals.mjs).
+  const groups = Object.keys(policy.standards.groups || {}), ids = new Set()
+  for (const s of policy.standards.list) {
+    if (!groups.includes(s.group)) errors.push(`scout-policy: standard "${s.id}" needs "group": one of ${groups.join('|') || '(define standards.groups)'}`)
+    if (ids.has(s.id)) errors.push(`scout-policy: duplicate standard "${s.id}"`); ids.add(s.id)
+  }
   const overlap = policy.licences.allow.filter((l) => policy.licences.conditional.includes(l) || policy.licences.deny.includes(l))
   if (overlap.length) errors.push(`scout-policy: licence in more than one list: ${overlap.join(', ')}`)
   const outs = new Set([...policy.outcomes.map((o) => o.id), 'pending-judgement']), seen = new Set()

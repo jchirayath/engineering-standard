@@ -43,6 +43,13 @@ export function safeMd(s, max = 4000) {
 const RULE_ID = /^[A-Z]+-\d+$/
 const multiline = (s, max) => String(s ?? '').split('\n').map((l) => safeMd(l, 2000)).join('\n').slice(0, max)
 const quote = (s, max = 3000) => multiline(s, max).split('\n').map((l) => `> ${l}`).join('\n')
+// {"watch": {id, name, cited, kind, group, url}}: add a standard to the scout's watch list. Validated, never trusted.
+export function watchOf(draft) {
+  const w = draft.watch; if (!w || typeof w !== 'object') return null
+  if (!/^[a-z0-9][a-z0-9-]{1,40}$/.test(w.id || '') || !['default', 'law', 'platform-policy'].includes(w.kind) || !['security', 'quality', 'platform', 'law'].includes(w.group)
+    || !/^https:\/\/[\w.-]+\/[^\s<>"'`]*$/.test(w.url || '') || !String(w.name || '').trim()) return null
+  return { id: w.id, name: clean(w.name, 80), cited: clean(w.cited || 'see REFERENCES.md', 80), kind: w.kind, group: w.group, url: w.url }
+}
 export const overlapsOf = (draft) => Object.entries(draft.acceptOverlaps && typeof draft.acceptOverlaps === 'object' ? draft.acceptOverlaps : {})
   .filter(([k, why]) => /^[A-Z]+-\d+~[A-Z]+-\d+$/.test(k) && typeof why === 'string' && why.trim().length >= 20).map(([k, why]) => [k, clean(why, 300)])
 const amendmentsOf = (draft) => (Array.isArray(draft.amendments) ? draft.amendments : []).map((a) => `- **${RULE_ID.test(a.id || '') ? a.id : '(invalid id)'}** gains:\n${quote(a.append)}`)
@@ -69,7 +76,8 @@ export function recommend({ kind, entry = null, draft = {}, md = '', checksOk = 
     if (entry?.c4By === 'provisional') cautions.push('The executable surface (C4) was not measured from a fetched inventory.')
   } else if (kind === 'standard') {
     if (!draft.sources?.length) stricter('hold', 'The proposal cites no source for the change.')
-    if (!draft.amendments?.length) stricter('hold', 'The proposal changes no rule.')
+    if (!draft.amendments?.length && !watchOf(draft)) stricter('hold', 'The proposal changes no rule and adds nothing to the watch list.')
+    if (draft.watch && !watchOf(draft)) stricter('hold', 'Its "watch" entry is malformed (needs id, name, kind, group and an https URL).')
   }
   if (kind === 'standard') for (const [k] of overlapsOf(draft)) cautions.push(`${k.replace('~', ' and ')} are recorded as reviewed (not duplicates): check the reason given below.`)
   const nv = notVerified(md) || draft.notVerified || ''
@@ -139,6 +147,7 @@ export function standardBody({ name, draft = {}, checks = [], policy }) {
     ...(Array.isArray(draft.sources) && draft.sources.length ? ['Sources:', ...draft.sources.filter((u) => /^https:\/\/[\w.-]+\/[^\s<>"'`]*$/.test(u)).map((u) => `- ${safeMd(u, 300)}`), ''] : []),
     '### What changes in the standard', '',
     ...amendmentsOf(draft), '',
+    ...(watchOf(draft) ? [`**Adds to the scout's watch list** (and the README's "Built on" visual): ${safeMd(watchOf(draft).name, 80)} (${watchOf(draft).group}, cited ${safeMd(watchOf(draft).cited, 80)}) · ${watchOf(draft).url}`, ''] : []),
     ...(overlapsOf(draft).length ? ['**Also records these rule pairs as reviewed, not duplicates** (the new wording shifts word weights in the overlap check):',
       ...overlapsOf(draft).map(([k, why]) => `- ${k.replace('~', ' and ')}: ${safeMd(why, 300)}`), ''] : []),
     '### Checks run on this branch', '', checksTable(checks), '',
@@ -257,15 +266,18 @@ function applyStandardCmd(name) {
   const draft = standardOf(name)
   if (draft.applied) throw new Error(`proposals/standards/${name}.json was already applied on ${draft.applied}`)
   const f = P('ENGINEERING_STANDARD.md'), lines = readFileSync(f, 'utf8').split('\n')
-  const amended = amendLines(lines, draft.amendments || [], draft.cite ? `*(source: ${clean(draft.cite, 80)})*` : '')
+  const amended = (draft.amendments || []).length ? amendLines(lines, draft.amendments, draft.cite ? `*(source: ${clean(draft.cite, 80)})*` : '') : []
   writeFileSync(f, lines.join('\n'))
+  // A standard the rules now cite joins the scout's watch list (and the README's "Built on" visual).
+  const watch = watchOf(draft)
+  if (watch) { const pf = P('sources/scout-policy.json'), pol = readJSON(pf); if (!pol.standards.list.some((s) => s.id === watch.id)) { pol.standards.list.push(watch); writeJSON(pf, pol) } }
   // New wording can shift word weights so two untouched rules cross the overlap threshold; a reviewed pair is
   // recorded with its reason (shown in the PR), exactly as /consume records "whyNew".
   const acc = overlapsOf(draft)
   if (acc.length) { const sim = readJSON(P('plugin/similarity.json')); for (const [k, why] of acc) sim.accepted[k] = why; writeJSON(P('plugin/similarity.json'), sim) }
   writeJSON(P('proposals/standards', `${name}.json`), { ...draft, applied: today() })
   run('bin/build-rules.mjs'); run('bin/readme-visuals.mjs')     // counts in the README images
-  const checks = [['build-rules --check', run('bin/build-rules.mjs', '--check')], ['similar --check', run('bin/similar.mjs', '--check')], ['check-public', run('bin/check-public.mjs')]]
+  const checks = [['build-rules --check', run('bin/build-rules.mjs', '--check')], ['similar --check', run('bin/similar.mjs', '--check')], ['scout --check', run('bin/scout.mjs', '--check')], ['check-public', run('bin/check-public.mjs')]]
   console.log(`✓ applied standards change ${name}: amended ${amended.join(' ')}`)
   for (const [n, r] of checks) console.log(`${r.ok ? '  ✓' : '  ✗'} ${n}\n${r.out.trim().split('\n').map((l) => '    ' + l).join('\n')}`)
   return checks.every(([, r]) => r.ok)

@@ -252,120 +252,191 @@
         "name": "OWASP ASVS",
         "cited": "5.0",
         "kind": "default",
-        "url": "https://owasp.org/www-project-application-security-verification-standard/"
+        "url": "https://owasp.org/www-project-application-security-verification-standard/",
+        "group": "security"
       },
       {
         "id": "owasp-top10",
         "name": "OWASP Top 10",
         "cited": "2025",
         "kind": "default",
-        "url": "https://owasp.org/www-project-top-ten/"
+        "url": "https://owasp.org/www-project-top-ten/",
+        "group": "security"
       },
       {
         "id": "owasp-api",
         "name": "OWASP API Security Top 10",
         "cited": "2023",
         "kind": "default",
-        "url": "https://owasp.org/API-Security/"
+        "url": "https://owasp.org/API-Security/",
+        "group": "security"
       },
       {
         "id": "owasp-genai",
         "name": "OWASP LLM & Agentic Top 10",
         "cited": "LLM Top 10 2026; Agentic Top 10 2026",
         "kind": "default",
-        "url": "https://genai.owasp.org/"
+        "url": "https://genai.owasp.org/",
+        "group": "security"
       },
       {
         "id": "owasp-masvs",
         "name": "OWASP MASVS",
         "cited": "see REFERENCES.md",
         "kind": "default",
-        "url": "https://mas.owasp.org/MASVS/"
+        "url": "https://mas.owasp.org/MASVS/",
+        "group": "security"
       },
       {
         "id": "nist-800-63",
         "name": "NIST SP 800-63",
         "cited": "4",
         "kind": "default",
-        "url": "https://pages.nist.gov/800-63-4/"
+        "url": "https://pages.nist.gov/800-63-4/",
+        "group": "security"
       },
       {
         "id": "slsa",
         "name": "SLSA",
         "cited": "see REFERENCES.md",
         "kind": "default",
-        "url": "https://slsa.dev/"
+        "url": "https://slsa.dev/",
+        "group": "security"
       },
       {
         "id": "mcp-spec",
         "name": "MCP specification (authorization)",
         "cited": "2026-07-28",
         "kind": "default",
-        "url": "https://modelcontextprotocol.io/specification/"
+        "url": "https://modelcontextprotocol.io/specification/",
+        "group": "security"
       },
       {
         "id": "wcag",
         "name": "WCAG",
         "cited": "2.2",
         "kind": "default",
-        "url": "https://www.w3.org/TR/WCAG22/"
+        "url": "https://www.w3.org/TR/WCAG22/",
+        "group": "quality"
       },
       {
         "id": "cwv",
         "name": "Core Web Vitals",
         "cited": "see REFERENCES.md",
         "kind": "default",
-        "url": "https://web.dev/articles/vitals"
+        "url": "https://web.dev/articles/vitals",
+        "group": "quality"
       },
       {
         "id": "claude-code",
         "name": "Claude Code permissions & hooks docs",
         "cited": "see REFERENCES.md",
         "kind": "platform-policy",
-        "url": "https://code.claude.com/docs/en/permissions"
+        "url": "https://code.claude.com/docs/en/permissions",
+        "group": "platform"
       },
       {
         "id": "apple-review",
         "name": "Apple App Review Guidelines",
         "cited": "see REFERENCES.md",
         "kind": "platform-policy",
-        "url": "https://developer.apple.com/app-store/review/guidelines/"
+        "url": "https://developer.apple.com/app-store/review/guidelines/",
+        "group": "platform"
       },
       {
         "id": "play-target-api",
         "name": "Google Play target API level",
         "cited": "see REFERENCES.md",
         "kind": "platform-policy",
-        "url": "https://developer.android.com/google/play/requirements/target-sdk"
+        "url": "https://developer.android.com/google/play/requirements/target-sdk",
+        "group": "platform"
       },
       {
         "id": "eu-cra",
         "name": "EU Cyber Resilience Act",
         "cited": "2024/2847",
         "kind": "law",
-        "url": "https://eur-lex.europa.eu/eli/reg/2024/2847/oj"
+        "url": "https://eur-lex.europa.eu/eli/reg/2024/2847/oj",
+        "group": "law"
       },
       {
         "id": "eu-ai-act",
         "name": "EU AI Act",
         "cited": "2024/1689 + AI Omnibus 2026/1744",
         "kind": "law",
-        "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj"
+        "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+        "group": "law"
       },
       {
         "id": "ccpa",
         "name": "CCPA regulations / GPC",
         "cited": "see REFERENCES.md",
         "kind": "law",
-        "url": "https://cppa.ca.gov/regulations/"
+        "url": "https://cppa.ca.gov/regulations/",
+        "group": "law"
       },
       {
         "id": "github-actions",
         "name": "GitHub Actions security changes (changelog)",
         "cited": "pull_request_target default block 2026-12-02",
         "kind": "platform-policy",
-        "url": "https://github.blog/changelog/label/actions/"
+        "url": "https://github.blog/changelog/label/actions/",
+        "group": "platform"
+      },
+      {
+        "id": "cisa-kev",
+        "name": "CISA KEV catalog",
+        "cited": "live catalog",
+        "kind": "default",
+        "group": "security",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+      },
+      {
+        "id": "openssf-scorecard",
+        "name": "OpenSSF Scorecard",
+        "cited": "see REFERENCES.md",
+        "kind": "default",
+        "group": "security",
+        "url": "https://github.com/ossf/scorecard"
+      },
+      {
+        "id": "opentelemetry",
+        "name": "OpenTelemetry logs",
+        "cited": "log data model + semconv",
+        "kind": "default",
+        "group": "quality",
+        "url": "https://opentelemetry.io/docs/specs/otel/logs/data-model/"
+      },
+      {
+        "id": "rfc9457",
+        "name": "RFC 9457 Problem Details",
+        "cited": "RFC 9457",
+        "kind": "default",
+        "group": "quality",
+        "url": "https://www.rfc-editor.org/rfc/rfc9457"
+      },
+      {
+        "id": "dtcg",
+        "name": "Design Tokens (DTCG)",
+        "cited": "see REFERENCES.md",
+        "kind": "default",
+        "group": "quality",
+        "url": "https://www.designtokens.org/"
+      },
+      {
+        "id": "gdpr",
+        "name": "GDPR",
+        "cited": "2016/679",
+        "kind": "law",
+        "group": "law",
+        "url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj"
       }
-    ]
+    ],
+    "groups": {
+      "security": "Security standards",
+      "quality": "Formats & quality",
+      "platform": "Platform policies",
+      "law": "Law & regulation"
+    }
   }
 }

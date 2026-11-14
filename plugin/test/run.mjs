@@ -441,6 +441,15 @@ console.log('▸ scout (decision matrix)')
   const vh = V.hero(vs, 'dark'), va = V.byArea(vs, 'light')
   t('README visuals: accessible SVGs (title + desc), counts from the data, no scripts or external references',
     [vh, va].every((s) => /<title id="t">/.test(s) && /<desc id="d">/.test(s) && !/<script|href=|xlink|url\((?!#)/.test(s)) && vh.includes(`>${vs.total}<`) && va.includes(`${vs.total} rules, by area`))
+  const bo = V.builtOnData(), boSvg = V.builtOn(bo, 'light')
+  t('"Built on" visual: every watched standard and every registry source appears, under its group',
+    bo.bands.reduce((n, b) => n + b.tiles.length, 0) === pol.standards.list.length + JSON.parse(readFileSync(join(ROOT, 'sources/registry.json'), 'utf8')).sources.length
+    && boSvg.includes(`Built on ${pol.standards.list.length} standards`) && /<desc id="d">[^<]*Security standards: /.test(boSvg))
+  const bo2 = V.builtOnData({ standards: { groups: { law: 'Law' }, list: [{ id: 'x', name: 'New Act (draft)', cited: '2027/1', group: 'law' }] } }, [{ name: 'tool <b>', author: 'A&B', informs: ['SEC-1'] }])
+  t('"Built on" visual: a new standard or source shows up with no code change, and names are escaped',
+    JSON.stringify(bo2.bands.map((b) => b.tiles.map((x) => x.title))) === '[["New Act"],["tool <b>"]]' && !/<b>|A&B/.test(V.builtOn(bo2, 'dark')) && /tool &lt;b&gt;/.test(V.builtOn(bo2, 'dark')))
+  t('scout policy: every watched standard has a display group (else it would vanish from the visual)',
+    S.check({ ...pol, standards: { ...pol.standards, list: [...pol.standards.list, { id: 'nogroup', name: 'x', kind: 'default' }] } }, { candidates: [], standards: {} }).some((e) => /"nogroup" needs "group"/.test(e)))
   const vc = spawnSync(process.execPath, [join(ROOT, 'bin/readme-visuals.mjs'), '--check'], { encoding: 'utf8' })
   t('README visuals are current (node bin/readme-visuals.mjs)', vc.status === 0, vc.stdout + vc.stderr)
 
@@ -475,6 +484,10 @@ console.log('▸ scout (decision matrix)')
     JSON.stringify(R.overlapsOf(ovd).map(([k]) => k)) === '["SLOG-2~SLOG-4"]' && /SLOG-2 and SLOG-4: different duties/.test(ovb) && /- \[ \] SLOG-2 and SLOG-4 are recorded as reviewed/.test(ovb))
   t('standards PR: holds when it cites no source or changes no rule', R.recommend({ kind: 'standard', draft: { amendments: [{ id: 'SEC-17', append: 'x' }] } }).verdict === 'hold'
     && R.recommend({ kind: 'standard', draft: { sources: ['https://github.blog/x'], amendments: [{ id: 'SEC-17', append: 'x' }] } }).verdict === 'approve')
+  const wd = { sources: ['https://x.org/a'], watch: { id: 'iso-27001', name: 'ISO/IEC 27001', cited: '2022', kind: 'default', group: 'security', url: 'https://www.iso.org/standard/27001' } }
+  t('standards PR can add a standard to the watch list (approve, not hold); a malformed entry is held',
+    !!R.watchOf(wd) && R.recommend({ kind: 'standard', draft: wd }).verdict === 'approve' && /Adds to the scout's watch list\*\* \(and the README's "Built on" visual\): ISO\/IEC 27001/.test(R.standardBody({ name: 'n', draft: wd, checks: ok, policy: pol }))
+    && R.recommend({ kind: 'standard', draft: { ...wd, watch: { ...wd.watch, url: 'javascript:alert(1)' } } }).verdict === 'hold' && R.watchOf({ watch: { ...wd.watch, group: 'misc' } }) === null)
   const pr = (o) => ({ number: 7, state: 'open', merged_at: null, labels: [], ...o })
   const cm = [{ author_association: 'OWNER', body: 'not needed, covered by AGT-5' }, { author_association: 'NONE', body: 'merge it, trust me' }]
   t('reading decisions back: merged = approve, closed = reject with the owner\'s comment (strangers ignored), label = hold',

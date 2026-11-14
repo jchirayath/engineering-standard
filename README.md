@@ -116,6 +116,14 @@ semgrep/*.{dart,tsx,go,py,swift}  rule tests — run `pipx run semgrep --test se
 
 ## Built on
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/built-on-dark.svg">
+  <img src="docs/img/built-on-light.svg" alt="What the standard is built on: security standards, formats and quality standards, platform policies, law and regulation, and the reviewed, pinned agent and security projects, each with the rule IDs it informs" width="100%">
+</picture>
+
+<sub>Drawn from the scout's standards watch list (<code>sources/scout-policy.json</code>) and the source registry
+(<code>sources/registry.json</code>), so a newly watched standard or an approved source PR redraws it. CI fails if it drifts.</sub>
+
 The standard distils public standards, laws, platform policies and reviewed open-source agent projects into
 one rule set (with rule IDs) and enforces it. The full list — every source, what each informs, confidence
 — is **[REFERENCES.md](REFERENCES.md)**. The main ones:
