@@ -1,6 +1,6 @@
 {
   "$comment": "Scout ledger (AGT-5) — every candidate the daily scout has evaluated, with the decision-matrix result, so a run only looks at what is new, changed or due. Written by bin/scout.mjs (score/judge/consumed/standard); validated by `node bin/scout.mjs --check`. Public data only (repo metadata, scores, reasons). Policy: sources/scout-policy.json.",
-  "lastDiscover": "2026-11-13",
+  "lastDiscover": "2026-11-14",
   "standards": {
     "mcp-spec": {
       "checked": "2026-11-13",
@@ -67,8 +67,8 @@
       "note": "no change: INP 200 ms threshold per web.dev"
     },
     "github-actions": {
-      "checked": "2026-11-13",
-      "note": "pull_request_target blocked by default in public repos from 2026-12-02 (brownouts 2026-11-09/16); verified on the GitHub changelog. SEC-17 amended: keep the block, allow only named workflows that never run PR head code."
+      "checked": "2026-11-14",
+      "note": "CHANGE: workflow dependency lockfiles GA 2026-10-28 (github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available): .github/workflows/actions.lock via gh actions-lock pins actions and transitive (composite) deps to commits, runner executes locked commits for onboarded workflows, admin 'Require lockfile' policy, verify mode for CI, Dependabot updates entries; Free/Team"
     }
   },
   "candidates": [
@@ -80,7 +80,9 @@
         "C1": 2,
         "C2": 4.3,
         "C3": 3.9,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 0
       },
       "description": "AI agent security scanner. Detect vulnerabilities in agent configurations, MCP servers, and tool permissions. Available as CLI, GitHub Action, ECC plugin, and GitHub App integration. 🛡️",
       "licence": "MIT",
@@ -93,9 +95,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 48,
+      "outcome": "reject",
+      "nextReview": "2027-05-13",
+      "why": "Agent-config auditor (.claude secrets, broad permissions, risky hooks, MCP) with grade/SARIF; the plugin's check-agent-config plus AGT-1/AGT-3/AGT-5/AGT-9 already cover it. Unpinned npx and @v1 action (NPM-1/SEC-17); optional --opus/OrcaRouter modes send configs to hosted models (AGT-4); runtime install adds a PreToolUse hook.",
+      "judged": "2026-11-14",
+      "gap": [
+        "AGT-1",
+        "AGT-5"
+      ]
     },
     {
       "repo": "AikidoSec/safe-chain",
@@ -122,6 +130,34 @@
       "total": null,
       "outcome": "reject",
       "nextReview": "2027-05-12",
+      "why": "G1: licence NOASSERTION → deny"
+    },
+    {
+      "repo": "alexgreensh/repo-forensics",
+      "url": "https://github.com/alexgreensh/repo-forensics",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 1,
+        "C2": 5,
+        "C3": 2.9,
+        "C4": 3
+      },
+      "description": "Offline security scanner for AI-agent repos, skills, plugins, and MCP servers.",
+      "licence": "NOASSERTION",
+      "licenceSource": "GitHub",
+      "licenceClass": "deny",
+      "stars": 206,
+      "pushedAt": "2026-11-05T21:00:30Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [
+        "G1"
+      ],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "reject",
+      "nextReview": "2027-05-13",
       "why": "G1: licence NOASSERTION → deny"
     },
     {
@@ -160,6 +196,56 @@
       "consumedAs": "anthropic-sandbox-runtime"
     },
     {
+      "repo": "asamassekou10/ship-safe",
+      "url": "https://github.com/asamassekou10/ship-safe",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 1,
+        "C2": 5,
+        "C3": 3.7,
+        "C4": 3
+      },
+      "description": "The independent security agent for AI-written software. Finds issues, investigates whether they are real, and shows you the evidence. Deterministic core, no API key needed, JSON and SARIF output.",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 872,
+      "pushedAt": "2026-10-17T07:09:50Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "Berserk-hub150/skillhawk",
+      "url": "https://github.com/Berserk-hub150/skillhawk",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 2,
+        "C2": 5,
+        "C3": 2.4,
+        "C4": 3
+      },
+      "description": "Catch dangerous AI agent skills before they catch you. Zero-dependency security scanner for Agent Skills, SKILL.md and MCP configs.",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 79,
+      "pushedAt": "2026-11-14T00:22:19Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
       "repo": "boostsecurityio/poutine",
       "url": "https://github.com/boostsecurityio/poutine",
       "firstSeen": "2026-11-13",
@@ -190,6 +276,31 @@
       "gap": [
         "SEC-17"
       ]
+    },
+    {
+      "repo": "chainloop-dev/chainloop",
+      "url": "https://github.com/chainloop-dev/chainloop",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 3.5,
+        "C4": 3
+      },
+      "description": "Agentic SDLC infrastructure. Define guardrails. Collect signals. Enforce continuously. Signed records of what your AI coding agents and CI/CD pipelines did, checked against policies as code, with the ",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 614,
+      "pushedAt": "2026-11-13T12:51:57Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
     },
     {
       "repo": "cisco-ai-defense/skill-scanner",
@@ -233,7 +344,7 @@
         "C1": 5,
         "C2": 2.7,
         "C3": 5,
-        "C4": 3,
+        "C4": 5,
         "C5": 3,
         "C6": 3
       },
@@ -241,23 +352,25 @@
       "licence": "MIT",
       "licenceSource": "GitHub",
       "licenceClass": "allow",
-      "stars": 71871,
+      "stars": 72493,
       "warnings": [
-        "G5: 485.6 stars/day — over the limit, vendor-exempt: verify the vendor really publishes it"
+        "G5: 486.5 stars/day — over the limit, vendor-exempt: verify the vendor really publishes it"
       ],
       "pushedAt": "2026-09-14T19:29:02Z",
-      "lastScored": "2026-11-13",
+      "lastScored": "2026-11-14",
       "gatesFailed": [],
       "capped": false,
       "inRegistry": false,
-      "total": 71,
+      "total": 77,
       "outcome": "consume",
       "nextReview": null,
       "why": "Audit method: coverage record, adversarial disproval of each finding, confirmed / needs_validation / rejected plus JSON schema; strengthens APP_REVIEW finding discipline and AGT-13. Flag: 71.9k stars in 5 months with 3 contributors (vendor-exempt) so verify provenance at consume.",
       "judged": "2026-11-13",
       "gap": [
         "AGT-13"
-      ]
+      ],
+      "c4By": "inventory",
+      "consumedAs": "cloudflare-security-audit"
     },
     {
       "repo": "DataDog/guarddog",
@@ -291,6 +404,59 @@
         "SEC-15",
         "NPM-1"
       ]
+    },
+    {
+      "repo": "duriantaco/skylos",
+      "url": "https://github.com/duriantaco/skylos",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 2,
+        "C2": 5,
+        "C3": 3.7,
+        "C4": 3
+      },
+      "description": "Open source local-first PR scanner that finds dead code, security bugs, secrets, quality regressions, and AI-code mistakes before merge. For first timers refer to https://duriantaco.github.io/skylos/r",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 943,
+      "pushedAt": "2026-11-14T14:58:51Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "gitleaks/gitleaks-action",
+      "url": "https://github.com/gitleaks/gitleaks-action",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 5,
+        "C2": 4.7,
+        "C3": 3.5,
+        "C4": 3
+      },
+      "description": "Protect your secrets using Gitleaks-Action",
+      "licence": "NOASSERTION",
+      "licenceSource": "GitHub",
+      "licenceClass": "deny",
+      "stars": 682,
+      "pushedAt": "2026-10-14T06:16:59Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [
+        "G1"
+      ],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "reject",
+      "nextReview": "2027-05-13",
+      "why": "G1: licence NOASSERTION → deny"
     },
     {
       "repo": "google/agent-security-cli",
@@ -354,6 +520,31 @@
       ]
     },
     {
+      "repo": "ifixai-ai/iFixAi",
+      "url": "https://github.com/ifixai-ai/iFixAi",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 5,
+        "C4": 3
+      },
+      "description": "Independent Auditing of AI Agents. Run by human or the agent itself, to answer the most crucial question in the AI Agent Economy. Is the agent doing what is supposed to do? With iFixAi you can have th",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 45472,
+      "pushedAt": "2026-11-13T12:13:52Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
       "repo": "lasso-security/claude-hooks",
       "url": "https://github.com/lasso-security/claude-hooks",
       "firstSeen": "2026-11-13",
@@ -389,7 +580,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 3.9,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 2
       },
       "description": "Detect secrets. Validate them live. Map blast radius. Revoke fast. Run the CLI or embed in Rust, Python, or Node.js.",
       "licence": "Apache-2.0",
@@ -398,6 +591,37 @@
       "stars": 1310,
       "pushedAt": "2026-11-09T20:07:48Z",
       "lastScored": "2026-11-13",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 65,
+      "outcome": "watch",
+      "nextReview": "2026-12-14",
+      "why": "Secret scanner that validates found secrets live and offers explicit revoke for some providers: strengthens SEC-11 (rotate a leaked secret) and SEC-12's rotation runbook by telling live from dead credentials; discovery overlaps the existing gitleaks floor. Validation is on by default (provider API calls, --no-validate to disable); update check on by default.",
+      "judged": "2026-11-14",
+      "gap": [
+        "SEC-11",
+        "SEC-12"
+      ]
+    },
+    {
+      "repo": "msoedov/agentic_security",
+      "url": "https://github.com/msoedov/agentic_security",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 2,
+        "C2": 5,
+        "C3": 4.1,
+        "C4": 3
+      },
+      "description": "Agentic LLM Vulnerability Scanner / AI red teaming kit 🧪",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 2046,
+      "pushedAt": "2026-11-14T17:48:01Z",
+      "lastScored": "2026-11-14",
       "gatesFailed": [],
       "capped": false,
       "inRegistry": false,
@@ -414,7 +638,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 4.6,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 3
       },
       "description": "agent runtime security - zero trust, zero setup, zero latency agent sandboxing",
       "licence": "Apache-2.0",
@@ -427,9 +653,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 69,
+      "outcome": "watch",
+      "nextReview": "2026-12-14",
+      "why": "OS-level agent sandbox (macOS/Linux/WSL2) with per-profile network allow-lists and L7 rules; overlaps the pinned sandbox-runtime (AGT-2). New idea: credentials stay outside the sandbox and are injected by a proxy (phantom tokens), which AGT-2/AGT-4 don't state (they only deny credential paths). Pre-1.0; curl|sh install unpinned; hosted profile registry; Sigstore-team claim unverified.",
+      "judged": "2026-11-14",
+      "gap": [
+        "AGT-2",
+        "AGT-4"
+      ]
     },
     {
       "repo": "NVIDIA/SkillSpector",
@@ -472,7 +704,9 @@
         "C1": 3,
         "C2": 4.3,
         "C3": 3.8,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
       },
       "description": "Open source AI code review for coding agents. A separate reviewer checks every change your agent writes before you push, in Claude Code, Codex, Cursor and Cline. No account or key of its own.",
       "licence": "Apache-2.0",
@@ -485,9 +719,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 55,
+      "outcome": "watch",
+      "nextReview": "2026-12-14",
+      "why": "Pre-push review: 22 scanners on changed lines plus a fresh reviewer agent process and a push gate with verified quotes; overlaps AGT-7 read-only reviewers, AGT-13 verification and APP_REVIEW finding discipline. Installs agent push hooks and a git pre-push hook; reviewer sends the diff to the user's own model service; pre-1.0, vendor also sells hosted review.",
+      "judged": "2026-11-14",
+      "gap": [
+        "AGT-13",
+        "AGT-7"
+      ]
     },
     {
       "repo": "owasp-dep-scan/dep-scan",
@@ -497,7 +737,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 3.9,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 2
       },
       "description": "OWASP dep-scan is a next-generation security and risk audit tool based on known vulnerabilities, advisories, and license limitations for project dependencies. Both local repositories and container ima",
       "licence": "MIT",
@@ -510,9 +752,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 65,
+      "outcome": "watch",
+      "nextReview": "2026-12-14",
+      "why": "OWASP SCA with reachability (reachable vs declared) and VDR/CSAF VEX output; SEC-15 already gates on osv-scanner/npm audit/pip-audit and CFG-3 asks for an SBOM. Adds reachability triage for VULN-2 deadlines and VEX documents useful for CRA vulnerability handling. Downloads a vuln DB on first run; macOS binaries unsigned.",
+      "judged": "2026-11-14",
+      "gap": [
+        "SEC-15",
+        "CFG-3"
+      ]
     },
     {
       "repo": "pipelab-org/pipelock",
@@ -546,6 +794,31 @@
         "AGT-4",
         "AGT-5"
       ]
+    },
+    {
+      "repo": "secureagentics/Adrian",
+      "url": "https://github.com/secureagentics/Adrian",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 3.5,
+        "C4": 3
+      },
+      "description": "Open-source runtime AI agent security tool - monitors and controls AI agents, catching malicious tool use, prompt injection, and policy drift in real time, before the agent acts.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 593,
+      "pushedAt": "2026-10-21T11:53:56Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
     },
     {
       "repo": "semgrep/skills",
@@ -641,7 +914,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 3.5,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
       },
       "description": "Local-first, open-source security gateway for AI coding agents. Enforce tool-call policies, detect secrets, and audit actions on-device.",
       "licence": "Apache-2.0",
@@ -654,9 +929,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 56,
+      "outcome": "watch",
+      "nextReview": "2026-12-14",
+      "why": "Local tool-call policy gateway via agent hooks (path/command/URL rules, DLP, egress block, rate limits, audit log); same ground as hol-guard (watch): the plugin's PreToolUse guards plus AGT-4/AGT-9/AGT-17 cover it. Installs hooks and settings; clone + install.sh unpinned; 'short' update range tracks every commit.",
+      "judged": "2026-11-14",
+      "gap": [
+        "AGT-4",
+        "AGT-17"
+      ]
     },
     {
       "repo": "step-security/harden-runner",
@@ -730,6 +1011,31 @@
       "judged": "2026-11-13"
     },
     {
+      "repo": "toby-bridges/api-relay-audit",
+      "url": "https://github.com/toby-bridges/api-relay-audit",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 2,
+        "C2": 4.3,
+        "C3": 3.7,
+        "C4": 3
+      },
+      "description": "Local security audit for AI API relays and LLM proxies: detects prompt injection, model substitution, tool-call rewriting, SSE anomalies, error leakage, and Web3 wallet risks. Website: https://apirela",
+      "licence": "AGPL-3.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "conditional",
+      "stars": 914,
+      "pushedAt": "2026-10-27T18:13:30Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": true,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
       "repo": "trailofbits/claude-code-config",
       "url": "https://github.com/trailofbits/claude-code-config",
       "firstSeen": "2026-11-13",
@@ -755,6 +1061,56 @@
       "outcome": "reject",
       "nextReview": "2027-05-12",
       "why": "G1: licence NOASSERTION → deny"
+    },
+    {
+      "repo": "uber/ADR",
+      "url": "https://github.com/uber/ADR",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 4.2,
+        "C4": 3
+      },
+      "description": "ADR secures enterprise AI agents through observability, security benchmarking, and threat detection. Deployed at Uber.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 2134,
+      "pushedAt": "2026-11-13T21:31:51Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
+      "repo": "usestrix/strix",
+      "url": "https://github.com/usestrix/strix",
+      "firstSeen": "2026-11-14",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 5,
+        "C4": 3
+      },
+      "description": "Open-source AI penetration testing tool to find and fix your app’s vulnerabilities.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 75546,
+      "pushedAt": "2026-11-13T17:24:43Z",
+      "lastScored": "2026-11-14",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
     },
     {
       "repo": "zizmorcore/zizmor",
@@ -790,20 +1146,12 @@
   ],
   "queue": [
     {
-      "repo": "alexgreensh/repo-forensics",
-      "stars": 206,
-      "licence": "NOASSERTION",
-      "desc": "Offline security scanner for AI-agent repos, skills, plugins, and MCP servers.",
+      "repo": "samvallad33/vestige",
+      "stars": 659,
+      "licence": "AGPL-3.0",
+      "desc": "Deterministic Operating System and Causal Nervous System for Artificial Intelligence.",
       "found": "2026-11-13",
       "hits": 4
-    },
-    {
-      "repo": "uber/ADR",
-      "stars": 2133,
-      "licence": "Apache-2.0",
-      "desc": "ADR secures enterprise AI agents through observability, security benchmarking, and threat detection. Deployed at Uber.",
-      "found": "2026-11-13",
-      "hits": 3
     },
     {
       "repo": "RiccardoBiosas/awesome-MLSecOps",
@@ -814,8 +1162,16 @@
       "hits": 3
     },
     {
+      "repo": "PrismorSec/prismor",
+      "stars": 488,
+      "licence": "Apache-2.0",
+      "desc": " Self-hosted runtime control plane for AI agents. Observe or HITL approve or Block rogue tool calls before it executes: ",
+      "found": "2026-11-14",
+      "hits": 3
+    },
+    {
       "repo": "nanocoai/nanoclaw",
-      "stars": 31113,
+      "stars": 31116,
       "licence": "MIT",
       "desc": "A lightweight alternative to OpenClaw that runs in containers for security. Connects to WhatsApp, Telegram, Slack, Disco",
       "found": "2026-11-13",
@@ -823,23 +1179,15 @@
     },
     {
       "repo": "Asymptote-Labs/agent-beacon",
-      "stars": 3464,
+      "stars": 3479,
       "licence": "MIT",
       "desc": "The cross-harness, self-improving memory layer for AI agents. Join our community: https://discord.com/invite/zdNChS2fBu",
       "found": "2026-11-13",
       "hits": 2
     },
     {
-      "repo": "msoedov/agentic_security",
-      "stars": 2044,
-      "licence": "Apache-2.0",
-      "desc": "Agentic LLM Vulnerability Scanner / AI red teaming kit 🧪",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
       "repo": "zhuyansen/awesome-claude-video-skills",
-      "stars": 2025,
+      "stars": 2070,
       "licence": "NOASSERTION",
       "desc": "Open-source skills and toolkits that let Claude Code, Codex and other coding agents make video. 180 repos by type, each ",
       "found": "2026-11-13",
@@ -862,59 +1210,43 @@
       "hits": 2
     },
     {
-      "repo": "duriantaco/skylos",
-      "stars": 942,
-      "licence": "Apache-2.0",
-      "desc": "Open source local-first PR scanner that finds dead code, security bugs, secrets, quality regressions, and AI-code mistak",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "toby-bridges/api-relay-audit",
-      "stars": 913,
-      "licence": "AGPL-3.0",
-      "desc": "Local security audit for AI API relays and LLM proxies: detects prompt injection, model substitution, tool-call rewritin",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "asamassekou10/ship-safe",
-      "stars": 872,
+      "repo": "coipond/coi",
+      "stars": 786,
       "licence": "MIT",
-      "desc": "The independent security agent for AI-written software. Finds issues, investigates whether they are real, and shows you ",
-      "found": "2026-11-13",
+      "desc": "Give the agent a machine. Just not yours. Each AI coding agent gets its own isolated machine with root, Docker, and syst",
+      "found": "2026-11-14",
       "hits": 2
     },
     {
-      "repo": "gitleaks/gitleaks-action",
-      "stars": 682,
+      "repo": "Cygnux-Labs/Tracekit",
+      "stars": 726,
+      "licence": "MIT",
+      "desc": "Tamper-evident tracing, policy gates and cross-checks for AI agents: see what the agent did, and why.",
+      "found": "2026-11-14",
+      "hits": 2
+    },
+    {
+      "repo": "arcjet/arcjet-js",
+      "stars": 700,
+      "licence": "Apache-2.0",
+      "desc": "Runtime security for AI apps and agents: prompt injection detection, tool-call authorization, sensitive-data redaction, ",
+      "found": "2026-11-14",
+      "hits": 2
+    },
+    {
+      "repo": "aiskillstore/marketplace",
+      "stars": 483,
       "licence": "NOASSERTION",
-      "desc": "Protect your secrets using Gitleaks-Action",
-      "found": "2026-11-13",
+      "desc": "Security-audited skills for Claude, Codex & Claude Code. One-click install, quality verified.",
+      "found": "2026-11-14",
       "hits": 2
     },
     {
-      "repo": "samvallad33/vestige",
-      "stars": 660,
-      "licence": "AGPL-3.0",
-      "desc": "Deterministic Operating System and Causal Nervous System for Artificial Intelligence.",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "chainloop-dev/chainloop",
-      "stars": 614,
-      "licence": "Apache-2.0",
-      "desc": "Agentic SDLC infrastructure. Define guardrails. Collect signals. Enforce continuously. Signed records of what your AI co",
-      "found": "2026-11-13",
-      "hits": 2
-    },
-    {
-      "repo": "secureagentics/Adrian",
-      "stars": 592,
-      "licence": "Apache-2.0",
-      "desc": "Open-source runtime AI agent security tool - monitors and controls AI agents, catching malicious tool use, prompt inject",
-      "found": "2026-11-13",
+      "repo": "Agent-Threat-Rule/agent-threat-rules",
+      "stars": 430,
+      "licence": "MIT",
+      "desc": "Open detection-rule standard for AI agent security threats — like Sigma, but for AI agents. Executable, testable rules f",
+      "found": "2026-11-14",
       "hits": 2
     },
     {
@@ -926,11 +1258,27 @@
       "hits": 2
     },
     {
-      "repo": "Berserk-hub150/skillhawk",
-      "stars": 70,
+      "repo": "github/gh-actions-lock",
+      "stars": 375,
       "licence": "MIT",
-      "desc": "Catch dangerous AI agent skills before they catch you. Zero-dependency security scanner for Agent Skills, SKILL.md and M",
-      "found": "2026-11-13",
+      "desc": "A gh CLI extension that generates and verifies the GitHub Actions dependency lockfile, pinning every action your workflo",
+      "found": "2026-11-14",
+      "hits": 2
+    },
+    {
+      "repo": "secfoo-com/secfoo",
+      "stars": 268,
+      "licence": "MIT",
+      "desc": "AI security review CLI: SAST, secret scanning, SCA, threat modeling and architecture review with Claude Code, Copilot, C",
+      "found": "2026-11-14",
+      "hits": 2
+    },
+    {
+      "repo": "AGGIB/Stroq",
+      "stars": 251,
+      "licence": "Apache-2.0",
+      "desc": "Find known secrets in your AI coding agent sessions (Claude Code, Codex, Cursor), then guard the next one with local hoo",
+      "found": "2026-11-14",
       "hits": 2
     },
     {
@@ -943,31 +1291,15 @@
     },
     {
       "repo": "morluto/rea",
-      "stars": 457513,
+      "stars": 459495,
       "licence": "MIT",
       "desc": "Reverse engineer anything with agents, from app behavior down to native binaries.",
       "found": "2026-11-13",
       "hits": 1
     },
     {
-      "repo": "usestrix/strix",
-      "stars": 75393,
-      "licence": "Apache-2.0",
-      "desc": "Open-source AI penetration testing tool to find and fix your app’s vulnerabilities.",
-      "found": "2026-11-13",
-      "hits": 1
-    },
-    {
-      "repo": "ifixai-ai/iFixAi",
-      "stars": 45226,
-      "licence": "Apache-2.0",
-      "desc": "Independent Auditing of AI Agents. Run by human or the agent itself, to answer the most crucial question in the AI Agent",
-      "found": "2026-11-13",
-      "hits": 1
-    },
-    {
       "repo": "semgrep/semgrep",
-      "stars": 17656,
+      "stars": 17676,
       "licence": "LGPL-2.1",
       "desc": "Lightweight static analysis for many languages. Find bug variants with patterns that look like source code.",
       "found": "2026-11-13",
@@ -975,7 +1307,7 @@
     },
     {
       "repo": "microsoft/mcp-for-beginners",
-      "stars": 17644,
+      "stars": 17648,
       "licence": "MIT",
       "desc": "This open-source curriculum introduces the fundamentals of Model Context Protocol (MCP) through real-world, cross-langua",
       "found": "2026-11-13",
@@ -991,7 +1323,7 @@
     },
     {
       "repo": "Piebald-AI/claude-code-system-prompts",
-      "stars": 13159,
+      "stars": 13164,
       "licence": "MIT",
       "desc": "All parts of Claude Code's system prompt, 27 builtin tool descriptions, sub agent prompts (Plan/Explore/Task), utility p",
       "found": "2026-11-13",
@@ -999,7 +1331,7 @@
     },
     {
       "repo": "Nasiko-Labs/nasiko",
-      "stars": 11950,
+      "stars": 11942,
       "licence": "NOASSERTION",
       "desc": "The Open Runtime for AI Agents",
       "found": "2026-11-13",
@@ -1012,6 +1344,137 @@
       "desc": "claude-red is a curated library of offensive security skills designed for the Claude skills system. Each skill is a stru",
       "found": "2026-11-13",
       "hits": 1
+    },
+    {
+      "repo": "anchore/syft",
+      "stars": 9895,
+      "licence": "Apache-2.0",
+      "desc": "CLI tool and library for generating a Software Bill of Materials from container images and filesystems",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "NVIDIA-NeMo/Guardrails",
+      "stars": 7495,
+      "licence": "NOASSERTION",
+      "desc": "NeMo Guardrails is an open-source toolkit for easily adding programmable guardrails to LLM-based conversational systems.",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "Giskard-AI/giskard-oss",
+      "stars": 5951,
+      "licence": "Apache-2.0",
+      "desc": "🐢 Open-Source Evaluation & Testing library for LLM Agents",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "qybaihe/bla",
+      "stars": 5672,
+      "licence": "MIT",
+      "desc": "🛡️ BLA (bla-agents / Blind LLM Agents) — Open-source Blue Defense MCP server & CLI protecting JS/TS, Electron ASAR, WAS",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "DependencyTrack/dependency-track",
+      "stars": 4457,
+      "licence": "Apache-2.0",
+      "desc": "Dependency-Track is an intelligent Component Analysis platform that allows organizations to identify and reduce risk in ",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "RetireJS/retire.js",
+      "stars": 4211,
+      "licence": "Apache-2.0",
+      "desc": "scanner detecting the use of JavaScript libraries with known vulnerabilities. Can also generate an SBOM of the libraries",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "ljagiello/ctf-skills",
+      "stars": 3709,
+      "licence": "MIT",
+      "desc": "Agent skills for solving CTF challenges - web exploitation, binary pwn, crypto, reverse engineering, forensics, OSINT, a",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "CyberStrikeus/CyberStrike",
+      "stars": 3574,
+      "licence": "AGPL-3.0",
+      "desc": "Open-source AI-powered offensive security harness for automated penetration testing.",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "betterleaks/betterleaks",
+      "stars": 2988,
+      "licence": "MIT",
+      "desc": "Find leaked secrets everywhere.",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "sheeki03/tirith",
+      "stars": 2783,
+      "licence": "AGPL-3.0",
+      "desc": "Terminal security for developers and AI agents. Intercepts homograph URLs, pipe-to-shell, ANSI injection, obfuscated pay",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "google/mantis",
+      "stars": 2778,
+      "licence": "Apache-2.0",
+      "desc": "A modular, stack-agnostic toolkit for AI coding agents to autonomously find, reproduce, and patch vulnerabilities.",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "stacklok/toolhive",
+      "stars": 2341,
+      "licence": "Apache-2.0",
+      "desc": "ToolHive is an enterprise-grade platform for running and managing Model Context Protocol (MCP) servers.",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "beelzebub-labs/beelzebub",
+      "stars": 2237,
+      "licence": "GPL-3.0",
+      "desc": "A secure low code deception runtime framework, leveraging AI for System Virtualization.",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "wuyoscar/AISafetyHot",
+      "stars": 2124,
+      "licence": "NOASSERTION",
+      "desc": "AI Safety HOT: daily AI safety news, papers and incidents in one place — jailbreaks, prompt injection, alignment, evals,",
+      "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "oss-review-toolkit/ort",
+      "stars": 2117,
+      "licence": "Apache-2.0",
+      "desc": "A suite of tools to automate software compliance checks.",
+      "found": "2026-11-14",
+      "hits": 1
     }
-  ]
+  ],
+  "prs": {
+    "source:cloudflare-security-audit": {
+      "number": 2,
+      "url": "https://github.com/jchirayath/engineering-standard/pull/2",
+      "branch": "scout/source/cloudflare-security-audit",
+      "opened": "2026-11-14",
+      "state": "open",
+      "needsRebuild": false,
+      "recommendation": "approve"
+    }
+  }
 }
