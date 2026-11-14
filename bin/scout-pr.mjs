@@ -264,7 +264,7 @@ function applyStandardCmd(name) {
   const acc = overlapsOf(draft)
   if (acc.length) { const sim = readJSON(P('plugin/similarity.json')); for (const [k, why] of acc) sim.accepted[k] = why; writeJSON(P('plugin/similarity.json'), sim) }
   writeJSON(P('proposals/standards', `${name}.json`), { ...draft, applied: today() })
-  run('bin/build-rules.mjs')
+  run('bin/build-rules.mjs'); run('bin/readme-visuals.mjs')     // counts in the README images
   const checks = [['build-rules --check', run('bin/build-rules.mjs', '--check')], ['similar --check', run('bin/similar.mjs', '--check')], ['check-public', run('bin/check-public.mjs')]]
   console.log(`✓ applied standards change ${name}: amended ${amended.join(' ')}`)
   for (const [n, r] of checks) console.log(`${r.ok ? '  ✓' : '  ✗'} ${n}\n${r.out.trim().split('\n').map((l) => '    ' + l).join('\n')}`)

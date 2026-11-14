@@ -434,6 +434,16 @@ console.log('▸ scout (decision matrix)')
     /replying to this email does nothing/.test(em.body) && /merge = approve/.test(em.body) && /"approve <repo>"/.test(em.body) && /scout\.mjs decide/.test(em.body) && !/Reply or open/.test(em.body)
     && !/HOW TO DECIDE/.test(S.emailSummary({ standards: {}, candidates: [] }, pol, now).body))
 
+  // ── README visuals (bin/readme-visuals.mjs) ──
+  const V = await import(join(ROOT, 'bin/readme-visuals.mjs')), vs = V.stats()
+  t('README visuals: every section of the standard sits in exactly one pillar group, and the groups add up to the rule count',
+    vs.areas.reduce((n, g) => n + g.areas.reduce((m, a) => m + a.total, 0), 0) === vs.total && new Set(V.GROUPS.flatMap((g) => g.sections)).size === V.GROUPS.flatMap((g) => g.sections).length)
+  const vh = V.hero(vs, 'dark'), va = V.byArea(vs, 'light')
+  t('README visuals: accessible SVGs (title + desc), counts from the data, no scripts or external references',
+    [vh, va].every((s) => /<title id="t">/.test(s) && /<desc id="d">/.test(s) && !/<script|href=|xlink|url\((?!#)/.test(s)) && vh.includes(`>${vs.total}<`) && va.includes(`${vs.total} rules, by area`))
+  const vc = spawnSync(process.execPath, [join(ROOT, 'bin/readme-visuals.mjs'), '--check'], { encoding: 'utf8' })
+  t('README visuals are current (node bin/readme-visuals.mjs)', vc.status === 0, vc.stdout + vc.stderr)
+
   // ── decisions as pull requests (bin/scout-pr.mjs) ──
   const R = await import(join(ROOT, 'bin/scout-pr.mjs'))
   const ent = { repo: 'acme/tool', outcome: 'consume', total: 77, consumedAs: 'acme-tool', scores: { C1: 5, C2: 3, C3: 4, C4: 5, C5: 3, C6: 3 }, description: 'a tool', licence: 'MIT', why: 'fills AGT-2 gap' }

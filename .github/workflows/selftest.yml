@@ -27,6 +27,8 @@ jobs:
         run: node bin/sources.mjs --check
       - name: Scout — decision matrix valid, ledger consistent, README matrix current
         run: node bin/scout.mjs --check
+      - name: README visuals — generated SVGs match build/rules.json and the registry
+        run: node bin/readme-visuals.mjs --check
       - name: Plugin — MCP server, hooks, parser self-test
         run: node plugin/test/run.mjs --offline
       - name: Lint rules pass their must-fail / must-pass tests

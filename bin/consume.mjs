@@ -317,7 +317,7 @@ function applyCmd(id, { dryRun = false } = {}) {
   const justified = (draft.newRules || []).filter((r) => r.whyNew && r.similar?.[0]?.score >= readJSON(P('plugin/similarity.json')).threshold)
   if (justified.length) { const sim = readJSON(P('plugin/similarity.json')); for (const r of justified) sim.accepted[`${r.similar[0].id}~${r.id}`] = r.whyNew; writeJSON(P('plugin/similarity.json'), sim) }
   const run = (f, ...a) => { try { return { ok: true, out: execFileSync('node', [P(f), ...a], { cwd: ROOT, encoding: 'utf8' }) } } catch (e) { return { ok: false, out: `${e.stdout || ''}${e.stderr || ''}` } } }
-  run('bin/build-rules.mjs'); run('bin/sources.mjs', '--render')
+  run('bin/build-rules.mjs'); run('bin/sources.mjs', '--render'); if (existsSync(P('bin/readme-visuals.mjs'))) run('bin/readme-visuals.mjs')
   const checks = [['build-rules --check', run('bin/build-rules.mjs', '--check')], ['similar --check', run('bin/similar.mjs', '--check')], ['sources --check', run('bin/sources.mjs', '--check')], ['check-public', run('bin/check-public.mjs')]]
   console.log(`✓ applied ${id}: ${added.length} new rule(s) ${added.join(' ')}${amended.length ? ` · amended ${amended.join(' ')}` : ''} · disposition ${entry.disposition}`)
   for (const [n, r] of checks) console.log(`${r.ok ? '  ✓' : '  ✗'} ${n}\n${r.out.trim().split('\n').map((l) => '    ' + l).join('\n')}`)

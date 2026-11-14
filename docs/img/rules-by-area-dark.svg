@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1028" viewBox="0 0 1200 1028" role="img" aria-labelledby="t d">
+  <title id="t">Rules by area</title>
+  <desc id="d">356 rules across 26 areas, grouped by pillar. Secure: 161; Optimized: 46; Shared: 38; Observable: 26; Consistent: 54; Proven: 31. Solid bar segments are rules that also apply in quick mode (141).</desc>
+  <rect width="1200" height="1028" rx="20" fill="#1a1a19"/>
+  <rect x="0.5" y="0.5" width="1199" height="1027" rx="20" fill="none" stroke="#2c2c2a"/>
+  <text x="40" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#f0efec">356 rules, by area</text>
+  <g transform="translate(40,62)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">
+    <rect width="22" height="12" rx="3" fill="#3987e5"/><text x="30" y="11">applies in quick mode too</text>
+    <rect x="200" width="22" height="12" rx="3" fill="#3987e5" opacity="0.45"/><text x="230" y="11">client mode only</text>
+  </g>
+  <line x1="370" y1="92" x2="370" y2="998" stroke="#383835" stroke-width="1"/>
+  <g transform="translate(40,92)"><rect y="6" width="12" height="12" rx="3" fill="#3987e5"/><text x="20" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Secure</text><text x="79" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#898781">161 rules</text></g>
+  <g><title>§2 Secure code: 32 rules, 27 in quick mode</title>
+    <text x="60" y="137" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§2 Secure code</text>
+    <rect x="370" y="125" width="440.8" height="16" rx="4" fill="#3987e5"/>
+    <rect x="812.8" y="125" width="80.8" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="901.6" y="137" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">32 · 27 quick</text></g>
+  <g><title>§2A Websites: 22 rules, 0 in quick mode</title>
+    <text x="60" y="163" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§2A Websites</text>
+    
+    <rect x="370.0" y="151" width="360.0" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="738.0" y="163" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">22</text></g>
+  <g><title>§2B Verified security controls: 44 rules, 25 in quick mode</title>
+    <text x="60" y="189" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§2B Verified security controls</text>
+    <rect x="370" y="177" width="408.1" height="16" rx="4" fill="#3987e5"/>
+    <rect x="780.1" y="177" width="309.9" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="1098.0" y="189" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">44 · 25 quick</text></g>
+  <g><title>§2C AI agents that build the code: 17 rules, 16 in quick mode</title>
+    <text x="60" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§2C AI agents that build the code</text>
+    <rect x="370" y="203" width="260.8" height="16" rx="4" fill="#3987e5"/>
+    <rect x="632.8" y="203" width="15.4" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="656.2" y="215" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">17 · 16 quick</text></g>
+  <g><title>§2D LLM features in apps: 9 rules, 4 in quick mode</title>
+    <text x="60" y="241" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§2D LLM features in apps</text>
+    <rect x="370" y="229" width="64.5" height="16" rx="4" fill="#3987e5"/>
+    <rect x="436.5" y="229" width="80.8" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="525.3" y="241" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">9 · 4 quick</text></g>
+  <g><title>§2E Supply chain &amp; lifecycle: 11 rules, 2 in quick mode</title>
+    <text x="60" y="267" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§2E Supply chain &amp; lifecycle</text>
+    <rect x="370" y="255" width="31.7" height="16" rx="4" fill="#3987e5"/>
+    <rect x="403.7" y="255" width="146.3" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="558.0" y="267" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">11 · 2 quick</text></g>
+  <g><title>§2F Privacy &amp; regulation: 7 rules, 0 in quick mode</title>
+    <text x="60" y="293" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§2F Privacy &amp; regulation</text>
+    
+    <rect x="370.0" y="281" width="114.5" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="492.5" y="293" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">7</text></g>
+  <g><title>§6C Mobile &amp; client security: 12 rules, 3 in quick mode</title>
+    <text x="60" y="319" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6C Mobile &amp; client security</text>
+    <rect x="370" y="307" width="48.1" height="16" rx="4" fill="#3987e5"/>
+    <rect x="420.1" y="307" width="146.3" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="574.4" y="319" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">12 · 3 quick</text></g>
+  <g><title>§6I Vulnerability management &amp; disclosure: 7 rules, 1 in quick mode</title>
+    <text x="60" y="345" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6I Vulnerability management &amp; disclosure</text>
+    <rect x="370" y="333" width="15.4" height="16" rx="4" fill="#3987e5"/>
+    <rect x="387.4" y="333" width="97.2" height="16" rx="4" fill="#3987e5" opacity="0.45"/>
+    <text x="492.5" y="345" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">7 · 1 quick</text></g>
+  <g transform="translate(40,366)"><rect y="6" width="12" height="12" rx="3" fill="#d95926"/><text x="20" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Optimized</text><text x="104" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#898781">46 rules</text></g>
+  <g><title>§3 Optimized code: 27 rules, 4 in quick mode</title>
+    <text x="60" y="411" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§3 Optimized code</text>
+    <rect x="370" y="399" width="64.5" height="16" rx="4" fill="#d95926"/>
+    <rect x="436.5" y="399" width="375.4" height="16" rx="4" fill="#d95926" opacity="0.45"/>
+    <text x="819.8" y="411" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">27 · 4 quick</text></g>
+  <g><title>§3A Clean code &amp; maintainability: 13 rules, 6 in quick mode</title>
+    <text x="60" y="437" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§3A Clean code &amp; maintainability</text>
+    <rect x="370" y="425" width="97.2" height="16" rx="4" fill="#d95926"/>
+    <rect x="469.2" y="425" width="113.5" height="16" rx="4" fill="#d95926" opacity="0.45"/>
+    <text x="590.7" y="437" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">13 · 6 quick</text></g>
+  <g><title>§3B Framework &amp; platform compatibility: 6 rules, 2 in quick mode</title>
+    <text x="60" y="463" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§3B Framework &amp; platform compatibility</text>
+    <rect x="370" y="451" width="31.7" height="16" rx="4" fill="#d95926"/>
+    <rect x="403.7" y="451" width="64.5" height="16" rx="4" fill="#d95926" opacity="0.45"/>
+    <text x="476.2" y="463" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">6 · 2 quick</text></g>
+  <g transform="translate(40,484)"><rect y="6" width="12" height="12" rx="3" fill="#199e70"/><text x="20" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Shared</text><text x="79" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#898781">38 rules</text></g>
+  <g><title>§1 Platform core: 20 rules, 10 in quick mode</title>
+    <text x="60" y="529" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§1 Platform core</text>
+    <rect x="370" y="517" width="162.6" height="16" rx="4" fill="#199e70"/>
+    <rect x="534.6" y="517" width="162.6" height="16" rx="4" fill="#199e70" opacity="0.45"/>
+    <text x="705.3" y="529" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">20 · 10 quick</text></g>
+  <g><title>§6K Backend platforms: 18 rules, 11 in quick mode</title>
+    <text x="60" y="555" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6K Backend platforms</text>
+    <rect x="370" y="543" width="179.0" height="16" rx="4" fill="#199e70"/>
+    <rect x="551.0" y="543" width="113.5" height="16" rx="4" fill="#199e70" opacity="0.45"/>
+    <text x="672.5" y="555" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">18 · 11 quick</text></g>
+  <g transform="translate(40,576)"><rect y="6" width="12" height="12" rx="3" fill="#c98500"/><text x="20" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Observable</text><text x="113" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#898781">26 rules</text></g>
+  <g><title>§5 Unified logging, audit &amp; telemetry: 10 rules, 3 in quick mode</title>
+    <text x="60" y="621" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§5 Unified logging, audit &amp; telemetry</text>
+    <rect x="370" y="609" width="48.1" height="16" rx="4" fill="#c98500"/>
+    <rect x="420.1" y="609" width="113.5" height="16" rx="4" fill="#c98500" opacity="0.45"/>
+    <text x="541.6" y="621" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">10 · 3 quick</text></g>
+  <g><title>§6E Operations &amp; delivery: 9 rules, 0 in quick mode</title>
+    <text x="60" y="647" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6E Operations &amp; delivery</text>
+    
+    <rect x="370.0" y="635" width="147.3" height="16" rx="4" fill="#c98500" opacity="0.45"/>
+    <text x="525.3" y="647" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">9</text></g>
+  <g><title>§6H Reliability &amp; incidents: 7 rules, 0 in quick mode</title>
+    <text x="60" y="673" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6H Reliability &amp; incidents</text>
+    
+    <rect x="370.0" y="661" width="114.5" height="16" rx="4" fill="#c98500" opacity="0.45"/>
+    <text x="492.5" y="673" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">7</text></g>
+  <g transform="translate(40,694)"><rect y="6" width="12" height="12" rx="3" fill="#d55181"/><text x="20" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Consistent</text><text x="113" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#898781">54 rules</text></g>
+  <g><title>§6 UX consistency, accessibility, docs: 8 rules, 1 in quick mode</title>
+    <text x="60" y="739" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6 UX consistency, accessibility, docs</text>
+    <rect x="370" y="727" width="15.4" height="16" rx="4" fill="#d55181"/>
+    <rect x="387.4" y="727" width="113.5" height="16" rx="4" fill="#d55181" opacity="0.45"/>
+    <text x="508.9" y="739" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">8 · 1 quick</text></g>
+  <g><title>§6A Design system &amp; theming: 12 rules, 9 in quick mode</title>
+    <text x="60" y="765" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6A Design system &amp; theming</text>
+    <rect x="370" y="753" width="146.3" height="16" rx="4" fill="#d55181"/>
+    <rect x="518.3" y="753" width="48.1" height="16" rx="4" fill="#d55181" opacity="0.45"/>
+    <text x="574.4" y="765" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">12 · 9 quick</text></g>
+  <g><title>§6B API contract: 12 rules, 0 in quick mode</title>
+    <text x="60" y="791" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6B API contract</text>
+    
+    <rect x="370.0" y="779" width="196.4" height="16" rx="4" fill="#d55181" opacity="0.45"/>
+    <text x="574.4" y="791" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">12</text></g>
+  <g><title>§6G In-app help &amp; documentation: 10 rules, 0 in quick mode</title>
+    <text x="60" y="817" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6G In-app help &amp; documentation</text>
+    
+    <rect x="370.0" y="805" width="163.6" height="16" rx="4" fill="#d55181" opacity="0.45"/>
+    <text x="541.6" y="817" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">10</text></g>
+  <g><title>§6J App stores &amp; Flutter: 12 rules, 1 in quick mode</title>
+    <text x="60" y="843" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6J App stores &amp; Flutter</text>
+    <rect x="370" y="831" width="15.4" height="16" rx="4" fill="#d55181"/>
+    <rect x="387.4" y="831" width="179.0" height="16" rx="4" fill="#d55181" opacity="0.45"/>
+    <text x="574.4" y="843" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">12 · 1 quick</text></g>
+  <g transform="translate(40,864)"><rect y="6" width="12" height="12" rx="3" fill="#008300"/><text x="20" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Proven</text><text x="79" y="17" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#898781">31 rules</text></g>
+  <g><title>§4 Correctness &amp; honesty: 7 rules, 6 in quick mode</title>
+    <text x="60" y="909" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§4 Correctness &amp; honesty</text>
+    <rect x="370" y="897" width="97.2" height="16" rx="4" fill="#008300"/>
+    <rect x="469.2" y="897" width="15.4" height="16" rx="4" fill="#008300" opacity="0.45"/>
+    <text x="492.5" y="909" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">7 · 6 quick</text></g>
+  <g><title>§6D Testing standard: 16 rules, 5 in quick mode</title>
+    <text x="60" y="935" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6D Testing standard</text>
+    <rect x="370" y="923" width="80.8" height="16" rx="4" fill="#008300"/>
+    <rect x="452.8" y="923" width="179.0" height="16" rx="4" fill="#008300" opacity="0.45"/>
+    <text x="639.8" y="935" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">16 · 5 quick</text></g>
+  <g><title>§6F Repo hygiene: 4 rules, 2 in quick mode</title>
+    <text x="60" y="961" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§6F Repo hygiene</text>
+    <rect x="370" y="949" width="31.7" height="16" rx="4" fill="#008300"/>
+    <rect x="403.7" y="949" width="31.7" height="16" rx="4" fill="#008300" opacity="0.45"/>
+    <text x="443.5" y="961" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">4 · 2 quick</text></g>
+  <g><title>§7 Enforcement: 4 rules, 3 in quick mode</title>
+    <text x="60" y="987" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13" fill="#c3c2b7">§7 Enforcement</text>
+    <rect x="370" y="975" width="48.1" height="16" rx="4" fill="#008300"/>
+    <rect x="420.1" y="975" width="15.4" height="16" rx="4" fill="#008300" opacity="0.45"/>
+    <text x="443.5" y="987" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">4 · 3 quick</text></g>
+</svg>

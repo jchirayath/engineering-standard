@@ -1,4 +1,20 @@
-# engineering-standard
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/img/hero-dark.svg">
+    <img src="docs/img/hero-light.svg" alt="engineering-standard: rule counts, how many are checked by tooling, reviewed sources and the daily security scout" width="100%">
+  </picture>
+</h1>
+
+<p align="center">
+  <a href="https://github.com/jchirayath/engineering-standard/actions/workflows/selftest.yml"><img src="https://github.com/jchirayath/engineering-standard/actions/workflows/selftest.yml/badge.svg?branch=main" alt="selftest"></a>
+  <br>
+  <a href="#use-it-in-your-apps"><b>Get started</b></a> ·
+  <a href="ENGINEERING_STANDARD.md">The standard</a> ·
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#claude-code-plugin-every-agent-gets-the-standard">Plugin</a> ·
+  <a href="#daily-scout--keeping-the-standard-current">Daily scout</a> ·
+  <a href="REFERENCES.md">Sources</a>
+</p>
 
 An engineering standard for apps built with AI coding agents — **356 rules** (secure · optimized · shared ·
 observable · consistent) — plus the kit and the Claude Code plugin that make it mechanical: hooks that block
@@ -8,6 +24,32 @@ design-token tooling and CI checks.
 Documents: [ENGINEERING_STANDARD.md](ENGINEERING_STANDARD.md) (what to build to) · [APP_REVIEW.md](APP_REVIEW.md)
 (how to review against it) · [MODES.md](MODES.md) (which rules apply in quick vs client mode) ·
 [REFERENCES.md](REFERENCES.md) (every source it is built on, and why).
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph kit["This repo"]
+    STD["ENGINEERING_STANDARD.md<br/>the rules"] --> RJ["build/rules.json"]
+    SRC["Reviewed sources<br/>+ daily scout"] -. "PRs you approve" .-> STD
+  end
+  subgraph app["Your app repo"]
+    AG["Claude Code<br/>(or any MCP agent)"] --> CODE["Code"]
+    CODE --> CHK["tools/standard/check.sh<br/>tokens · drift · tests · semgrep"]
+    CHK --> CI["CI on every push"]
+  end
+  RJ -- "MCP: rules_for · rule · mode" --> AG
+  RJ -- "session start: pillars + mode's rules" --> AG
+  HK["Plugin hooks<br/>block secrets, --no-verify,<br/>curl | sh, risky packages"] -- "guard every tool call" --> AG
+  kit -- "adopt.sh (pinned release)" --> app
+```
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/rules-by-area-dark.svg">
+  <img src="docs/img/rules-by-area-light.svg" alt="Rules per area of the standard, grouped by pillar (Secure, Optimized, Shared, Observable, Consistent, Proven); solid segments are the rules that also apply in quick mode" width="100%">
+</picture>
+
+<sub>Generated from <code>build/rules.json</code> by <code>bin/readme-visuals.mjs</code>; CI fails if it drifts. **Quick mode** (prototypes, internal tools) is the security floor; **client mode** (real users) is every rule — see <a href="MODES.md">MODES.md</a>.</sub>
 
 ## Use it in your apps
 
@@ -97,6 +139,10 @@ one rule set (with rule IDs) and enforces it. The full list — every source, wh
   [superpowers](https://github.com/obra/superpowers) · [grill-me](https://github.com/mattpocock/skills) ·
   [ponytail](https://github.com/DietrichGebert/ponytail) · [caveman](https://github.com/JuliusBrussee/caveman) ·
   [frontend-design & skill-creator](https://github.com/anthropics/skills)
+- **Agent & supply-chain security (reviewed, pinned):** [sandbox-runtime](https://github.com/anthropics/sandbox-runtime) (AGT-2) ·
+  [Cisco skill-scanner](https://github.com/cisco-ai-defense/skill-scanner) and [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) (AGT-5) ·
+  [Cloudflare security-audit skill](https://github.com/cloudflare/security-audit-skill) (AGT-2, AGT-13) ·
+  [Trail of Bits skills](https://github.com/trailofbits/skills) · GitHub Actions [workflow lockfiles](https://github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available/) (SEC-17)
 - **Claude Code plugins used alongside:** [official marketplace](https://github.com/anthropics/claude-plugins-official) —
   feature-dev, security-review, code-review, simplify, supabase, azure, vercel, playwright, plugin-dev
   ([table](REFERENCES.md#claude-code-plugins--skills-the-standard-uses))
@@ -202,6 +248,9 @@ Set `design/tokens.config.json` → `{ "platforms": [...], "out": { "dart": "lib
       - run: tools/standard/check.sh
         env: { CI: "true" }
 ```
+SEC-17 also asks for an Actions lockfile (`gh actions-lock` → `.github/workflows/actions.lock`), so the actions'
+own dependencies run at recorded commits too. CI checks that it's current; client mode turns on the "Require
+lockfile" policy.
 
 ## Claude Code plugin (every agent gets the standard)
 
@@ -284,7 +333,24 @@ pinned source is re-reviewed before its pin moves. `node bin/sources.mjs --check
 ## Daily scout — keeping the standard current
 
 The gateway above handles one source you already found. The scout finds the sources, decides which are worth
-consuming, and keeps a record of every decision (standard §7.5). Run it daily, on a schedule or by hand:
+consuming, and keeps a record of every decision (standard §7.5).
+
+```mermaid
+flowchart LR
+  A["07:30 LaunchAgent"] --> B["Discover<br/>GitHub search · watched orgs · web"]
+  B --> C{"Hard gates<br/>licence · archived · alive<br/>age · star-farming · fork"}
+  C -- fail --> R["Rejected<br/>(recorded with why)"]
+  C -- pass --> D["Score 0–100<br/>provenance · maintenance · adoption<br/>surface · gap fit · novelty"]
+  D -- "< 50" --> R
+  D -- "50–69" --> W["Watch<br/>re-check in 30 days"]
+  D -- "≥ 70" --> E["Intake review<br/>+ proposal"]
+  E --> F["PR per proposal<br/>applied on a branch from main<br/>every check run"]
+  F --> G(["You: merge · close · hold"])
+  G -- "next run reads it back" --> L[("sources/candidates.json")]
+  F -. email with links .-> G
+```
+
+Run it daily, on a schedule or by hand:
 
 ```
 /engineering-standard:scout                       # the whole run; it stops before anything is applied or committed
@@ -418,6 +484,9 @@ job; never commit with `--no-verify` (the plugin's Bash guard blocks it for agen
   under `color.domain.*` / `icon.domain.*`.
 - **Rules**: every rule gets `ruleid:` and `ok:` cases in the matching fixture; `semgrep --test semgrep/`
   must pass. Bump `VERSION`, then re-run `adopt.sh` in each repo.
+- **README images** (`docs/img/*.svg`) are generated from `build/rules.json` and `sources/registry.json`: after a
+  rule or source change run `node bin/readme-visuals.mjs` (`consume.mjs apply` and the scout's PRs do it for you;
+  CI fails on stale images).
 - Put this folder in its own git repo so CI and other machines can pin a version.
 
 ## Licence
