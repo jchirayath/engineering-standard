@@ -1442,7 +1442,10 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   (WEB-9). Public GitHub repos enable private vulnerability reporting (GitHub offers it only for public repos).
 - **VULN-2 MUST** **Fix-time targets from discovery** (scanner, report, or advisory): **Critical 7 days ·
   High 30 days · Medium 90 days · Low next planned release.** Actively exploited (CISA KEV) = Critical
-  regardless of score. Overdue items are reported weekly until closed.
+  regardless of score. Overdue items are reported weekly until closed. A KEV entry that CISA marks for
+  forensic triage (BOD 26-04) is fixed or mitigated within 3 days, and each affected deployment is checked
+  for signs of exploitation since the flaw's KEV date before the finding closes; any sign of compromise
+  starts the REL-3 incident process.
 - **VULN-3 MUST** **Continuous monitoring of what is already shipped:** Dependabot/Renovate security alerts
   on, and a scheduled scan (weekly) of the default branch and the latest release with `osv-scanner` /
   `govulncheck` — a CVE published after release still has to be found.
