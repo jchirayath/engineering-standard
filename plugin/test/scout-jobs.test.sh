@@ -53,9 +53,10 @@ restore_code locked >/dev/null 2>&1; rc=$?; chmod 755 "$WT/bin/locked"
 check "restore_code fails closed when the reset can't be completed" '[ $rc -ne 0 ]'
 
 # credential helper: token comes from the environment, prints only for "get"
-PR_TOKEN=tok_123
+# The value is made up at run time: no credential-shaped literal sits in the repo for secret scanners to flag.
+PR_TOKEN="fixture$RANDOM$RANDOM"
 out="$(printf 'protocol=https\nhost=github.com\n\n' | SCOUT_PR_TOKEN="$PR_TOKEN" git -c credential.helper= -c 'credential.helper=!f() { test "$1" = get && printf "username=x-access-token\npassword=%s\n" "$SCOUT_PR_TOKEN"; }; f' credential fill 2>/dev/null)"
-check "credential helper supplies the token" 'echo "$out" | grep -q "password=tok_123"'
+check "credential helper supplies the token" '[ "$(echo "$out" | sed -n "s/^password=//p")" = "$PR_TOKEN" ]'
 
 # empty array under set -u (bash 3.2)
 draft=(); x=(a ${draft[@]+"${draft[@]}"} b)
