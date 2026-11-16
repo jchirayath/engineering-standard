@@ -1,0 +1,21 @@
+{
+  "standard": "cisa-kev",
+  "date": "2026-11-15",
+  "title": "Fix KEV entries marked forensic triage in 3 days and check for compromise",
+  "summary": "CISA's BOD 26-04 'Prioritizing Security Updates Based on Risk' (issued 2026-06-10) replaces BOD 22-01 and BOD 19-02. KEV status is now one of four SSVC-style factors (exposure, KEV status, exploit automation, technical impact) that set graduated deadlines. KEV entries now cite BOD 26-04, and some carry a '& forensic triage' marking: remediate or mitigate within three days and carry out a forensic triage. VULN-2 treats every KEV entry as Critical (7 days) and never asks whether the flaw was already exploited, so a patched-but-compromised system can be closed as fixed. The directive binds US federal agencies only; this amendment borrows its stricter timeline and compromise check for the subset CISA itself flags.",
+  "sources": [
+    "https://www.cisa.gov/news-events/directives/bod-26-04-prioritizing-security-updates-based-risk",
+    "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
+  ],
+  "amendments": [
+    {
+      "id": "VULN-2",
+      "append": "A KEV entry that CISA marks for forensic triage (BOD 26-04) is fixed or mitigated within 3 days, and each affected deployment is checked for signs of exploitation since the flaw's KEV date before the finding closes; any sign of compromise starts the REL-3 incident process."
+    }
+  ],
+  "recommendation": {
+    "verdict": "approve",
+    "why": "Apps using the standard stop treating a patched but possibly compromised system as fixed, for the small set of KEV entries CISA flags as needing forensic triage. The main risk is cost: a 3-day deadline and a log review are demanding for a small team, and CISA's table of tier deadlines was not read (it is an image), so only the 3-day forensic-triage tier is relied on."
+  },
+  "applied": "2026-11-15"
+}
