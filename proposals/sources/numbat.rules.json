@@ -1,0 +1,36 @@
+{
+  "name": "Perplexity numbat",
+  "author": "Perplexity AI",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "main@ebb511f",
+  "repo": "perplexityai/numbat",
+  "url": "https://github.com/perplexityai/numbat",
+  "commit": "ebb511ff5b4d9ed4b1c732460e128a8601091fed",
+  "license": "Apache-2.0",
+  "paths": [
+    "README.md",
+    "SECURITY.md",
+    "internal/hook/install.go",
+    "cmd/numbat/hook.go",
+    "cmd/numbat/sink.go"
+  ],
+  "informs": [
+    "AGT-10",
+    "AGT-9"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-10",
+      "append": "An agent CLI that exports no OpenTelemetry is covered by a local monitor that records its hook events or on-disk session files into the same store; the monitor is installed from a pinned, checksum-verified release and the hooks it writes are reviewed as agent configuration (AGT-9). A monitor-only hook, or one in a mode that lets an action through when its rule engine errors, is audit evidence and is never cited as the enforcement of a MUST rule."
+    }
+  ],
+  "notes": "Not installed by the scout. `numbat hook install` writes 11 command hooks into the user-level Claude Code settings.json (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, PostToolUseFailure, PermissionRequest, PermissionDenied, Stop, SessionEnd, SubagentStart, SubagentStop), so it runs on every prompt and every subagent. Hook stdout is reserved for the agent protocol; monitor mode returns no decision. Enforce mode is opt-in, only for operator-copied rules marked enforce: true, and fails open on malformed payloads and decision errors (cmd/numbat/hook.go). Network: only the operator-configured HTTP sink (bearer or HMAC secrets from env, an allowInsecure option exists); the 18 hosts the fetch found are test fixtures or doc URLs. `go install …@latest` in the README is unpinned; release binaries carry SHA-256 checksums. 171 of 490 files were not read (200-file limit).",
+  "rationale": "Distilled as a tool-agnostic amendment to AGT-10, following the owner's 2026-11-13 harden-runner decision to state the principle rather than name the product. AGT-10 asks for OpenTelemetry export only, which many agent CLIs lack; numbat shows that hook events and on-disk session files give the same audit trail, and its fail-open enforcement shows why a monitor must not be mistaken for a control. Tracekit (watch, 64) adds signed records but routes approvals through vendor services and carries agent-directed promotion; uber/ADR (watch, 60) sends sessions to hosted LLMs; hol-guard, prismor and solongate (watch) are runtime guards that overlap the plugin's PreToolUse hooks.",
+  "recommendation": {
+    "verdict": "hold",
+    "why": "An app team gains an audit trail for agent CLIs that have no OpenTelemetry, and a clear statement that monitor-only or fail-open hooks don't count as enforcement. The main risk is that the matrix's 73 rests on C4 4 while the fetch reported hooks as unknown: the tool installs hooks on every prompt and subagent and documents an unpinned @latest install, which would put C4 at 2 and the total at 67 (watch)."
+  },
+  "newRules": [],
+  "applied": "2026-11-16"
+}
