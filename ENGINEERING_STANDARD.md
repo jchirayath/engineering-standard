@@ -1448,7 +1448,13 @@ the feature — in the same PR, by whoever builds it (person or Claude) — not 
   starts the REL-3 incident process.
 - **VULN-3 MUST** **Continuous monitoring of what is already shipped:** Dependabot/Renovate security alerts
   on, and a scheduled scan (weekly) of the default branch and the latest release with `osv-scanner` /
-  `govulncheck` — a CVE published after release still has to be found.
+  `govulncheck` — a CVE published after release still has to be found. When a supply-chain compromise is
+  published (a malicious package version, editor or browser extension, MCP server or agent skill), developer
+  machines and CI runners are checked as well as repos, within VULN-2's Critical window: a read-only
+  inventory of on-disk package, extension, MCP-config and skill metadata is matched against the named
+  versions, and a hit starts the REL-3 incident process, including rotation of every credential that machine
+  held (SEC-12). For example, use `bumblebee` built from a pinned release tag with `--exposure-catalog`;
+  results stay local or go only to a team-owned HTTPS endpoint. *(source: Perplexity Bumblebee)*
 - **VULN-4 MUST** **Triage is recorded:** each finding is fixed, or marked not-affected with a reason
   (VEX-style statement in the issue or `docs/STANDARD_EXCEPTIONS.md`) — never silently ignored.
 - **VULN-5 MUST** **Emergency patch path:** a documented way to ship a security fix to production within

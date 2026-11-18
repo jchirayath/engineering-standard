@@ -1,0 +1,39 @@
+{
+  "name": "Perplexity Bumblebee",
+  "author": "Perplexity AI",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "v0.1.2",
+  "repo": "perplexityai/bumblebee",
+  "url": "https://github.com/perplexityai/bumblebee",
+  "commit": "93b8877e28ac23f50357aa610a0bd287525be4b1",
+  "license": "Apache-2.0",
+  "paths": [
+    "README.md",
+    "SECURITY.md",
+    "cmd/bumblebee/main.go",
+    "cmd/bumblebee/sink.go",
+    "internal/output/httpsink.go",
+    "internal/osv/osv.go",
+    "tools/osvcatalog/main.go"
+  ],
+  "informs": [
+    "VULN-3",
+    "AGT-5",
+    "REL-3"
+  ],
+  "amendments": [
+    {
+      "id": "VULN-3",
+      "append": "When a supply-chain compromise is published (a malicious package version, editor or browser extension, MCP server or agent skill), developer machines and CI runners are checked as well as repos, within VULN-2's Critical window: a read-only inventory of on-disk package, extension, MCP-config and skill metadata is matched against the named versions, and a hit starts the REL-3 incident process, including rotation of every credential that machine held (SEC-12). For example, use `bumblebee` built from a pinned release tag with `--exposure-catalog`; results stay local or go only to a team-owned HTTPS endpoint."
+    }
+  ],
+  "notes": "Not installed or run by the scout. The README installs with `go install …@latest`, which is unpinned, so the amendment requires a release tag (latest v0.1.2, 2026-06-18; its tag commit is signed, release asset signing not confirmed). main (93b8877) is well ahead of v0.1.2, and whether v0.1.2 already includes the MCP-config, skills and extension collectors was not checked. Network (read from the fetched code): the scanner itself makes no outbound calls; `--output=http --http-url` POSTs NDJSON results to an operator-chosen URL (https required for non-loopback, optional bearer/HMAC auth); OSV malicious-package catalogs are built offline by `tools/osvcatalog`, which downloads from osv-vulnerabilities.storage.googleapis.com, and osv.go states the scanner never contacts osv.dev. Other hosts in the inventory (registry.npmjs.org, api.github.com, *.example.com, mcp.stripe.com) appear only in test fixtures. MCP config env values are not emitted. Go stdlib only, no agent-facing files, no hooks, no install scripts.",
+  "rationale": "Distilled as a tool-agnostic incident step plus an example tool. VULN-3 and SEC-15 cover repos and shipped artifacts, but a compromise like Shai-Hulud lands on developer machines (packages, IDE extensions, MCP servers, skills) where the standard has no check. Bumblebee is read-only, has no dependencies, and doesn't phone home, so the amendment can name it while staying tool-agnostic.",
+  "newRules": [],
+  "recommendation": {
+    "verdict": "approve",
+    "why": "When a malicious package, extension, MCP server or skill is published, an app team gains a defined way to find out within the Critical window whether any developer laptop or CI runner has it, and to rotate that machine's credentials. The main risk is that the tool is young (v0.1.2, main far ahead of the release) and its exposure catalogs are only as good as the threat feed behind them, so a clean result is not proof of absence."
+  },
+  "applied": "2026-11-18"
+}
