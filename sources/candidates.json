@@ -1,6 +1,6 @@
 {
   "$comment": "Scout ledger (AGT-5) — every candidate the daily scout has evaluated, with the decision-matrix result, so a run only looks at what is new, changed or due. Written by bin/scout.mjs (score/judge/consumed/standard); validated by `node bin/scout.mjs --check`. Public data only (repo metadata, scores, reasons). Policy: sources/scout-policy.json.",
-  "lastDiscover": "2026-11-15",
+  "lastDiscover": "2026-11-18",
   "standards": {
     "mcp-spec": {
       "checked": "2026-11-13",
@@ -137,7 +137,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 3.3,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 1
       },
       "description": "Open detection-rule standard for AI agent security threats — like Sigma, but for AI agents. Executable, testable rules for prompt injection, tool poisoning, context exfiltration and MCP attacks. Merge",
       "licence": "MIT",
@@ -150,9 +152,14 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 61,
+      "outcome": "watch",
+      "nextReview": "2026-12-19",
+      "why": "A Sigma-style YAML rule format, with test cases, for prompt injection, tool poisoning and skill compromise. atr scan checks SKILL.md files and MCP configs and emits SARIF. It overlaps AGT-5's pinned skill scanner, which the README says already consumes ATR rules. Draft spec (v4.1.5) with a single maintainer whose company sells products built on it; rule counts are inconsistent and false-positive rates were withdrawn pending re-measurement.",
+      "judged": "2026-11-19",
+      "gap": [
+        "AGT-5"
+      ]
     },
     {
       "repo": "AGGIB/Stroq",
@@ -207,6 +214,34 @@
       "why": "G1: licence NOASSERTION → deny"
     },
     {
+      "repo": "aiskillstore/marketplace",
+      "url": "https://github.com/aiskillstore/marketplace",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 3.4,
+        "C4": 3
+      },
+      "description": "Security-audited skills for Claude, Codex & Claude Code. One-click install, quality verified.",
+      "licence": "NOASSERTION",
+      "licenceSource": "GitHub",
+      "licenceClass": "deny",
+      "stars": 486,
+      "pushedAt": "2026-11-17T15:02:35Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [
+        "G1"
+      ],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "reject",
+      "nextReview": "2027-05-16",
+      "why": "G1: licence NOASSERTION → deny"
+    },
+    {
       "repo": "alexgreensh/repo-forensics",
       "url": "https://github.com/alexgreensh/repo-forensics",
       "firstSeen": "2026-11-14",
@@ -242,7 +277,9 @@
         "C1": 5,
         "C2": 5,
         "C3": 5,
-        "C4": 3
+        "C4": 3,
+        "C5": 0,
+        "C6": 0
       },
       "description": "CLI tool and library for generating a Software Bill of Materials from container images and filesystems",
       "licence": "Apache-2.0",
@@ -255,9 +292,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 54,
+      "outcome": "watch",
+      "nextReview": "2026-12-17",
+      "why": "SBOM generator already named by SEC-16/CFG-3 (syft per release in client mode); nothing new for the standard.",
+      "judged": "2026-11-17",
+      "gap": [
+        "SEC-16",
+        "CFG-3"
+      ]
     },
     {
       "repo": "anthropics/sandbox-runtime",
@@ -360,7 +403,9 @@
         "C1": 2,
         "C2": 5,
         "C3": 2.4,
-        "C4": 3
+        "C4": 3,
+        "C5": 1,
+        "C6": 0
       },
       "description": "Catch dangerous AI agent skills before they catch you. Zero-dependency security scanner for Agent Skills, SKILL.md and MCP configs.",
       "licence": "MIT",
@@ -373,9 +418,14 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 42,
+      "outcome": "reject",
+      "nextReview": "2027-05-20",
+      "why": "Zero-dependency static scanner for SKILL.md, agent instructions and MCP configs (14 heuristic rules, SARIF, --fail-on high). AGT-5 already requires a pinned static skill scanner at intake (cisco-ai-skill-scanner, with NVIDIA SkillSpector as the alternative), and both are pinned sources, so this duplicates them. Self-reported benchmark is 48 synthetic fixtures. Install is git clone of the default branch, and the Action is a mutable tag @v0.2.1, not a SHA (SEC-17). Single maintainer. Read from the README only.",
+      "judged": "2026-11-21",
+      "gap": [
+        "AGT-5"
+      ]
     },
     {
       "repo": "betterleaks/betterleaks",
@@ -385,7 +435,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 4.3,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 0
       },
       "description": "Find leaked secrets everywhere.",
       "licence": "MIT",
@@ -398,9 +450,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 55,
+      "outcome": "watch",
+      "nextReview": "2026-12-17",
+      "why": "Secrets scanner by gitleaks' original author; the standard already runs gitleaks everywhere (CI, pre-commit, AI-5). Watch as a possible gitleaks successor (LIFE-1) — live validation (-v/-a) calls providers, so default scans only.",
+      "judged": "2026-11-17",
+      "gap": [
+        "SEC-17",
+        "AI-5"
+      ]
     },
     {
       "repo": "boostsecurityio/poutine",
@@ -465,6 +523,39 @@
       "gap": [
         "AGT-10",
         "SUP-7"
+      ]
+    },
+    {
+      "repo": "cisco-ai-defense/mcp-scanner",
+      "url": "https://github.com/cisco-ai-defense/mcp-scanner",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 3.8,
+        "C4": 3,
+        "C5": 3,
+        "C6": 3
+      },
+      "description": "Scan MCP servers for potential threats & security findings.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 1120,
+      "pushedAt": "2026-11-16T18:52:32Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 68,
+      "outcome": "watch",
+      "nextReview": "2026-12-19",
+      "why": "Scans MCP server tool descriptions, prompts and configs (YARA offline; static mode reads pre-generated JSON), which would give AGT-5's manual re-review of tool descriptions a mechanical check. It comes from the vendor of the already-pinned skill-scanner. Partial overlap: AGT-5 already mandates pinning and re-review, the README documents no description pinning or diff (rug-pull) feature, and its LLM, Cisco AI Defense and VirusTotal analyzers send data off-box, so an amendment would require YARA-only (AGT-4).",
+      "judged": "2026-11-19",
+      "gap": [
+        "AGT-5",
+        "AGT-4"
       ]
     },
     {
@@ -546,7 +637,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 3.6,
-        "C4": 3
+        "C4": 3,
+        "C5": 1,
+        "C6": 0
       },
       "description": "Give the agent a machine. Just not yours. Each AI coding agent gets its own isolated machine with root, Docker, and systemd - active defense detects and stops threats automatically.",
       "licence": "MIT",
@@ -559,9 +652,14 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 48,
+      "outcome": "reject",
+      "nextReview": "2027-05-16",
+      "why": "Incus-container isolation with nftables egress allow-list for agent CLIs; AGT-2 and the pinned sandbox-runtime source already require OS-level sandboxing with a network allow-list. Install is curl|bash from master (unpinned, SUP-1/AGT-5).",
+      "judged": "2026-11-17",
+      "gap": [
+        "AGT-2"
+      ]
     },
     {
       "repo": "Cygnux-Labs/Tracekit",
@@ -630,6 +728,39 @@
       ]
     },
     {
+      "repo": "decionis/agent-safe-pipeline",
+      "url": "https://github.com/decionis/agent-safe-pipeline",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 4,
+        "C2": 4.3,
+        "C3": 3.5,
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
+      },
+      "description": "Open-source gateway that puts authorization in front of every action your AI agents, workflows and pipelines take, before it commits: payments, trades, price changes, deployments and API calls run onc",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 672,
+      "pushedAt": "2026-11-17T04:42:53Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 58,
+      "outcome": "watch",
+      "nextReview": "2026-12-19",
+      "why": "An HTTP gateway that holds agent actions such as payments and deploys for authorization or human approval. SEC-19 (destructive tools need human confirmation) and AGT-17 already cover the requirement. The open-source part runs only a local demo authority with a synthetic policy; real policy evaluation and human approval (Presence) are commercial hosted Decionis services in private beta.",
+      "judged": "2026-11-19",
+      "gap": [
+        "SEC-19",
+        "AGT-17"
+      ]
+    },
+    {
       "repo": "DependencyTrack/dependency-track",
       "url": "https://github.com/DependencyTrack/dependency-track",
       "firstSeen": "2026-11-16",
@@ -637,7 +768,9 @@
         "C1": 4,
         "C2": 5,
         "C3": 4.6,
-        "C4": 3
+        "C4": 3,
+        "C5": 1,
+        "C6": 1
       },
       "description": "Dependency-Track is an intelligent Component Analysis platform that allows organizations to identify and reduce risk in the software supply chain.",
       "licence": "Apache-2.0",
@@ -650,9 +783,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 57,
+      "outcome": "watch",
+      "nextReview": "2026-12-17",
+      "why": "Self-hosted SBOM monitoring platform; SEC-15/VULN-2 plus the weekly scheduled osv-scanner of the latest release already cover CVEs against shipped versions without running a server.",
+      "judged": "2026-11-17",
+      "gap": [
+        "SEC-15",
+        "VULN-2"
+      ]
     },
     {
       "repo": "DobermanCore/Doberman-Core",
@@ -662,7 +801,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 3,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
       },
       "description": "Your AI's guard dog. Doberman sits at runtime, gating every input, output and tool call to stop unsafe or unintended actions before they execute.",
       "licence": "Apache-2.0",
@@ -675,9 +816,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 55,
+      "outcome": "watch",
+      "nextReview": "2026-12-20",
+      "why": "Alpha runtime gate that runs as a Claude Code/Codex hook or an MCP proxy and returns PASS/AUTH/BLOCK per tool call, failing closed. The plugin's own PreToolUse hooks plus AGT-4, AGT-17 and SEC-19 already gate destructive and exfiltrating calls, and hol-guard (watch) is the same idea. The MCP-proxy mode is the only partial extra over AGT-5. Its setup writes hook entries into agent configs (AGT-9), PostHog telemetry is on by default (us.i.posthog.com, off with DO_NOT_TRACK=1), and its own caveat says a script the agent writes can answer its own prompts.",
+      "judged": "2026-11-20",
+      "gap": [
+        "AGT-5",
+        "AGT-17"
+      ]
     },
     {
       "repo": "duriantaco/skylos",
@@ -687,7 +834,9 @@
         "C1": 2,
         "C2": 5,
         "C3": 3.7,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 1
       },
       "description": "Open source local-first PR scanner that finds dead code, security bugs, secrets, quality regressions, and AI-code mistakes before merge. For first timers refer to https://duriantaco.github.io/skylos/r",
       "licence": "Apache-2.0",
@@ -700,9 +849,16 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 57,
+      "outcome": "watch",
+      "nextReview": "2026-12-21",
+      "why": "Local PR scanner (dead code, taint, secrets, dependency CVEs via OSV, AI-code mistakes such as imports of functions that don't exist), with --gate exit codes 0/1/2, SARIF and --diff origin/main. The standard already gates SAST, secrets and SCA deterministically (semgrep, gitleaks, SEC-15, SEC-31). The dead-code check would be the first enforcement for PERF-9's 'no dead code', and that is the only extra. Python coverage is the deepest; other languages are thinner. Agent hooks fail open ('If Skylos itself errors, the action is allowed'), install is unpinned pip/ghcr :latest (SUP-1), and OSV and ",
+      "judged": "2026-11-21",
+      "gap": [
+        "PERF-9",
+        "SEC-15",
+        "SEC-31"
+      ]
     },
     {
       "repo": "eugene1g/agent-safehouse",
@@ -712,7 +868,9 @@
         "C1": 2,
         "C2": 5,
         "C3": 4.2,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 0
       },
       "description": "Sandbox your local AI agents so they can read/write only what they need",
       "licence": "Apache-2.0",
@@ -725,9 +883,14 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 50,
+      "outcome": "watch",
+      "nextReview": "2026-12-20",
+      "why": "macOS-only sandbox-exec wrapper for local coding agents: deny-first filesystem profiles (working dir read/write, SSH keys and browser profiles denied, about 30 opt-in capabilities). AGT-2 already requires an OS-level sandbox for agents without one, and the pinned sandbox-runtime (srt) covers it. Safehouse's default network policy allows all outbound traffic ('blocking exfiltration/C2 is explicitly NOT a goal'), so it fails AGT-2's network allow-list and AGT-4's egress leg out of the box.",
+      "judged": "2026-11-20",
+      "gap": [
+        "AGT-2"
+      ]
     },
     {
       "repo": "Giskard-AI/giskard-oss",
@@ -737,7 +900,9 @@
         "C1": 4,
         "C2": 5,
         "C3": 4.7,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 1
       },
       "description": "🐢 Open-Source Evaluation & Testing library for LLM Agents",
       "licence": "Apache-2.0",
@@ -750,9 +915,14 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 67,
+      "outcome": "watch",
+      "nextReview": "2026-12-17",
+      "why": "Eval/red-team library that could back AI-3's CI eval suite (prompt-injection, jailbreak cases); AI-3 already requires the suite, so it is an Enforced-by hint at most. Default LLM judge is openai/gpt-4o-mini (AGT-4/AI-9 data egress), no documented CI pass threshold, v2 unmaintained.",
+      "judged": "2026-11-17",
+      "gap": [
+        "AI-3"
+      ]
     },
     {
       "repo": "github/gh-actions-lock",
@@ -883,7 +1053,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 4,
-        "C4": 3
+        "C4": 3,
+        "C5": 0,
+        "C6": 0
       },
       "description": "GUAC aggregates software security metadata into a high fidelity graph database.",
       "licence": "Apache-2.0",
@@ -896,9 +1068,14 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 44,
+      "outcome": "reject",
+      "nextReview": "2027-05-16",
+      "why": "OpenSSF org-level supply-chain graph platform (GraphQL, NATS, Postgres), not a per-repo check; out of scope for an app-level standard.",
+      "judged": "2026-11-17",
+      "gap": [
+        "SEC-16"
+      ]
     },
     {
       "repo": "guardana/guardana",
@@ -908,7 +1085,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 2.9,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 3
       },
       "description": "Open-source AI security verification for model artifacts, live endpoints, MCP servers, and recorded agent traces. Reproducible evidence for release decisions.",
       "licence": "Apache-2.0",
@@ -921,9 +1100,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 66,
+      "outcome": "watch",
+      "nextReview": "2026-12-20",
+      "why": "Python CLI and GitHub Action that verifies AI systems out of band, with SARIF/JSON/JUnit output and a CI gate that reports unverified checks and coverage gaps separately (matches AGT-13). Partial gap: 'scan' flags dangerous pickle opcodes, torch.load without weights_only and remote code in model configs. SEC-27 bans unsafe deserialization in general but never names third-party model files, so an amendment could. Its probe/MCP/trace verbs are beta and overlap AI-3's eval suite and the cisco mcp-scanner watch entry. Says no telemetry; third-party plugins run with the user's privileges.",
+      "judged": "2026-11-20",
+      "gap": [
+        "SEC-27",
+        "AI-3"
+      ]
     },
     {
       "repo": "gy15901580825/Argus",
@@ -984,6 +1169,31 @@
       ]
     },
     {
+      "repo": "i1see1you/VirbiusAgent",
+      "url": "https://github.com/i1see1you/VirbiusAgent",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 2,
+        "C2": 4.3,
+        "C3": 1.8,
+        "C4": 3
+      },
+      "description": "Open-source AI Agent security platform — prompt injection defense, MCP tool-call guardrails, eBPF runtime observability. Four-tier Edge→Gateway→Kernel→Cloud architecture.",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 29,
+      "pushedAt": "2026-11-17T03:22:31Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
       "repo": "ifixai-ai/iFixAi",
       "url": "https://github.com/ifixai-ai/iFixAi",
       "firstSeen": "2026-11-14",
@@ -1016,6 +1226,31 @@
       ]
     },
     {
+      "repo": "karanb192/claude-code-hooks",
+      "url": "https://github.com/karanb192/claude-code-hooks",
+      "firstSeen": "2026-11-18",
+      "scores": {
+        "C1": 2,
+        "C2": 3,
+        "C3": 3.5,
+        "C4": 3
+      },
+      "description": "🪝 Claude Code hooks + an installable plugin marketplace: safety, cost, observability, productivity.",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 587,
+      "pushedAt": "2026-11-18T03:15:14Z",
+      "lastScored": "2026-11-18",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
+    },
+    {
       "repo": "kenryu42/cc-safety-net",
       "url": "https://github.com/kenryu42/cc-safety-net",
       "firstSeen": "2026-11-15",
@@ -1023,7 +1258,9 @@
         "C1": 2,
         "C2": 4.3,
         "C3": 4.1,
-        "C4": 3
+        "C4": 3,
+        "C5": 1,
+        "C6": 0
       },
       "description": "A pre-execution guard for AI coding agents. It blocks destructive Git and file system commands, plus common attempts to access sensitive files, before a tool call runs. Supports Amp Code, Antigravity ",
       "licence": "MIT",
@@ -1036,9 +1273,48 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 43,
+      "outcome": "reject",
+      "nextReview": "2027-05-20",
+      "why": "Pre-execution guard that parses commands and blocks git reset --hard, force push, rm -rf on dangerous targets, curl|bash and reads of SSH keys, .env and cloud credentials, across about 20 agent CLIs. The plugin's Bash/Read hooks already block these for Claude Code (AGT-1, AGT-17; force push to main, curl|bash and --no-verify are in plugin/test/run.mjs), and AGT-2 puts other agent CLIs inside an OS sandbox. Its own README: 'It is not a sandbox'. Install is npx -y cc-safety-net@latest, which the README tells you to keep on @latest (fails AGT-5/SUP-1). No CI mode. Telemetry not documented. Read f",
+      "judged": "2026-11-21",
+      "gap": [
+        "AGT-1",
+        "AGT-17"
+      ]
+    },
+    {
+      "repo": "knostic/OpenAnt",
+      "url": "https://github.com/knostic/OpenAnt",
+      "firstSeen": "2026-11-18",
+      "scores": {
+        "C1": 4,
+        "C2": 3.7,
+        "C3": 3.6,
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
+      },
+      "description": "OpenAnt from Knostic is the leading open source LLM-based vulnerability discovery and remediation product, helping defenders proactively find and patch verified security flaws while minimizing both fa",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 812,
+      "pushedAt": "2026-11-18T06:07:59Z",
+      "lastScored": "2026-11-18",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 56,
+      "outcome": "watch",
+      "nextReview": "2026-12-19",
+      "why": "LLM-based vulnerability discovery with adversarial verification and an auto-patcher. SEC-31 (AI-assisted code passes the same gates) and the codex-security watch entry already cover AI review. It sends source code to hosted LLM providers unless Ollama is used (AGT-4), and its README does not document what sandbox isolates its dynamic testing stage (AGT-2 audit sandbox).",
+      "judged": "2026-11-19",
+      "gap": [
+        "SEC-31",
+        "AGT-2"
+      ]
     },
     {
       "repo": "lasso-security/claude-hooks",
@@ -1109,7 +1385,9 @@
         "C1": 2,
         "C2": 5,
         "C3": 4.1,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 1
       },
       "description": "Agentic LLM Vulnerability Scanner / AI red teaming kit 🧪",
       "licence": "Apache-2.0",
@@ -1122,9 +1400,14 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 58,
+      "outcome": "watch",
+      "nextReview": "2026-12-20",
+      "why": "Red-team scanner that runs jailbreak, multi-step and encoding-fuzz probes against any LLM HTTP endpoint, with a CI mode that exits 1 above a failure threshold. That could back AI-3's required prompt-injection eval suite, but AI-3 already mandates it and Giskard (watch) covers the same ground. The documented install is from git main (uv tool install git+..., not pinned: SUP-1/AGT-5). Probe corpora download from Hugging Face at run time, and an optional LLM decider calls OpenRouter (AGT-4). Telemetry not verified from code.",
+      "judged": "2026-11-20",
+      "gap": [
+        "AI-3"
+      ]
     },
     {
       "repo": "node9-ai/node9-proxy",
@@ -1134,7 +1417,9 @@
         "C1": 3,
         "C2": 4.3,
         "C3": 2.9,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
       },
       "description": "Access control for AI agents. Set what Claude Code, Codex, Gemini, Cursor and any MCP server are allowed to do, review risky actions before they run, and keep every action on the record.",
       "licence": "Apache-2.0",
@@ -1147,9 +1432,16 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 53,
+      "outcome": "watch",
+      "nextReview": "2026-12-21",
+      "why": "Hook-based access control for Claude Code, Codex, Cursor and MCP servers: shell-AST rules for destructive git/SQL and curl|bash, a credential jail (~/.ssh, ~/.aws, .env), an optional egress allow-list and an MCP gateway. The plugin's PreToolUse hooks with AGT-1, AGT-2 (sandbox network allow-list) and AGT-17 already do this for Claude Code, and Doberman-Core and hol-guard (both watch) are the same idea. Only the MCP-gateway mode partly extends AGT-5. Egress control is off by default (its README: curl -d @~/.aws/credentials is not treated as a read of that file), the MCP install is bare npx -y (",
+      "judged": "2026-11-21",
+      "gap": [
+        "AGT-4",
+        "AGT-5",
+        "AGT-17"
+      ]
     },
     {
       "repo": "nolabs-ai/nono",
@@ -1185,6 +1477,71 @@
       ]
     },
     {
+      "repo": "NVIDIA-NeMo/Guardrails",
+      "url": "https://github.com/NVIDIA-NeMo/Guardrails",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 4.8,
+        "C4": 3,
+        "C5": 2,
+        "C6": 2
+      },
+      "description": "NeMo Guardrails is an open-source toolkit for easily adding programmable guardrails to LLM-based conversational systems.",
+      "licence": "Apache-2.0",
+      "licenceSource": "LICENSE.md text (GitHub: NOASSERTION)",
+      "licenceClass": "allow",
+      "stars": 7517,
+      "pushedAt": "2026-11-17T14:15:55Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 66,
+      "outcome": "watch",
+      "nextReview": "2026-12-18",
+      "why": "Runtime input/output/tool rails for LLM apps. SEC-19, AI-1/AI-6 and AGT-4 already require structural controls (schema output, human confirmation, remove a trifecta leg); its classifier/heuristic jailbreak detection is probabilistic, so it isn't a control the standard would mandate. Anonymous usage telemetry is on by default.",
+      "judged": "2026-11-18",
+      "gap": [
+        "SEC-19"
+      ]
+    },
+    {
+      "repo": "NVIDIA/SkillEvaluator",
+      "url": "https://github.com/NVIDIA/SkillEvaluator",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 5,
+        "C2": 5,
+        "C3": 4.4,
+        "C4": 2,
+        "C5": 3,
+        "C6": 2
+      },
+      "description": "Multi-tier framework for evaluating AI agent skills and plugins with quality gates, semantic overlap detection, synthetic evaluation dataset generation, and live agent evaluation that measures how ski",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 3539,
+      "pushedAt": "2026-11-18T09:12:59Z",
+      "lastScored": "2026-11-18",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "inventory",
+      "total": 71,
+      "outcome": "consume",
+      "nextReview": null,
+      "why": "Strengthens enforcement of AGT-16/AGT-5 with a per-harness load check, catalogue overlap detection and with/without-skill evals. Its security tier just wraps SkillSpector, Gitleaks and Bandit, which AGT-5 already accepts, and static quality alone is reported INCOMPLETE, matching AGT-5's coverage rule. Tiers 2-3 need hosted LLMs.",
+      "judged": "2026-11-18",
+      "gap": [
+        "AGT-16"
+      ],
+      "consumedAs": "skillevaluator"
+    },
+    {
       "repo": "NVIDIA/SkillSpector",
       "url": "https://github.com/NVIDIA/SkillSpector",
       "firstSeen": "2026-11-13",
@@ -1216,6 +1573,38 @@
         "AGT-5"
       ],
       "consumedAs": "skillspector"
+    },
+    {
+      "repo": "openai/codex-security",
+      "url": "https://github.com/openai/codex-security",
+      "firstSeen": "2026-11-18",
+      "scores": {
+        "C1": 5,
+        "C2": 5,
+        "C3": 5,
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
+      },
+      "description": "OpenAI's Codex Security CLI and TypeScript SDK for finding, validating, and fixing security vulnerabilities. npm: https://www.npmjs.com/package/@openai/codex-security",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 14055,
+      "pushedAt": "2026-11-18T09:18:04Z",
+      "lastScored": "2026-11-18",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 67,
+      "outcome": "watch",
+      "nextReview": "2026-12-18",
+      "why": "LLM SAST CLI (find/validate/patch, SARIF). SEC-31 plus the existing security-review skills (trailofbits, sentry, Anthropic security-guidance) already cover AI-assisted review. Scans send code to OpenAI or another hosted provider (AGT-4), some features are gated behind an access programme, and repo SECURITY.md files steer the scanner (an injection surface).",
+      "judged": "2026-11-18",
+      "gap": [
+        "SEC-31"
+      ]
     },
     {
       "repo": "openqodex/openqodex",
@@ -1284,6 +1673,39 @@
       ]
     },
     {
+      "repo": "perplexityai/bumblebee",
+      "url": "https://github.com/perplexityai/bumblebee",
+      "firstSeen": "2026-11-18",
+      "scores": {
+        "C1": 4,
+        "C2": 4.3,
+        "C3": 4.6,
+        "C4": 4,
+        "C5": 4,
+        "C6": 4
+      },
+      "description": "Read-only developer endpoint scanner for on-disk package, extension, and developer-tool metadata, built to check exposure to known software supply-chain compromises.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 5157,
+      "pushedAt": "2026-11-18T15:13:36Z",
+      "lastScored": "2026-11-18",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "inventory",
+      "total": 82,
+      "outcome": "consume",
+      "nextReview": null,
+      "why": "Fills a gap: nothing in the standard covers checking developer endpoints (installed packages, IDE/browser extensions, MCP host configs, agent skills) for exposure to a named supply-chain compromise. VULN-3/SEC-15 cover repos and shipped artifacts only. Read-only Go collector, stdlib only; network behaviour of normal scans undocumented.",
+      "judged": "2026-11-18",
+      "gap": [
+        "VULN-3"
+      ],
+      "consumedAs": "bumblebee"
+    },
+    {
       "repo": "perplexityai/numbat",
       "url": "https://github.com/perplexityai/numbat",
       "firstSeen": "2026-11-15",
@@ -1316,6 +1738,38 @@
         "AGT-9"
       ],
       "consumedAs": "numbat"
+    },
+    {
+      "repo": "phasehq/console",
+      "url": "https://github.com/phasehq/console",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 3.7,
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
+      },
+      "description": "Keep secrets from AI agents.",
+      "licence": "MIT",
+      "licenceSource": "LICENSE text (GitHub: NOASSERTION)",
+      "licenceClass": "allow",
+      "stars": 950,
+      "pushedAt": "2026-11-17T15:07:02Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 60,
+      "outcome": "watch",
+      "nextReview": "2026-12-18",
+      "why": "Open-core secrets manager marketed as keeping secrets from AI agents. The README doesn't document how. SEC-12 (keys in a vault, rotation) and AGT-1 (deny agent reads of .env/secrets) already cover the need. The ee/ directory needs a commercial licence.",
+      "judged": "2026-11-18",
+      "gap": [
+        "SEC-12"
+      ]
     },
     {
       "repo": "pipelab-org/pipelock",
@@ -1384,6 +1838,100 @@
       ]
     },
     {
+      "repo": "qybaihe/bla",
+      "url": "https://github.com/qybaihe/bla",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 2,
+        "C2": 5,
+        "C3": 4.7,
+        "C4": 3
+      },
+      "description": "🛡️ BLA (bla-agents / Blind LLM Agents) — Open-source Blue Defense MCP server & CLI protecting JS/TS, Electron ASAR, WASM, Python, Native Binaries, SQLite, GGUF/Safetensors & Android DEX against AI re",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 6035,
+      "pushedAt": "2026-11-17T06:43:37Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [
+        "G4",
+        "G5"
+      ],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "reject",
+      "nextReview": "2027-05-16",
+      "why": "G4: 23d old; G5: 262.4 stars/day"
+    },
+    {
+      "repo": "RetireJS/retire.js",
+      "url": "https://github.com/RetireJS/retire.js",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 3,
+        "C2": 5,
+        "C3": 4.5,
+        "C4": 3,
+        "C5": 3,
+        "C6": 3
+      },
+      "description": "scanner detecting the use of JavaScript libraries with known vulnerabilities. Can also generate an SBOM of the libraries it finds.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 4216,
+      "pushedAt": "2026-11-17T11:26:17Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 69,
+      "outcome": "watch",
+      "nextReview": "2026-12-19",
+      "why": "Finds vulnerable JavaScript libraries that were copied or committed into a repo without a package manifest (vendored or minified jQuery and similar), which manifest-based SEC-15 scanners (osv-scanner, npm audit) miss. An SEC-15 amendment naming vendored JS would close that partial gap. Its own vulnerability repo is the data source, it has no SARIF output, and its Grunt and Gulp integrations are deprecated.",
+      "judged": "2026-11-19",
+      "gap": [
+        "SEC-15"
+      ]
+    },
+    {
+      "repo": "safedep/pmg",
+      "url": "https://github.com/safedep/pmg",
+      "firstSeen": "2026-11-18",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 3.4,
+        "C4": 3,
+        "C5": 3,
+        "C6": 2
+      },
+      "description": "PMG protects developers, AI agents from malicious open source packages using proxy, sandbox and SafeDep's threat intelligence feed.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 566,
+      "pushedAt": "2026-11-18T12:39:03Z",
+      "lastScored": "2026-11-18",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 68,
+      "outcome": "watch",
+      "nextReview": "2026-12-19",
+      "why": "Wraps npm/pnpm/pip/uv installs to block known-malicious packages and can sandbox install scripts (Seatbelt/Landlock), which would strengthen NPM-1 and SEC-15 enforcement. But NPM-1's release-age quarantine and build-script allow-list plus the plugin's verify_dependency (OSV MAL- entries) already cover most of it; safedep/vet from the same org is on watch. Every install sends package identities to SafeDep's cloud API and telemetry is on by default.",
+      "judged": "2026-11-19",
+      "gap": [
+        "NPM-1",
+        "SEC-15"
+      ]
+    },
+    {
       "repo": "safedep/vet",
       "url": "https://github.com/safedep/vet",
       "firstSeen": "2026-11-15",
@@ -1424,7 +1972,9 @@
         "C1": 3,
         "C2": 5,
         "C3": 3.1,
-        "C4": 3
+        "C4": 3,
+        "C5": 2,
+        "C6": 1
       },
       "description": "AI security review CLI: SAST, secret scanning, SCA, threat modeling and architecture review with Claude Code, Copilot, Codex, Gemini, Cursor or an API key. Reads your design docs, Confluence and Jira ",
       "licence": "MIT",
@@ -1437,9 +1987,15 @@
       "capped": false,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 55,
+      "outcome": "watch",
+      "nextReview": "2026-12-20",
+      "why": "LLM-driven review CLI (SAST, secrets, SCA, threat model, prompt review) that briefs a coding agent or an API model and collects a fixed-shape SARIF/JSON report, with a GitHub Action and a cost cap. The standard already requires deterministic SAST/secret/SCA gates (SEC-15, semgrep, gitleaks), and SEC-31 already covers AI review passing the same gates. An LLM verdict is non-deterministic, so it adds no control. The api agent sends target source to the model provider (AGT-4). install.sh is curl | sh, checked only against a SHA256SUMS file from the same release, and the Action does an unpinned pip",
+      "judged": "2026-11-20",
+      "gap": [
+        "SEC-20",
+        "SEC-31"
+      ]
     },
     {
       "repo": "secureagentics/Adrian",
@@ -1500,6 +2056,65 @@
       "outcome": "reject",
       "nextReview": "2027-05-12",
       "why": "G1: licence NOASSERTION → deny"
+    },
+    {
+      "repo": "sgasser/pasteguard",
+      "url": "https://github.com/sgasser/pasteguard",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 2,
+        "C2": 4.3,
+        "C3": 3.7,
+        "C4": 3,
+        "C5": 3,
+        "C6": 3
+      },
+      "description": "AI gets the context. Not your private data. Local-first privacy proxy for browser chat, AI APIs, and coding agents.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 834,
+      "pushedAt": "2026-11-17T15:01:19Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 61,
+      "outcome": "watch",
+      "nextReview": "2026-12-21",
+      "why": "Local proxy that masks PII and secrets (checksum and format checks plus a GLiNER NER model) before requests reach an LLM provider, or routes sensitive requests to a local model. Partial gap: DATA-2 bars sensitive data from unapproved third parties and DATA-1 names minimisation, but no AI-* rule says an app's LLM path redacts or minimises PII before the provider call. An AI-section amendment could say that, with a redaction fixture test. Running it is risky: it is a man-in-the-middle on every API key and prompt. The documented install is ghcr :latest (SUP-1), ONNX Runtime telemetry is implied b",
+      "judged": "2026-11-21",
+      "gap": [
+        "DATA-1",
+        "DATA-2",
+        "AGT-4"
+      ]
+    },
+    {
+      "repo": "sheeki03/tirith",
+      "url": "https://github.com/sheeki03/tirith",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 2,
+        "C2": 3.7,
+        "C3": 4.3,
+        "C4": 3
+      },
+      "description": "Terminal security for developers and AI agents. Intercepts homograph URLs, pipe-to-shell, ANSI injection, obfuscated payloads, data exfiltration, and malicious AI skills/configs before they execute.",
+      "licence": "AGPL-3.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "conditional",
+      "stars": 2783,
+      "pushedAt": "2026-11-17T04:26:48Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": true,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": null,
+      "outcome": "pending-judgement",
+      "nextReview": null
     },
     {
       "repo": "snyk/agent-scan",
@@ -1594,6 +2209,38 @@
       ]
     },
     {
+      "repo": "stacklok/toolhive",
+      "url": "https://github.com/stacklok/toolhive",
+      "firstSeen": "2026-11-17",
+      "scores": {
+        "C1": 4,
+        "C2": 5,
+        "C3": 4.2,
+        "C4": 3,
+        "C5": 3,
+        "C6": 1
+      },
+      "description": "ToolHive is an enterprise-grade platform for running and managing Model Context Protocol (MCP) servers.",
+      "licence": "Apache-2.0",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 2342,
+      "pushedAt": "2026-11-17T14:34:55Z",
+      "lastScored": "2026-11-17",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 66,
+      "outcome": "watch",
+      "nextReview": "2026-12-18",
+      "why": "Runs MCP servers in containers with registry provenance and tool filtering, which is one way to implement AGT-2 (local stdio MCP servers in an OS sandbox) and AGT-5 (allow-listed, reviewed MCP servers). Both rules already say this, with srt as the example. It is a platform, not a missing rule, and version pinning isn't documented.",
+      "judged": "2026-11-18",
+      "gap": [
+        "AGT-2"
+      ]
+    },
+    {
       "repo": "step-security/harden-runner",
       "url": "https://github.com/step-security/harden-runner",
       "firstSeen": "2026-11-13",
@@ -1643,7 +2290,9 @@
         "C1": 2,
         "C2": 5,
         "C3": 3.9,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 1
       },
       "description": "pinact is a CLI to edit GitHub Workflow and Composite action files and pin versions of Actions and Reusable Workflows. pinact can also update their versions and verify version annotations.",
       "licence": "MIT",
@@ -1652,6 +2301,36 @@
       "stars": 1255,
       "pushedAt": "2026-11-15T10:32:51Z",
       "lastScored": "2026-11-15",
+      "gatesFailed": [],
+      "capped": false,
+      "inRegistry": false,
+      "c4By": "provisional",
+      "total": 58,
+      "outcome": "watch",
+      "nextReview": "2026-12-20",
+      "why": "Go CLI that pins workflow and composite-action uses: to full SHAs with a version comment; 'pinact run --check' fails CI when something is unpinned and '--verify' checks (and corrects) that the version comment matches the SHA. SEC-17 already requires SHA pins, enforces them with zizmor and records transitive actions in the Actions lockfile, so pinact would only be an autofixer for an enforced rule. The comment-vs-SHA verification is the only extra and needs the GitHub API. Single maintainer; the README's go install path uses @latest (pin a signed release instead, SUP-1).",
+      "judged": "2026-11-20",
+      "gap": [
+        "SEC-17"
+      ]
+    },
+    {
+      "repo": "tanviet12/vbsec",
+      "url": "https://github.com/tanviet12/vbsec",
+      "firstSeen": "2026-11-18",
+      "scores": {
+        "C1": 2,
+        "C2": 4.3,
+        "C3": 3.1,
+        "C4": 3
+      },
+      "description": "Security scanning skill for Claude Code, Codex and Antigravity. Finds the 21 most common vulnerabilities in AI-written code and shows how to fix each one.",
+      "licence": "MIT",
+      "licenceSource": "GitHub",
+      "licenceClass": "allow",
+      "stars": 331,
+      "pushedAt": "2026-11-17T04:01:57Z",
+      "lastScored": "2026-11-18",
       "gatesFailed": [],
       "capped": false,
       "inRegistry": false,
@@ -1697,7 +2376,9 @@
         "C1": 2,
         "C2": 4.3,
         "C3": 3.7,
-        "C4": 3
+        "C4": 3,
+        "C5": 3,
+        "C6": 3
       },
       "description": "Local security audit for AI API relays and LLM proxies: detects prompt injection, model substitution, tool-call rewriting, SSE anomalies, error leakage, and Web3 wallet risks. Website: https://apirela",
       "licence": "AGPL-3.0",
@@ -1710,9 +2391,16 @@
       "capped": true,
       "inRegistry": false,
       "c4By": "provisional",
-      "total": null,
-      "outcome": "pending-judgement",
-      "nextReview": null
+      "total": 61,
+      "outcome": "watch",
+      "nextReview": "2026-12-21",
+      "why": "Python stdlib audit of third-party LLM API relays: 14 probes for prompt injection, model substitution, tool-call rewriting, context truncation and SSE anomalies, with LOW/MEDIUM/HIGH output and JSON. Partial gap: no rule names LLM relays or gateways. DATA-2 (no unapproved third parties) and AGT-5 (dependencies pinned and allow-listed) imply an app or agent must call the provider directly or through an approved gateway, and an amendment could say so explicitly. It is a probe tool, so it is not needed to enforce that. AGPL-3.0-only caps it at distil/reference. It sends your real API key to the r",
+      "judged": "2026-11-21",
+      "gap": [
+        "DATA-2",
+        "AGT-5",
+        "AI-2"
+      ]
     },
     {
       "repo": "trailofbits/claude-code-config",
@@ -1850,15 +2538,15 @@
     },
     {
       "repo": "RiccardoBiosas/awesome-MLSecOps",
-      "stars": 491,
+      "stars": 493,
       "licence": "MIT",
       "desc": "A curated list of MLSecOps tools and resources for securing machine learning and AI systems - adversarial ML defense, LL",
       "found": "2026-11-13",
-      "hits": 3
+      "hits": 4
     },
     {
       "repo": "nanocoai/nanoclaw",
-      "stars": 31119,
+      "stars": 31117,
       "licence": "MIT",
       "desc": "A lightweight alternative to OpenClaw that runs in containers for security. Connects to WhatsApp, Telegram, Slack, Disco",
       "found": "2026-11-13",
@@ -1866,7 +2554,7 @@
     },
     {
       "repo": "Asymptote-Labs/agent-beacon",
-      "stars": 3479,
+      "stars": 3567,
       "licence": "MIT",
       "desc": "The cross-harness, self-improving memory layer for AI agents. Join our community: https://discord.com/invite/zdNChS2fBu",
       "found": "2026-11-13",
@@ -1874,10 +2562,18 @@
     },
     {
       "repo": "zhuyansen/awesome-claude-video-skills",
-      "stars": 2114,
+      "stars": 2319,
       "licence": "NOASSERTION",
       "desc": "Open-source skills and toolkits that let Claude Code, Codex and other coding agents make video. 180 repos by type, each ",
       "found": "2026-11-13",
+      "hits": 2
+    },
+    {
+      "repo": "xalgorix/xalgorix",
+      "stars": 1371,
+      "licence": "Apache-2.0",
+      "desc": "Open-source AI penetration testing agent that exploit-verifies every finding. Autonomous 22-phase pentests of web apps &",
+      "found": "2026-11-17",
       "hits": 2
     },
     {
@@ -1889,11 +2585,11 @@
       "hits": 2
     },
     {
-      "repo": "aiskillstore/marketplace",
-      "stars": 483,
-      "licence": "NOASSERTION",
-      "desc": "Security-audited skills for Claude, Codex & Claude Code. One-click install, quality verified.",
-      "found": "2026-11-14",
+      "repo": "owasp-dep-scan/blint",
+      "stars": 472,
+      "licence": "MIT",
+      "desc": "blint is a Binary Linter that checks the security properties and capabilities of your executables. It can also generate ",
+      "found": "2026-11-17",
       "hits": 2
     },
     {
@@ -1921,16 +2617,8 @@
       "hits": 2
     },
     {
-      "repo": "i1see1you/VirbiusAgent",
-      "stars": 29,
-      "licence": "MIT",
-      "desc": "Open-source AI Agent security platform — prompt injection defense, MCP tool-call guardrails, eBPF runtime observability.",
-      "found": "2026-11-15",
-      "hits": 2
-    },
-    {
       "repo": "morluto/rea",
-      "stars": 461220,
+      "stars": 467715,
       "licence": "MIT",
       "desc": "Reverse engineer anything with agents, from app behavior down to native binaries.",
       "found": "2026-11-13",
@@ -1938,7 +2626,7 @@
     },
     {
       "repo": "semgrep/semgrep",
-      "stars": 17676,
+      "stars": 17799,
       "licence": "LGPL-2.1",
       "desc": "Lightweight static analysis for many languages. Find bug variants with patterns that look like source code.",
       "found": "2026-11-13",
@@ -1970,7 +2658,7 @@
     },
     {
       "repo": "Nasiko-Labs/nasiko",
-      "stars": 11937,
+      "stars": 11956,
       "licence": "NOASSERTION",
       "desc": "The Open Runtime for AI Agents",
       "found": "2026-11-13",
@@ -1978,39 +2666,31 @@
     },
     {
       "repo": "SnailSploit/Claude-Red",
-      "stars": 10719,
+      "stars": 11202,
       "licence": "MIT",
       "desc": "claude-red is a curated library of offensive security skills designed for the Claude skills system. Each skill is a stru",
       "found": "2026-11-13",
       "hits": 1
     },
     {
-      "repo": "NVIDIA-NeMo/Guardrails",
-      "stars": 7501,
-      "licence": "NOASSERTION",
-      "desc": "NeMo Guardrails is an open-source toolkit for easily adding programmable guardrails to LLM-based conversational systems.",
-      "found": "2026-11-14",
+      "repo": "lintsinghua/DeepAudit",
+      "stars": 7316,
+      "licence": "AGPL-3.0",
+      "desc": "DeepAudit：人人拥有的 AI 黑客战队，让漏洞挖掘触手可及。小白一键部署运行，自主协作审计 + 自动化沙箱 PoC 验证。支持 Ollama 私有部署 ，一键生成报告。支持中转站。?让安全不再昂贵，让审计不再复杂。",
+      "found": "2026-11-17",
       "hits": 1
     },
     {
-      "repo": "qybaihe/bla",
-      "stars": 5763,
-      "licence": "MIT",
-      "desc": "🛡️ BLA (bla-agents / Blind LLM Agents) — Open-source Blue Defense MCP server & CLI protecting JS/TS, Electron ASAR, WAS",
-      "found": "2026-11-14",
-      "hits": 1
-    },
-    {
-      "repo": "RetireJS/retire.js",
-      "stars": 4212,
-      "licence": "Apache-2.0",
-      "desc": "scanner detecting the use of JavaScript libraries with known vulnerabilities. Can also generate an SBOM of the libraries",
-      "found": "2026-11-14",
+      "repo": "e-m-b-a/emba",
+      "stars": 3776,
+      "licence": "GPL-3.0",
+      "desc": "EMBA - The firmware security analyzer",
+      "found": "2026-11-17",
       "hits": 1
     },
     {
       "repo": "ljagiello/ctf-skills",
-      "stars": 3717,
+      "stars": 3729,
       "licence": "MIT",
       "desc": "Agent skills for solving CTF challenges - web exploitation, binary pwn, crypto, reverse engineering, forensics, OSINT, a",
       "found": "2026-11-14",
@@ -2018,10 +2698,122 @@
     },
     {
       "repo": "CyberStrikeus/CyberStrike",
-      "stars": 3580,
+      "stars": 3630,
       "licence": "AGPL-3.0",
       "desc": "Open-source AI-powered offensive security harness for automated penetration testing.",
       "found": "2026-11-14",
+      "hits": 1
+    },
+    {
+      "repo": "Bearer/bearer",
+      "stars": 2794,
+      "licence": "NOASSERTION",
+      "desc": "Code security scanning tool (SAST) to discover, filter and prioritize security and privacy risks.",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "wuyoscar/AISafetyHot",
+      "stars": 2134,
+      "licence": "NOASSERTION",
+      "desc": "AI Safety HOT: daily AI safety news, papers and incidents in one place — jailbreaks, prompt injection, alignment, evals,",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "oss-review-toolkit/ort",
+      "stars": 2123,
+      "licence": "Apache-2.0",
+      "desc": "A suite of tools to automate software compliance checks.",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "zarf-dev/zarf",
+      "stars": 2101,
+      "licence": "Apache-2.0",
+      "desc": "The Airgap Native Package Manager for Kubernetes",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "slsa-framework/slsa",
+      "stars": 1966,
+      "licence": "NOASSERTION",
+      "desc": "Supply-chain Levels for Software Artifacts",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "ossf/cve-bin-tool",
+      "stars": 1812,
+      "licence": "GPL-3.0",
+      "desc": "The CVE Binary Tool helps you determine if your system includes known vulnerabilities. You can scan binaries for over 35",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "LING71671/open-reverselab",
+      "stars": 1379,
+      "licence": "Apache-2.0",
+      "desc": "Open-source AI reverse-engineering workspace with a desktop app, red / blue / both analysis, parallel Goals, a security ",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "package-url/purl-spec",
+      "stars": 1133,
+      "licence": "NOASSERTION",
+      "desc": "A minimal specification for purl aka. a package \"mostly universal\" URL, join the discussion at https://gitter.im/package",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "cdxgen/cdxgen",
+      "stars": 1123,
+      "licence": "Apache-2.0",
+      "desc": "Creates CycloneDX Bill of Materials (BOM) for your projects from source and container images. Supports many languages an",
+      "found": "2026-11-17",
+      "hits": 1
+    },
+    {
+      "repo": "HelpCode-ai/anythingmcp",
+      "stars": 805,
+      "licence": "AGPL-3.0",
+      "desc": "Enterprise Agent Harness & MCP Gateway: connect APIs, databases, file servers and 600+ connectors (SAP, Odoo, Etsy…) to ",
+      "found": "2026-11-18",
+      "hits": 1
+    },
+    {
+      "repo": "awslabs/automated-security-helper",
+      "stars": 716,
+      "licence": "Apache-2.0",
+      "desc": "ASH is an extensible, open source SAST, SCA, and IaC security scanner orchestration engine.",
+      "found": "2026-11-18",
+      "hits": 1
+    },
+    {
+      "repo": "seo-skills/seo-audit-skill",
+      "stars": 675,
+      "licence": "MIT",
+      "desc": "A comprehensive SEO audit command-line tool with 332 audit rules across 20 categories. Analyze any website for SEO best ",
+      "found": "2026-11-18",
+      "hits": 1
+    },
+    {
+      "repo": "agentic-os-org/ANOLISA",
+      "stars": 667,
+      "licence": "Apache-2.0",
+      "desc": "ANOLISA (Agentic Nexus Operating Layer & Interface System Architecture) | Agentic OS with runtime, security, observabili",
+      "found": "2026-11-18",
+      "hits": 1
+    },
+    {
+      "repo": "kdeldycke/meta-package-manager",
+      "stars": 632,
+      "licence": "GPL-2.0",
+      "desc": "🎁 snapshot every package on your machine to one file, restore it on a new one",
+      "found": "2026-11-18",
       "hits": 1
     }
   ],
@@ -2053,9 +2845,11 @@
       "url": "https://github.com/jchirayath/engineering-standard/pull/5",
       "branch": "scout/standard/cisa-kev-2026-11-15",
       "opened": "2026-11-15",
-      "state": "open",
+      "state": "merged",
       "needsRebuild": false,
-      "recommendation": "approve"
+      "recommendation": "approve",
+      "decided": "2026-11-17",
+      "why": "approved: merged PR #5"
     },
     "source:numbat": {
       "number": 7,
@@ -2065,6 +2859,24 @@
       "state": "open",
       "needsRebuild": false,
       "recommendation": "hold"
+    },
+    "source:skillevaluator": {
+      "number": 9,
+      "url": "https://github.com/jchirayath/engineering-standard/pull/9",
+      "branch": "scout/source/skillevaluator",
+      "opened": "2026-11-18",
+      "state": "open",
+      "needsRebuild": false,
+      "recommendation": "hold"
+    },
+    "source:bumblebee": {
+      "number": 10,
+      "url": "https://github.com/jchirayath/engineering-standard/pull/10",
+      "branch": "scout/source/bumblebee",
+      "opened": "2026-11-18",
+      "state": "open",
+      "needsRebuild": false,
+      "recommendation": "approve"
     }
   }
 }
