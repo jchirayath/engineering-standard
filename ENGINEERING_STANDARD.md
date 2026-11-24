@@ -631,7 +631,12 @@ URLs to untrusted content (OpenSSF *Security-Focused Guide for AI Code Assistant
 - **AI-2 MUST** The model ID lives in one config value (CORE-1); a scheduled CI job fails when that model
   is deprecated or has a retirement date.
 - **AI-3 MUST** Prompts are versioned files; a change to a prompt, model or tool schema runs an eval suite
-  in CI with a pass threshold, including prompt-injection and accuracy cases.
+  in CI with a pass threshold, including prompt-injection and accuracy cases. The prompt-injection cases
+  include a maintained public probe set as well as the app's own cases, run against a staging endpoint of
+  the app's LLM path with a spend-capped test key (AI-4), never against production or a model the team
+  doesn't operate. For example, use `garak` pinned to an exact PyPI version with its `promptinject`,
+  `latentinjection` and `encoding` probes. garak exits 0 when probes succeed, so CI computes the hit rate
+  from its JSONL report and fails above the committed threshold. *(source: NVIDIA garak)*
 - **AI-4 MUST** Every LLM path caps `max_tokens`, tool-loop iterations, wall time and a per-user token
   budget (API-4 limits request rate, not runaway loops). *Test:* a mock that always calls a tool stops at
   the cap.

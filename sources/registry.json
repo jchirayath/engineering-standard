@@ -438,6 +438,30 @@
         "AGT-13"
       ],
       "notes": "Not installed by the scout; fetched as data at c1c8a8c. Prompt-only skill (15 Markdown files) plus two Node validators (validate-findings.cjs, validate-coverage-ledger.cjs) with .test.cjs files a test runner would pick up if the repo were cloned and tested. No hooks, no install scripts, no network hosts in code. The skill's full-audit mode writes to ~/security-audit-skill/<repo>/run-N outside the target and starts many parallel sub-agents (cost; AGT-7 tool lists apply). Provenance: the repo is in the cloudflare GitHub org (trusted vendor); 72.5k stars in about 5 months (486/day, vendor-exempt from G5) with 3 contributors and no push since 2026-09-14; secondary write-ups and the README's link to Cloudflare's blog agree it is Cloudflare's. Pinned to a commit: the repo has no releases."
+    },
+    {
+      "id": "garak",
+      "name": "NVIDIA garak",
+      "author": "NVIDIA",
+      "repo": "NVIDIA/garak",
+      "url": "https://github.com/NVIDIA/garak",
+      "commit": "f1c99df7883dcfbfe4118381305b74e7e469a6e3",
+      "version": "main",
+      "reviewed": "2026-11-24",
+      "license": "Apache-2.0",
+      "kind": "tool",
+      "disposition": "distilled",
+      "rationale": "AI-3 already requires an eval suite with prompt-injection cases and a pass threshold in CI, but names no case set, so each team writes its own handful of injections and misses whole families (encoded, latent or indirect injection). garak is the most widely used open LLM scanner (NVIDIA, Apache-2.0, about 10k stars, active), so the amendment can name it as an example while the rule stays tool-agnostic. It does not gate CI by itself, so the amendment says how to turn its report into the threshold AI-3 already asks for.",
+      "paths": [
+        "README.md",
+        "AGENTS.md",
+        "SECURITY.md",
+        "garak/cli.py"
+      ],
+      "informs": [
+        "AI-3"
+      ],
+      "notes": "Not installed or run by the scout. The fetch pinned main at f1c99df. 898 files, 455 executable, and 260 were not read (200-file limit, mostly garak/probes/*), so per-probe network behaviour is unverified. The inventory's 30 'hooks' and 194 auto-run tests are the React report UI (garak-report/src/hooks, __tests__), not agent hooks. No CLAUDE.md, skills, MCP server or plugin manifest. AGENTS.md is contribution policy for AI-assisted PRs. One symlink: garak/data/calibration/calibration.json. Read in garak/cli.py: exit(1) only on config, --spec or selection parse errors, interactive-mode exceptions and config migration. There is no non-zero exit on findings, and --eval_threshold is the per-detector 'minimum threshold for a successful hit', not a run-level pass/fail. Network: it calls the target model (OpenAI, Bedrock, HF, LiteLLM, REST and others). The README/FAQ say detectors may use a classifier 'locally or via API', and huggingface.co, arxiv.org and genai.owasp.org appear in code, so model or dataset downloads at run time are likely and unverified. No telemetry library was found by grep. Some probes (malwaregen, dan, gcg) send content that hosted providers' usage policies may flag, which is why the amendment limits runs to the team's own staging endpoint."
     }
   ]
 }
