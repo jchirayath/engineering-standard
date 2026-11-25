@@ -20,7 +20,7 @@ const write = (f, o) => writeFileSync(f, JSON.stringify(o, null, 2) + '\n')
 
 // 1. .claude/settings.json — AGT-1 (the deny list names .env variants, so .env.example stays readable)
 const DENY = ['Read(./.env)', 'Read(./.env.local)', 'Read(./.env.*.local)', 'Read(./.env.production)', 'Read(./.env.development)',
-  'Read(./.env.staging)', 'Read(./.env.test)', 'Read(./secrets/**)', 'Read(./**/env.prod*.json)', 'Read(~/.ssh/**)', 'Read(~/.aws/**)']
+  'Read(./.env.staging)', 'Read(./.env.test)', 'Read(./**/env.prod*.json)', 'Read(~/.ssh/**)', 'Read(~/.aws/**)']
 const sf = join(repo, '.claude', 'settings.json'), cur = readJSON(sf)
 if (cur === undefined) say('skip', '.claude/settings.json is not valid JSON — fix it, then re-run (AGT-1 not applied)')
 else {

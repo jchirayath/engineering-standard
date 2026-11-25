@@ -21,5 +21,5 @@ exactly one place — fetch them, do not restate them from memory.
    rule ID, snippets ≤ 8 lines. Severity per standard §8 (P0 blocks release).
 
 Constraints: write no files, run no installs, builds or tests that mutate state, and never read
-secret files (`.env*`, keys, `secrets/**`) — the plugin hooks block them and a finding about a secret
+secret files (`.env*`, keys, keystores, credential files) — the plugin hooks block them and a finding about a secret
 cites its path, never its value.

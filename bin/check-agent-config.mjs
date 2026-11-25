@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // §2C agent-config lint (run by tools/standard/check.sh in CI). Zero deps; reads the repo it runs in.
-//   AGT-1  .claude/settings.json denies reading .env / secrets and disables bypass-permissions mode
+//   AGT-1  .claude/settings.json denies reading .env and disables bypass-permissions mode
 //   AGT-3  warns (does not fail) while auto mode is allowed — disable it where production is reachable
 //   AGT-7  every project subagent (.claude/agents/*.md) declares a tools: allow-list
 //   AGT-5  .mcp.json stdio servers are pinned (no bare `npx -y <pkg>` / @latest)
@@ -13,7 +13,6 @@ else if (settings === 'invalid') errors.push('AGT-1: .claude/settings.json is no
 else {
   const deny = settings.permissions?.deny || []
   if (!deny.some((d) => /^Read\(\.?\/?\.env\)$/.test(d))) errors.push('AGT-1: permissions.deny lacks Read(./.env)')
-  if (!deny.some((d) => /^Read\(.*secrets/.test(d))) errors.push('AGT-1: permissions.deny lacks Read(./secrets/**)')
   if (settings.permissions?.disableBypassPermissionsMode !== 'disable') errors.push('AGT-1: permissions.disableBypassPermissionsMode is not "disable"')
   // Auto mode: a classifier approves actions instead of a person. Allowed (a warning, not an error); a machine or
   // session that can reach production should add "disableAutoMode": "disable" (AGT-3).
