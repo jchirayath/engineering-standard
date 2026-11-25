@@ -55,10 +55,10 @@ flowchart LR
 
 **Once per machine** — install the plugin (every Claude Code session, every repo, gets it):
 ```
-/plugin marketplace add jchirayath/engineering-standard@v1.4.4
+/plugin marketplace add jchirayath/engineering-standard@v1.4.5
 /plugin install engineering-standard@engineering-standard
 ```
-and clone the kit at the same release: `git clone --branch v1.4.4 https://github.com/jchirayath/engineering-standard ~/code/engineering-standard`.
+and clone the kit at the same release: `git clone --branch v1.4.5 https://github.com/jchirayath/engineering-standard ~/code/engineering-standard`.
 Releases are immutable GitHub releases, so a pinned version never changes underneath you (AGT-5, SUP-3).
 
 **Once per app** — from the app's root:
