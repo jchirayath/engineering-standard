@@ -468,8 +468,10 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   `permissions.disableBypassPermissionsMode: "disable"`. `.env.example` stays readable. A folder named
   `secrets/` is not denied by name (disabled in v1.4.2): that rule blocked automation jobs working on
   source code in folders of that name, such as a Key Vault client module, while the files that hold
-  values (`.env*`, keys, keystores, credential files) are denied by name wherever they sit. A repo that
-  keeps secret values in a folder denies that folder's own path. Security limits
+  values (`.env*`, keys, keystores, credential files) are denied by name wherever they sit. Folders that
+  exist only to hold values stay blocked by the plugin: the container mount (`/run/secrets/`,
+  `/var/run/secrets/`) and a hidden `.secrets/`. A repo that keeps secret values in any other folder
+  denies that folder's own path. Security limits
   never live only in `CLAUDE.md`. *Enforced by:* `adopt.sh` writes it; plugin `SessionStart` warning +
   `PreToolUse` block; `tools/standard/check-agent-config.mjs` in CI. The same file enables the
   `engineering-standard` plugin (`enabledPlugins`) so every session — local, cloud or a teammate's — loads

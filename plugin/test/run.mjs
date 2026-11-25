@@ -157,7 +157,7 @@ const expect = (name, script, input, code, env) => { const r = hookRun(script, i
 const tool = (tool_name, tool_input) => ({ hook_event_name: 'PreToolUse', tool_name, tool_input, cwd: repo, session_id: 'selftest' })
 
 for (const [p, code] of [['.env', 2], ['config/.env.production', 2], ['.env.example', 0], ['.env.sample', 0], ['certs/server.pem', 2], ['deploy.key', 2],
-  ['/Users/x/.ssh/config', 2], ['~/.ssh/id_ed25519', 2], ['keys/id_rsa.pub', 0], ['keys/id_ed25519', 2], ['.ENV', 2], ['.Env.Local', 2], ['~/.aws/credentials', 2], ['.npmrc', 2], ['certs/app.p12', 2], ['android/upload.keystore', 2], ['.envrc', 2], ['env.prod.json', 2], ['env.prod.eu.json', 2], ['secrets/db.txt', 0], ['src/platform/secrets/keyvault.py', 0], ['secrets/.env', 2], ['secrets/tls.key', 2], ['src/app.ts', 0], ['env.dev.json', 0]])
+  ['/Users/x/.ssh/config', 2], ['~/.ssh/id_ed25519', 2], ['keys/id_rsa.pub', 0], ['keys/id_ed25519', 2], ['.ENV', 2], ['.Env.Local', 2], ['~/.aws/credentials', 2], ['.npmrc', 2], ['certs/app.p12', 2], ['android/upload.keystore', 2], ['.envrc', 2], ['env.prod.json', 2], ['env.prod.eu.json', 2], ['secrets/db.txt', 0], ['src/platform/secrets/keyvault.py', 0], ['secrets/.env', 2], ['secrets/tls.key', 2], ['/run/secrets/db_password', 2], ['/var/run/secrets/kubernetes.io/serviceaccount/token', 2], ['.secrets/api.txt', 2], ['app/run/secrets.py', 0], ['src/app.ts', 0], ['env.dev.json', 0]])
   expect(`guard-files Read ${p}`, 'guard-files.mjs', tool('Read', { file_path: p }), code)
 expect('guard-files Grep path .env', 'guard-files.mjs', tool('Grep', { pattern: 'KEY', path: '.env.local' }), 2)
 expect('guard-files Edit src', 'guard-files.mjs', tool('Edit', { file_path: 'src/a.ts', old_string: 'a', new_string: 'b' }), 0)
