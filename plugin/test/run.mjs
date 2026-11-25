@@ -176,7 +176,7 @@ for (const [c, code] of [
   ['echo hi | cat .env', 2], ['true && source .env', 2], ['. ./.env', 2], ['python3 -c "print(open(\'.env\').read())"', 2],
   ['docker run --env-file=.env img', 2], ['cat .e*', 2], ['cat .en?', 2], ['cat *.md', 0], ['echo $(cat .env)', 2], ['bash -c "cat .env"', 2],
   ['ls -la .env', 0], ['cp .env.example .env.sample', 0],
-  ['cat nodir/.e*', 2], ['cat nodir/.*', 2], ['cat nodir/.en?', 2], ["sed -E 's#.*pkg/(1\\.[0-9.]+)/.*#\\1#' log", 0], ["grep -o '.*[0-9]' build.log", 0],
+  ['cat nodir/.e*', 2], ['cat nodir/.*', 2], ['cat nodir/.en?', 2], ['cat nodir/.n*', 2], ['cat nodir/.git-c*', 2], ['cat nodir/*.pem', 2], ['cat nodir/id_*', 2], ['cat nodir/*.md', 0], ["sed -E 's#.*pkg/(1\\.[0-9.]+)/.*#\\1#' log", 0], ["grep -o '.*[0-9]' build.log", 0],
   ['npm i foo@npm:evil-pkg', 2], ['npm i github:user/repo', 2], ['npm i user/repo', 2], ['npm i https://x.test/p.tgz', 2], ['npm i lodash@next', 2],
   ['pnpm add git+https://x.test/r.git', 2], ['pip install pkg @ https://x.test/p.whl', 2], ['pip install git+https://x.test/r', 2],
   ['env npm i foo@npm:evil', 2], ['sudo -E npm i github:a/b', 2], ['bash -c "npm i foo@npm:evil"', 2], ['npx github:a/b', 2], ['pnpm dlx foo@npm:evil', 2],
