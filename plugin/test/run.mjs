@@ -184,7 +184,7 @@ for (const [c, code] of [
   ["awk '{print}' .e*", 2], ["sed -n p '.e*'", 2], ["grep -e '.*x' -e '.e*' build.log", 0], ["sed -i '' 's/.*x//' build.log", 0], ["grep -A 2 '.e*' build.log", 0],
   ["grep -rn -- '.*v' src", 0],
   ['cat .[!x]nv', 2], ['cat .[^x]nv', 2], ['cat .[[:alpha:]]nv', 2], ['cat ~/.[!x]ube/config', 2], ['cat ~/.[^x]ube/config', 2], ['cat nodir/.c*/x', 2],
-  ['cat /run/[!x]ecrets/db', 2], ['cat nodir/[!.]*.md', 0], ["sed -n 's/.env.*//p' build.log", 0], ["sed -E 's#.*pkg/(1\\.[0-9.]+)/.*#\\1#' log", 0], ["grep -o '.*[0-9]' build.log", 0],
+  ['cat /run/[!x]ecrets/db', 2], ['cat nodir/[!.]*.md', 0], ['cat .[z-a]nv', 2], ['cat nodir/[z-a]x', 2], ['cat ~/.[z-a]/config', 2], ["sed -n 's/.env.*//p' build.log", 0], ["sed -E 's#.*pkg/(1\\.[0-9.]+)/.*#\\1#' log", 0], ["grep -o '.*[0-9]' build.log", 0],
   ['npm i foo@npm:evil-pkg', 2], ['npm i github:user/repo', 2], ['npm i user/repo', 2], ['npm i https://x.test/p.tgz', 2], ['npm i lodash@next', 2],
   ['pnpm add git+https://x.test/r.git', 2], ['pip install pkg @ https://x.test/p.whl', 2], ['pip install git+https://x.test/r', 2],
   ['env npm i foo@npm:evil', 2], ['sudo -E npm i github:a/b', 2], ['bash -c "npm i foo@npm:evil"', 2], ['npx github:a/b', 2], ['pnpm dlx foo@npm:evil', 2],
