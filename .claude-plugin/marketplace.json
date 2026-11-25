@@ -11,7 +11,7 @@
     {
       "name": "engineering-standard",
       "description": "Hooks enforce, skills + MCP inform, CI stays the backstop.",
-      "version": "1.4.2",
+      "version": "1.4.3",
       "source": "./",
       "category": "security"
     }
