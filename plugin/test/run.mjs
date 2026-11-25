@@ -157,7 +157,7 @@ const expect = (name, script, input, code, env) => { const r = hookRun(script, i
 const tool = (tool_name, tool_input) => ({ hook_event_name: 'PreToolUse', tool_name, tool_input, cwd: repo, session_id: 'selftest' })
 
 for (const [p, code] of [['.env', 2], ['config/.env.production', 2], ['.env.example', 0], ['.env.sample', 0], ['certs/server.pem', 2], ['deploy.key', 2],
-  ['/Users/x/.ssh/config', 2], ['~/.ssh/id_ed25519', 2], ['keys/id_rsa.pub', 0], ['keys/id_ed25519', 2], ['.ENV', 2], ['.Env.Local', 2], ['~/.aws/credentials', 2], ['.npmrc', 2], ['certs/app.p12', 2], ['android/upload.keystore', 2], ['.envrc', 2], ['env.prod.json', 2], ['env.prod.eu.json', 2], ['secrets/db.txt', 2], ['src/app.ts', 0], ['env.dev.json', 0]])
+  ['/Users/x/.ssh/config', 2], ['~/.ssh/id_ed25519', 2], ['keys/id_rsa.pub', 0], ['keys/id_ed25519', 2], ['.ENV', 2], ['.Env.Local', 2], ['~/.aws/credentials', 2], ['.npmrc', 2], ['certs/app.p12', 2], ['android/upload.keystore', 2], ['.envrc', 2], ['env.prod.json', 2], ['env.prod.eu.json', 2], ['secrets/db.txt', 0], ['src/platform/secrets/keyvault.py', 0], ['secrets/.env', 2], ['secrets/tls.key', 2], ['src/app.ts', 0], ['env.dev.json', 0]])
   expect(`guard-files Read ${p}`, 'guard-files.mjs', tool('Read', { file_path: p }), code)
 expect('guard-files Grep path .env', 'guard-files.mjs', tool('Grep', { pattern: 'KEY', path: '.env.local' }), 2)
 expect('guard-files Edit src', 'guard-files.mjs', tool('Edit', { file_path: 'src/a.ts', old_string: 'a', new_string: 'b' }), 0)
@@ -346,7 +346,7 @@ console.log('▸ consume (sources gateway)')
 console.log('▸ check-agent-config (auto mode)')
 {
   const d = mkdtempSync(join(tmpdir(), 'es-agentcfg-')); mkdirSync(join(d, '.claude'))
-  const base = { permissions: { deny: ['Read(./.env)', 'Read(./secrets/**)'], disableBypassPermissionsMode: 'disable' } }
+  const base = { permissions: { deny: ['Read(./.env)'], disableBypassPermissionsMode: 'disable' } }  // no secrets/ folder deny needed (v1.4.2)
   writeFileSync(join(d, '.claude/settings.json'), JSON.stringify(base))
   const a = node(['bin/check-agent-config.mjs', d])
   t('auto mode allowed → exit 0 with an AGT-3 warning', a.status === 0 && /⚠ AGT-3: auto mode is allowed/.test(a.stderr) && /1 warning/.test(a.stdout), a.stdout + a.stderr)

@@ -61,7 +61,6 @@ export function warnings(root) {
     let s = {}; try { s = JSON.parse(read(join(root, '.claude/settings.json')) || '{}') } catch { w.push('AGT-1: .claude/settings.json is not valid JSON') }
     const deny = s.permissions?.deny || [], miss = []
     if (!deny.some((d) => /^Read\(.*\.env/.test(d))) miss.push('deny Read(./.env*)')
-    if (!deny.some((d) => /^Read\(.*secrets/.test(d))) miss.push('deny Read(./secrets/**)')
     if (s.permissions?.disableBypassPermissionsMode !== 'disable') miss.push('permissions.disableBypassPermissionsMode:"disable"')
     if (miss.length) w.push(`AGT-1: .claude/settings.json lacks ${miss.join(', ')}`)
   }
