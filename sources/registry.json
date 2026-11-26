@@ -438,6 +438,32 @@
         "AGT-13"
       ],
       "notes": "Not installed by the scout; fetched as data at c1c8a8c. Prompt-only skill (15 Markdown files) plus two Node validators (validate-findings.cjs, validate-coverage-ledger.cjs) with .test.cjs files a test runner would pick up if the repo were cloned and tested. No hooks, no install scripts, no network hosts in code. The skill's full-audit mode writes to ~/security-audit-skill/<repo>/run-N outside the target and starts many parallel sub-agents (cost; AGT-7 tool lists apply). Provenance: the repo is in the cloudflare GitHub org (trusted vendor); 72.5k stars in about 5 months (486/day, vendor-exempt from G5) with 3 contributors and no push since 2026-09-14; secondary write-ups and the README's link to Cloudflare's blog agree it is Cloudflare's. Pinned to a commit: the repo has no releases."
+    },
+    {
+      "id": "numbat",
+      "name": "Perplexity numbat",
+      "author": "Perplexity AI",
+      "repo": "perplexityai/numbat",
+      "url": "https://github.com/perplexityai/numbat",
+      "commit": "ebb511ff5b4d9ed4b1c732460e128a8601091fed",
+      "version": "main@ebb511f",
+      "reviewed": "2026-11-16",
+      "license": "Apache-2.0",
+      "kind": "tool",
+      "disposition": "distilled",
+      "rationale": "Distilled as a tool-agnostic amendment to AGT-10, following the owner's 2026-11-13 harden-runner decision to state the principle rather than name the product. AGT-10 asks for OpenTelemetry export only, which many agent CLIs lack; numbat shows that hook events and on-disk session files give the same audit trail, and its fail-open enforcement shows why a monitor must not be mistaken for a control. Tracekit (watch, 64) adds signed records but routes approvals through vendor services and carries agent-directed promotion; uber/ADR (watch, 60) sends sessions to hosted LLMs; hol-guard, prismor and solongate (watch) are runtime guards that overlap the plugin's PreToolUse hooks.",
+      "paths": [
+        "README.md",
+        "SECURITY.md",
+        "internal/hook/install.go",
+        "cmd/numbat/hook.go",
+        "cmd/numbat/sink.go"
+      ],
+      "informs": [
+        "AGT-10",
+        "AGT-9"
+      ],
+      "notes": "Not installed by the scout. `numbat hook install` writes 11 command hooks into the user-level Claude Code settings.json (SessionStart, UserPromptSubmit, PreToolUse, PostToolUse, PostToolUseFailure, PermissionRequest, PermissionDenied, Stop, SessionEnd, SubagentStart, SubagentStop), so it runs on every prompt and every subagent. Hook stdout is reserved for the agent protocol; monitor mode returns no decision. Enforce mode is opt-in, only for operator-copied rules marked enforce: true, and fails open on malformed payloads and decision errors (cmd/numbat/hook.go). Network: only the operator-configured HTTP sink (bearer or HMAC secrets from env, an allowInsecure option exists); the 18 hosts the fetch found are test fixtures or doc URLs. `go install …@latest` in the README is unpinned; release binaries carry SHA-256 checksums. 171 of 490 files were not read (200-file limit)."
     }
   ]
 }

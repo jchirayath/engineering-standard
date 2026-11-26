@@ -556,8 +556,13 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   memory or instruction files (memory poisoning). Memory, compaction and planning plugins keep what they
   capture local and re-inject captured tool output only as quoted data, never as instructions. *(source:
   sentry-skills)*
-- **AGT-10 SHOULD** Agent sessions export OpenTelemetry (with tool details) through CORE-3 to the LOG-9 store so tool
-  and MCP use is auditable.
+- **AGT-10 SHOULD** Agent sessions export OpenTelemetry (with tool details) through CORE-3 to the LOG-9
+  store so tool and MCP use is auditable. An agent CLI that exports no OpenTelemetry is covered by a local
+  monitor that records its hook events or on-disk session files into the same store; the monitor is
+  installed from a pinned, checksum-verified release and the hooks it writes are reviewed as agent
+  configuration (AGT-9). A monitor-only hook, or one in a mode that lets an action through when its rule
+  engine errors, is audit evidence and is never cited as the enforcement of a MUST rule. *(source:
+  Perplexity numbat)*
 
 **How the agent works — one workflow** (distilled from reviewed sources in `sources/registry.json` — each
 rule cites its source; this standard wins over any of them):
