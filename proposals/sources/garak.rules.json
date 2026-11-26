@@ -1,0 +1,34 @@
+{
+  "name": "NVIDIA garak",
+  "author": "NVIDIA",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "main",
+  "repo": "NVIDIA/garak",
+  "url": "https://github.com/NVIDIA/garak",
+  "commit": "f1c99df7883dcfbfe4118381305b74e7e469a6e3",
+  "license": "Apache-2.0",
+  "paths": [
+    "README.md",
+    "AGENTS.md",
+    "SECURITY.md",
+    "garak/cli.py"
+  ],
+  "informs": [
+    "AI-3"
+  ],
+  "amendments": [
+    {
+      "id": "AI-3",
+      "append": "The prompt-injection cases include a maintained public probe set as well as the app's own cases, run against a staging endpoint of the app's LLM path with a spend-capped test key (AI-4), never against production or a model the team doesn't operate. For example, use `garak` pinned to an exact PyPI version with its `promptinject`, `latentinjection` and `encoding` probes. garak exits 0 when probes succeed, so CI computes the hit rate from its JSONL report and fails above the committed threshold."
+    }
+  ],
+  "notes": "Not installed or run by the scout. The fetch pinned main at f1c99df. 898 files, 455 executable, and 260 were not read (200-file limit, mostly garak/probes/*), so per-probe network behaviour is unverified. The inventory's 30 'hooks' and 194 auto-run tests are the React report UI (garak-report/src/hooks, __tests__), not agent hooks. No CLAUDE.md, skills, MCP server or plugin manifest. AGENTS.md is contribution policy for AI-assisted PRs. One symlink: garak/data/calibration/calibration.json. Read in garak/cli.py: exit(1) only on config, --spec or selection parse errors, interactive-mode exceptions and config migration. There is no non-zero exit on findings, and --eval_threshold is the per-detector 'minimum threshold for a successful hit', not a run-level pass/fail. Network: it calls the target model (OpenAI, Bedrock, HF, LiteLLM, REST and others). The README/FAQ say detectors may use a classifier 'locally or via API', and huggingface.co, arxiv.org and genai.owasp.org appear in code, so model or dataset downloads at run time are likely and unverified. No telemetry library was found by grep. Some probes (malwaregen, dan, gcg) send content that hosted providers' usage policies may flag, which is why the amendment limits runs to the team's own staging endpoint.",
+  "rationale": "AI-3 already requires an eval suite with prompt-injection cases and a pass threshold in CI, but names no case set, so each team writes its own handful of injections and misses whole families (encoded, latent or indirect injection). garak is the most widely used open LLM scanner (NVIDIA, Apache-2.0, about 10k stars, active), so the amendment can name it as an example while the rule stays tool-agnostic. It does not gate CI by itself, so the amendment says how to turn its report into the threshold AI-3 already asks for.",
+  "newRules": [],
+  "recommendation": {
+    "verdict": "approve",
+    "why": "An app with an LLM feature gains a maintained set of hundreds of prompt-injection probes (encoded, latent and indirect injection) in its AI-3 eval, instead of only the few cases a team writes by hand. The main risk is cost and side effects: garak sends many adversarial generations to the target and may download detector models, and it doesn't fail CI by itself, so the threshold wrapper and spend cap are the team's job."
+  },
+  "applied": "2026-11-24"
+}

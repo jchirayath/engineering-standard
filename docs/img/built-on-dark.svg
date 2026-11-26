@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="970" viewBox="0 0 1200 970" role="img" aria-labelledby="t d">
   <title id="t">Built on</title>
-  <desc id="d">23 standards, platform policies and laws the daily scout watches, and 19 reviewed, pinned agent and security projects. Security standards: OWASP ASVS, OWASP Top 10, OWASP API Security Top 10, OWASP LLM &amp; Agentic Top 10, OWASP MASVS, NIST SP 800-63, SLSA, MCP specification, CISA KEV catalog, OpenSSF Scorecard. Formats &amp; quality: WCAG, Core Web Vitals, OpenTelemetry logs, RFC 9457 Problem Details, Design Tokens. Platform policies: Claude Code permissions &amp; hooks docs, Apple App Review Guidelines, Google Play target API level, GitHub Actions security changes. Law &amp; regulation: EU Cyber Resilience Act, EU AI Act, CCPA regulations / GPC, GDPR. Reviewed agent &amp; security projects (pinned): superpowers, Sentry skills, ponytail, caveman, Cloudflare security-audit skill, frontend-design, NVIDIA SkillSpector, Cisco AI Defense skill-scanner, code-modernization, docker-destructive-guardrails, ECC database-migrations, firebase-security-rules-auditor, grill-me / grilling, Playwright test agents, sandbox-runtime, skill-creator, Supabase agent skill, Trail of Bits skills, Vercel React best practices.</desc>
+  <desc id="d">23 standards, platform policies and laws the daily scout watches, and 20 reviewed, pinned agent and security projects. Security standards: OWASP ASVS, OWASP Top 10, OWASP API Security Top 10, OWASP LLM &amp; Agentic Top 10, OWASP MASVS, NIST SP 800-63, SLSA, MCP specification, CISA KEV catalog, OpenSSF Scorecard. Formats &amp; quality: WCAG, Core Web Vitals, OpenTelemetry logs, RFC 9457 Problem Details, Design Tokens. Platform policies: Claude Code permissions &amp; hooks docs, Apple App Review Guidelines, Google Play target API level, GitHub Actions security changes. Law &amp; regulation: EU Cyber Resilience Act, EU AI Act, CCPA regulations / GPC, GDPR. Reviewed agent &amp; security projects (pinned): superpowers, Sentry skills, ponytail, caveman, Cloudflare security-audit skill, frontend-design, NVIDIA SkillSpector, Cisco AI Defense skill-scanner, code-modernization, docker-destructive-guardrails, ECC database-migrations, firebase-security-rules-auditor, grill-me / grilling, NVIDIA garak, Playwright test agents, sandbox-runtime, skill-creator, Supabase agent skill, Trail of Bits skills, Vercel React best practices.</desc>
   <rect width="1200" height="970" rx="20" fill="#1a1a19"/>
   <rect x="0.5" y="0.5" width="1199" height="969" rx="20" fill="none" stroke="#2c2c2a"/>
-  <text x="40" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#f0efec">Built on 23 standards &amp; policies and 19 reviewed projects</text>
+  <text x="40" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="22" font-weight="700" fill="#f0efec">Built on 23 standards &amp; policies and 20 reviewed projects</text>
   <text x="40" y="72" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" fill="#c3c2b7">Each one is watched by the daily scout: a new version or a new source arrives as a pull request with a recommendation.</text>
   <g transform="translate(40,104)"><rect y="3" width="12" height="12" rx="3" fill="#3987e5"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Security standards<tspan dx="8" font-size="13" font-weight="400" fill="#898781">10</tspan></text></g>
   <g transform="translate(40.0,130)"><title>OWASP ASVS — 5.0</title>
@@ -92,7 +92,7 @@
     <rect width="87.3" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#c98500"/>
     <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">GDPR</text>
     <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">2016/679</text></g>
-  <g transform="translate(40,624)"><rect y="3" width="12" height="12" rx="3" fill="#d55181"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Reviewed agent &amp; security projects (pinned)<tspan dx="8" font-size="13" font-weight="400" fill="#898781">19</tspan></text></g>
+  <g transform="translate(40,624)"><rect y="3" width="12" height="12" rx="3" fill="#d55181"/><text x="20" y="14" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#f0efec">Reviewed agent &amp; security projects (pinned)<tspan dx="8" font-size="13" font-weight="400" fill="#898781">20</tspan></text></g>
   <g transform="translate(40.0,650)"><title>superpowers — Jesse Vincent · AGT-11, AGT-12, AGT-13 +2</title>
     <rect width="298.2" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
     <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">superpowers</text>
@@ -145,19 +145,23 @@
     <rect width="185.8" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
     <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">grill-me / grilling</text>
     <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Matt Pocock · AGT-11</text></g>
-  <g transform="translate(235.8,830)"><title>Playwright test agents — Microsoft · AGT-8</title>
+  <g transform="translate(235.8,830)"><title>NVIDIA garak — NVIDIA · AI-3</title>
+    <rect width="130.6" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">NVIDIA garak</text>
+    <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">NVIDIA · AI-3</text></g>
+  <g transform="translate(376.4,830)"><title>Playwright test agents — Microsoft · AGT-8</title>
     <rect width="209.7" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
     <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Playwright test agents</text>
     <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Microsoft · AGT-8</text></g>
-  <g transform="translate(455.4,830)"><title>sandbox-runtime — Anthropic · AGT-2</title>
+  <g transform="translate(596.1,830)"><title>sandbox-runtime — Anthropic · AGT-2</title>
     <rect width="154.6" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
     <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">sandbox-runtime</text>
     <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Anthropic · AGT-2</text></g>
-  <g transform="translate(620.0,830)"><title>skill-creator — Anthropic · AGT-16</title>
+  <g transform="translate(760.6,830)"><title>skill-creator — Anthropic · AGT-16</title>
     <rect width="150.9" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
     <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">skill-creator</text>
     <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Anthropic · AGT-16</text></g>
-  <g transform="translate(781.0,830)"><title>Supabase agent skill — Supabase · SUPA-5</title>
+  <g transform="translate(921.6,830)"><title>Supabase agent skill — Supabase · SUPA-5</title>
     <rect width="194.1" height="50" rx="10" fill="#262624"/><rect x="0" y="10" width="4" height="30" rx="2" fill="#d55181"/>
     <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="13.5" font-weight="600" fill="#f0efec">Supabase agent skill</text>
     <text x="16" y="38" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#c3c2b7">Supabase · SUPA-5</text></g>
