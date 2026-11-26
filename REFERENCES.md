@@ -190,6 +190,7 @@ Third-party agent projects reach this standard only through the sources gateway 
 | [Cisco AI Defense skill-scanner](https://github.com/cisco-ai-defense/skill-scanner) — Cisco AI Defense | `f782465` (2.3.2) | Apache-2.0 | distilled | AGT-5 |
 | [NVIDIA SkillSpector](https://github.com/NVIDIA/SkillSpector) — NVIDIA | `ce46d46` (v2.13.4) | Apache-2.0 | distilled | AGT-5, AGT-13 |
 | [Cloudflare security-audit skill](https://github.com/cloudflare/security-audit-skill) — Cloudflare | `c1c8a8c` (main) | MIT | distilled | AGT-2, AGT-13 |
+| [Perplexity Bumblebee](https://github.com/perplexityai/bumblebee) — Perplexity AI | `93b8877` (v0.1.2) | Apache-2.0 | distilled | VULN-3, AGT-5, REL-3 |
 <!-- sources-references:end -->
 
 ### Why each source was handled this way
@@ -217,6 +218,7 @@ the standard keeps one rule per fact.
 - **Cisco AI Defense skill-scanner** (distilled) — Distilled into AGT-5's intake step. It is the most complete open skill scanner (signatures, dataflow, SARIF, CI workflow) and is Apache-2.0 with active releases. Snyk agent-scan was rejected for this role because it requires a Snyk token and sends configs to Snyk's API. NVIDIA SkillSpector is queued and not yet scored, so this choice is to be re-compared when it is.
 - **NVIDIA SkillSpector** (distilled) — Distilled as an alternative scanner plus a tool-agnostic coverage rule. A paper comparison with cisco-skill-scanner favours keeping Cisco as the default: it is distributed on PyPI with a verified pin, its static core has no network, and it was reviewed first. SkillSpector adds coverage gates and MCP registry diffing. The incomplete-coverage rule closes a gap in AGT-5 whichever scanner is used.
 - **Cloudflare security-audit skill** (distilled) — Distilled, not installed. APP_REVIEW already has concrete-case findings, INCOMPLETE and adversarial verification (from ponytail), so most of the method overlaps. Two ideas are new: a security finding needs a crossed trust boundary and a concrete result (AGT-13), and a reviewer runs code it didn't write only in a no-network, empty-environment sandbox and never probes live systems (AGT-2). APP_REVIEW's instruction to run archetype H/I findings currently has no such fence.
+- **Perplexity Bumblebee** (distilled) — Distilled as a tool-agnostic incident step plus an example tool. VULN-3 and SEC-15 cover repos and shipped artifacts, but a compromise like Shai-Hulud lands on developer machines (packages, IDE extensions, MCP servers, skills) where the standard has no check. Bumblebee is read-only, has no dependencies, and doesn't phone home, so the amendment can name it while staying tool-agnostic.
 <!-- sources-rationale:end -->
 
 "Distilled" means the idea was rewritten as a rule here, citing the source; none of that project's text or code is loaded by
