@@ -438,6 +438,29 @@
         "AGT-13"
       ],
       "notes": "Not installed by the scout; fetched as data at c1c8a8c. Prompt-only skill (15 Markdown files) plus two Node validators (validate-findings.cjs, validate-coverage-ledger.cjs) with .test.cjs files a test runner would pick up if the repo were cloned and tested. No hooks, no install scripts, no network hosts in code. The skill's full-audit mode writes to ~/security-audit-skill/<repo>/run-N outside the target and starts many parallel sub-agents (cost; AGT-7 tool lists apply). Provenance: the repo is in the cloudflare GitHub org (trusted vendor); 72.5k stars in about 5 months (486/day, vendor-exempt from G5) with 3 contributors and no push since 2026-09-14; secondary write-ups and the README's link to Cloudflare's blog agree it is Cloudflare's. Pinned to a commit: the repo has no releases."
+    },
+    {
+      "id": "skillevaluator",
+      "name": "NVIDIA SkillEvaluator",
+      "author": "NVIDIA",
+      "repo": "NVIDIA/SkillEvaluator",
+      "url": "https://github.com/NVIDIA/SkillEvaluator",
+      "commit": "affe1acc3d0a24877c5d508d96ac69663a7fd92a",
+      "version": "main@affe1ac",
+      "reviewed": "2026-11-18",
+      "license": "Apache-2.0",
+      "kind": "tool",
+      "disposition": "distilled",
+      "rationale": "Distilled as one tool-agnostic check in AGT-16. AGT-5 already covers the security scanners this wraps, AGT-16 already governs nested-agent eval loops, and similar.mjs already does overlap detection for this standard's own rules. The one new idea is a static, keyless check that a skill loads in every target harness: a skill that silently doesn't load means its guardrails don't apply.",
+      "paths": [
+        "README.md",
+        "skills/skillevaluator/SKILL.md"
+      ],
+      "informs": [
+        "AGT-16",
+        "AGT-5"
+      ],
+      "notes": "Not installed or run by the scout. Labelled Experimental by NVIDIA, with no SLA. Tier 1 (quality-check, harness-check, security-scan, pii-scan, lint-scripts, `tier1 --no-llm`) needs no key. Tier 2 (dedup) and Tier 3 (live with/without-skill runs) send skill text to an LLM provider (NVIDIA Build by default) and start nested agents in Docker; Tier 3 already falls under AGT-16's nested-agent clause, and both fall under AGT-4. Its security tier wraps SkillSpector, Gitleaks, Bandit, optional Semgrep and pip-audit, so it adds no new security detector beyond what AGT-5 accepts. The hooks the inventory found (PostToolUse, SessionStart) are test fixtures under tests/fixtures/plugins/bundled-script-hooks/, not hooks the tool installs. 518 pytest files would be picked up by a test runner. The bundled skills/skillevaluator/SKILL.md asks before installing and points LLM stages at a provider key. Remote-instruction hosts: docs.nvidia.com, buildwithfern.com, build.nvidia.com (docs links). 664 of 1231 files were not read (fetch limit), including pyproject.toml and the tier1 plugin_checks.py that implements harness-check, so the release version and the exact checks are unverified."
     }
   ]
 }

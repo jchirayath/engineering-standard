@@ -609,7 +609,11 @@ rule cites its source; this standard wins over any of them):
   declare `tools:` (AGT-7). Skill evaluation tools that start nested agents (e.g. Anthropic's skill-creator
   eval loop) run only in a throwaway worktree with an explicit `--allowedTools`, never in a
   permission-bypass mode outside AGT-3's container, and a person reviews the resulting skill diff — in both
-  modes. *(source: anthropic-skill-creator)*
+  modes. *(source: anthropic-skill-creator)* Before a skill is committed, an offline harness check confirms
+  that every agent the repo targets will actually load it (valid frontmatter, description within that
+  harness's length limit, no files in directories the harness skips); for example `skillevaluator
+  harness-check` from a pinned release, with no `--llm`. A skill that one target agent would not load is
+  fixed or the target is dropped, never left to fail silently. *(source: NVIDIA SkillEvaluator)*
 - **AGT-17 MUST** **Confirm before destroying state.** Before a command that deletes data or irreversibly
   changes infrastructure — `docker system/volume/image prune`, `docker volume rm`, `terraform` / `tofu` /
   `terragrunt destroy` or `apply -destroy`, `supabase db push` or a remote `supabase db reset`, SQL `DROP` /

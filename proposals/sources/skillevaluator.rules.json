@@ -1,0 +1,33 @@
+{
+  "name": "NVIDIA SkillEvaluator",
+  "author": "NVIDIA",
+  "kind": "tool",
+  "disposition": "distilled",
+  "version": "main@affe1ac",
+  "repo": "NVIDIA/SkillEvaluator",
+  "url": "https://github.com/NVIDIA/SkillEvaluator",
+  "commit": "affe1acc3d0a24877c5d508d96ac69663a7fd92a",
+  "license": "Apache-2.0",
+  "paths": [
+    "README.md",
+    "skills/skillevaluator/SKILL.md"
+  ],
+  "informs": [
+    "AGT-16",
+    "AGT-5"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-16",
+      "append": "Before a skill is committed, an offline harness check confirms that every agent the repo targets will actually load it (valid frontmatter, description within that harness's length limit, no files in directories the harness skips); for example `skillevaluator harness-check` from a pinned release, with no `--llm`. A skill that one target agent would not load is fixed or the target is dropped, never left to fail silently."
+    }
+  ],
+  "notes": "Not installed or run by the scout. Labelled Experimental by NVIDIA, with no SLA. Tier 1 (quality-check, harness-check, security-scan, pii-scan, lint-scripts, `tier1 --no-llm`) needs no key. Tier 2 (dedup) and Tier 3 (live with/without-skill runs) send skill text to an LLM provider (NVIDIA Build by default) and start nested agents in Docker; Tier 3 already falls under AGT-16's nested-agent clause, and both fall under AGT-4. Its security tier wraps SkillSpector, Gitleaks, Bandit, optional Semgrep and pip-audit, so it adds no new security detector beyond what AGT-5 accepts. The hooks the inventory found (PostToolUse, SessionStart) are test fixtures under tests/fixtures/plugins/bundled-script-hooks/, not hooks the tool installs. 518 pytest files would be picked up by a test runner. The bundled skills/skillevaluator/SKILL.md asks before installing and points LLM stages at a provider key. Remote-instruction hosts: docs.nvidia.com, buildwithfern.com, build.nvidia.com (docs links). 664 of 1231 files were not read (fetch limit), including pyproject.toml and the tier1 plugin_checks.py that implements harness-check, so the release version and the exact checks are unverified.",
+  "rationale": "Distilled as one tool-agnostic check in AGT-16. AGT-5 already covers the security scanners this wraps, AGT-16 already governs nested-agent eval loops, and similar.mjs already does overlap detection for this standard's own rules. The one new idea is a static, keyless check that a skill loads in every target harness: a skill that silently doesn't load means its guardrails don't apply.",
+  "newRules": [],
+  "recommendation": {
+    "verdict": "hold",
+    "why": "An app repo that ships skills would gain an offline check that each skill actually loads in every agent it targets, so a skill's instructions don't silently stop applying. The gain is small and the main risk is that the tool is experimental, that the code implementing the check was not read (664 files unread), and that it scored 71, just over the bar; run it once on this repo's own skills before approving."
+  },
+  "applied": "2026-11-18"
+}
