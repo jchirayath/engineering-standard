@@ -488,7 +488,10 @@ The `engineering-standard` plugin checks most of these at session start and bloc
   a sandbox with **no** network (loopback only), an empty environment filled from an allow-list with dummy
   secrets, a read-only target and resource limits; it never probes deployed endpoints, shared services or
   production identities. When the sandbox can't give all of these, it doesn't run the code and records the
-  finding as unconfirmed (AGT-13). *(source: Cloudflare security-audit skill)*
+  finding as unconfirmed (AGT-13). *(source: Cloudflare security-audit skill)* In Claude Code this means
+  `sandbox.failIfUnavailable: true` (otherwise it runs commands unsandboxed when the sandbox can't start)
+  and `sandbox.allowUnsandboxedCommands: false` (no retry outside the sandbox), set in user or managed
+  settings or `--settings` on Claude Code ≥ 2.1.285 so a repo's project settings can't turn them back on.
 - **AGT-3 MUST** Permission-bypass modes (`--dangerously-skip-permissions`, bypass/auto-approve modes)
   run only inside a disposable container or VM that holds **no production credentials**. A machine or
   session that can reach production keeps AGT-1's `disableBypassPermissionsMode`. **Auto mode** (a classifier
