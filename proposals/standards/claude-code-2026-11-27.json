@@ -1,0 +1,21 @@
+{
+  "standard": "claude-code",
+  "date": "2026-11-27",
+  "title": "Name the Claude Code settings that make the sandbox fail closed",
+  "summary": "AGT-2 requires Bash to run sandboxed and to fail rather than fall back to unsandboxed execution, but it doesn't name the settings that do this, and neither adopt.sh nor check-agent-config sets them. Claude Code's sandboxing docs say that by default, when the platform doesn't support the sandbox or the startup dependency check fails, Claude Code runs commands without sandboxing; `sandbox.failIfUnavailable: true` makes it exit at startup instead. A separate retry path runs a failed command outside the sandbox unless `sandbox.allowUnsandboxedCommands` is `false`. Before v2.1.285 a project's `true` overrode a `false` in user settings, so the value has to come from a scope a cloned repo can't loosen. Without the two keys a machine where the sandbox can't start runs every Bash command unsandboxed, which is the opposite of what AGT-2 asks.",
+  "sources": [
+    "https://code.claude.com/docs/en/sandboxing",
+    "https://code.claude.com/docs/en/settings"
+  ],
+  "amendments": [
+    {
+      "id": "AGT-2",
+      "append": "In Claude Code this means `sandbox.failIfUnavailable: true` (otherwise it runs commands unsandboxed when the sandbox can't start) and `sandbox.allowUnsandboxedCommands: false` (no retry outside the sandbox), set in user or managed settings or `--settings` on Claude Code ≥ 2.1.285 so a repo's project settings can't turn them back on."
+    }
+  ],
+  "recommendation": {
+    "verdict": "approve",
+    "why": "An app team following AGT-2 gets the two exact keys that turn 'fail rather than fall back' into a setting, closing the silent unsandboxed fallback on machines where the sandbox can't start. The risk is that sessions on unsupported platforms now refuse to start until the sandbox works, and adopt.sh and check-agent-config don't set or check the keys yet, so the rule depends on people setting them until the tooling follows."
+  },
+  "applied": "2026-11-27"
+}
