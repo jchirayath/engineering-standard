@@ -45,4 +45,29 @@ as clean.
 `transitive.py` and `unicode_confusables.py`; whether the release wheel matches the tagged source; the contributor
 count. A side-by-side run of both scanners on the same fixtures should precede any switch of the default.
 
+## Drift re-review 2026-11-27: `ce46d46` → `02894ec` (v2.13.7, 127 commits)
+
+Run by the unattended scout because five watched files changed (`README.md`, `pyproject.toml`,
+`skills/skill-inspector/SKILL.md`, `src/skillspector/cli.py`, `src/skillspector/llm_utils.py`). Re-fetched with
+`bin/consume.mjs fetch` (609 files, 35 agent-facing, no hooks, no install scripts; 280 files over the fetch limit,
+including all of `cli.py`). Re-scored 75/100 (consume). Nothing was installed or run.
+
+| Change | Impact | Resolution |
+|---|---|---|
+| README: "Once a release is available on PyPI… `python -m pip install --upgrade skillspector`"; `release.yml` gains a `workflow_dispatch` PyPI upload with Trusted Publishing | AGT-5 says "it is not on PyPI and a PyPI package of that name is not NVIDIA's". PyPI now shows 2.13.7 (2026-11-24) under the NVIDIA org, Trusted Publishing yes, **no provenance**. OSV **MAL-2026-6561** (ossf/malicious-packages, campaign `2026-06-skillspector`) lists versions 0.0.1–0.0.4, 2.3.7–2.3.10 **and 2.13.7**. The earlier versions were clones that added a `telemetry.py` posting hostname, username, cwd and command arguments to `livekit-agents.xyz`. The 2.13.7 entry was added 2026-11-24 by one feed with no separate evidence file | keep the GitHub release tag as the only install path until OSV stops listing NVIDIA's version; the amendment says why. The old clause needs a hand edit |
+| SC4 OSV lookups: "…to OSV.dev by default"; new `SKILLSPECTOR_OSV_DB_PATH` reads local snapshots and "never calls OSV.dev" | `--no-llm` still isn't offline by default; AGT-2's intake sandbox has no network (it falls back to a small bundled list) | the amendment names the offline snapshot setting |
+| HTTP MCP scans accept "credential-free `https://` targets on allowed hosts", now including direct file URLs; registry default `/v0.1/servers` | wider fetch surface, used only for URL or registry targets | not used at intake (local files only); allowed-host list not read |
+| `pyproject.toml` 2.13.7: adds `tree-sitter-bash==0.25.1`, `tree-sitter-typescript==0.23.2`, `semver>=3.1,<4`; hatchling, no build hooks | none | — |
+| `SKILL.md`: still "Keep `--no-llm` unless the user asks", "Do not install tools… silently", "Do not execute scripts from the target skill" | none | — |
+| `llm_utils.py`: providers through `skillspector.providers`; no hard-coded host added | none | — |
+
+`--fail-on-incomplete` is still documented (README exit-code table and the CI example).
+
+**Not verified:** most of `cli.py` (over the fetch limit, and only partly read upstream), including how `--no-llm`
+and `SKILLSPECTOR_OSV_DB_PATH` are handled in code; the allowed-host list for HTTP MCP scans; whether the PyPI 2.13.7
+wheel matches the `v2.13.7` tag (the release notes name `main` at `2d0c6ddcb`, the tag points at `c323ad4`); whether
+the OSV listing of 2.13.7 is a real finding or a feed that lists the whole package name; whether the earlier
+malicious versions were removed from PyPI (the pages returned a client challenge). The upstream diff was read through
+a fetch agent's summary, with the full file list truncated.
+
 **Owner decision 2026-11-13:** applied as an *alternative* scanner, not as the new default. The paper comparison (install/pinning, network with `--no-llm`, coverage gates, MCP diffing, published detection figures) favours keeping Cisco as the default. A side-by-side run on the same fixtures is still to do; it was not performed. The tool-agnostic part, that incomplete coverage is never recorded as clean, is adopted outright.
